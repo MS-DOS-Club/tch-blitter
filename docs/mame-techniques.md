@@ -77,7 +77,9 @@ logging `PC`.
 
 **A read tap says that an address was read, not that code ran there.** On these boards' 68000 a
 read tap on the program space sees instruction fetches from ROM as well as data reads: a tap on
-the vblank handler's first word fires once a frame. Taps need no debugger and are the cheap way to
+the vblank handler's first word fires once a frame. The debugger's watchpoints are installed as
+taps too (`src/emu/debug/points.cpp`), so a read watchpoint on code fires on its fetch as well;
+"this code ran" is still a breakpoint's answer. Taps need no debugger and are the cheap way to
 watch I/O and RAM. Two details bite: a callback that returns a number replaces the value the cpu
 reads, and a callback that raises an error is dropped silently while the tap keeps firing, so a
 counter incremented before the risky part, with the body under `pcall`, tells a quiet machine from
@@ -89,8 +91,13 @@ over the line count `frame_period / scan_period` rounded to an integer. The half
 `vpos()` rounds to the nearest pixel, and the `1e-9` makes a tie round up as `vpos()` does. Trust
 it once it equals the debugger's `beamy` at a stop, which is MAME's own `vpos()`.
 
-**Reading from Lua a table the game rewrites every frame tears**: half of one frame and half of
-the next. Such a table is read at the write (a watchpoint) or with the cpu stopped.
+**A Lua read of a table the game rewrites every frame is whole only outside the game's write
+pass.** During a race Wheels & Fire rewrites its road's per-line table in the upper part of the
+frame, so a read from a frame notifier, which fires at vblank, gets one frame's table, while the
+same read taken in the middle of the pass gets the lines already rewritten from one frame and the
+rest from the frame before. Where the pass falls is found
+first, with a write watchpoint logging `beamy`; a table whose pass reaches vblank is read at the
+write or with the cpu stopped.
 
 For a debugger outside MAME, `make debug` runs Radical Enduro with the gdbstub; MAME's gdbstub
 speaks the 68000 natively.

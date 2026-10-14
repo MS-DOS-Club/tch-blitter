@@ -250,6 +250,18 @@ blitter:
         0xdc7d0 writer comes in moves with the horizon. And the HIGH byte of the word is rewritten by
         every blit with its zoom bits, so reading it while painting is worse still'
       observed:
+        wheelfir_road_table_written_above_the_road: 'MEASURED on 2026-10-14 at the pinned MAME, over the
+          race from a clean NVRAM (frame-notifier calls 1100..1300): every write to the road''s per-line
+          table (0x201cc8..0x2020c7, from wf_generate_road_table, the stores at 0xa44b0..0xa44c6) fell on
+          beam lines 32..95 of its frame, 358 to 510 writes a frame, walking upwards, and none at or
+          after line 252, where vblank starts and the frame notifier fires. A Lua read of the whole
+          table from the notifier equalled the table replayed from a write watchpoint in 201 of 201
+          frames, and was one frame''s pass whole in 199 of 199 frames whose passes differed; the same
+          read taken inside the pass (line 54..57, from the 150th write of the frame) mixed two frames in
+          199 of 199. The control on the instrument: the Lua write tap and the watchpoint saw the same
+          writes, and replaying the tap gave the Lua reads back with 0 mismatches over 38412 words.
+          Hence docs/mame-techniques.md: a notifier read of this table is whole, a read inside the
+          pass is not.'
         wheelfir_the_warning_sign_blinks_by_design: 'MEASURED on 2026-09-16, the flicker of the
           race''s triangular warning sign, reached in the attract demo by replaying the run that
           showed it (a cold boot, a soft reset at frame 3000 and another at 4510, the demo at
