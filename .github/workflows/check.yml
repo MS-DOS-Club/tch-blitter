@@ -24,16 +24,19 @@ jobs:
 
       - uses: astral-sh/setup-uv@v10.2.0
 
-      # A mirror that never answers looks like a slow one, so the install has its own bound and
-      # the step after it proves the tool is there rather than letting `make lint` find out.
+      # The release a maintainer runs, not the distribution's: shellcheck versions disagree on what
+      # they flag, and a CI that judges by another version goes red on code that is clean locally.
+      # A download that never answers looks like a slow one, so the step has its own bound, and the
+      # version check proves the right tool is there rather than letting `make lint` find out.
       - name: Install shellcheck
         timeout-minutes: 3
+        env:
+          SHELLCHECK_VERSION: v0.11.0
         run: |
-          for attempt in 1 2 3; do
-            sudo apt-get update -q && sudo apt-get install -y -q shellcheck && break
-            sleep 10
-          done
-          shellcheck --version
+          url="https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.linux.x86_64.tar.xz"
+          curl -fsSL --retry 3 --max-time 60 "$url" | tar -xJ -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/shellcheck-${SHELLCHECK_VERSION}" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/shellcheck-${SHELLCHECK_VERSION}/shellcheck" --version | grep -Fx "version: ${SHELLCHECK_VERSION#v}"
 
       - name: Lint
         run: make lint
