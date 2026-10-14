@@ -250,7 +250,7 @@ blitter:
         0xdc7d0 writer comes in moves with the horizon. And the HIGH byte of the word is rewritten by
         every blit with its zoom bits, so reading it while painting is worse still'
       observed:
-        wheelfir_road_table_written_above_the_road: 'MEASURED on 2026-10-14 at the pinned MAME, over the
+        wheelfir_road_table_written_above_the_road: 'MEASURED on 2026-10-14 at the MAME pin 62f8ddedc, over the
           race from a clean NVRAM (frame-notifier calls 1100..1300): every write to the road''s per-line
           table (0x201cc8..0x2020c7, from wf_generate_road_table, the stores at 0xa44b0..0xa44c6) fell on
           beam lines 32..95 of its frame, 358 to 510 writes a frame, walking upwards, and none at or
@@ -648,7 +648,7 @@ blitter:
           0x20bc9c at 0xdd3ca. THE SHIPPED EEPROM GIVES 2, MEDIUM 3:
           the file loads ROM_LOAD16_WORD_SWAP and only in that order does the game checksum (bytes 0..126
           summed against byte 127, 0xdd3f8..0xdd404) hold, 0xb7 = 0xb7 (as stored it is 0x6e against 0x00);
-          byte 4 is 0x2a. LIVE, same day, the wheelfir binary at the pin with this repository patches,
+          byte 4 is 0x2a. LIVE, same day, the wheelfir binary at the pin 9c28def34 with this repository''s patches,
           shipped EEPROM, coin at frame 300, pedal and button 1 held from 400 and START pulsed every 150,
           14000 frames, write taps on 0x20bd1c, 0x20bc84 and 0x20bc6e plus the TIME high word each frame (scripts/wheelfir/race-clock.lua, since retired):
           0x20bc84 is written 2 at frame 16 from pc 0xdd46c, right after the 0xdd466 store. Three races ran.
@@ -2894,7 +2894,7 @@ ports:
     pwball_no_build_of_this_repository_sounds: 'MEASURED on 2026-10-12, a bisection that found no
       sounding end. Every distinct source of Power Ball''s machine in this repository''s history (102
       states over the 151 commits that touch patches 0001 or 0002, wheelfir.cpp and wheelfir_v2.cpp
-      eras alike) and the stock 0.288 driver, each rebuilt at the current pin from the stock file
+      eras alike) and the stock 0.288 driver, each rebuilt at the pin 9c28def34 from the stock file
       its patch was cut against (pre- and post-image blobs checked) with mechanical API ports only
       (the screen-type argument, population_count_32, the ramdac clock argument): 0 of 30 s with
       sound in a cold-boot attract, every one. Eleven of them (each era''s ends, the pin moves,
