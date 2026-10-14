@@ -1,8 +1,8 @@
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa..8bd607d3 100644
+index 1de425fa..a2bb2004 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
-@@ -1,95 +1,103 @@
+@@ -1,99 +1,108 @@
  // license:BSD-3-Clause
 -// copyright-holders:Tomasz Slanina
 +// copyright-holders:Tomasz Slanina, Marcos Hernández
@@ -170,7 +170,7 @@ index 1de425fa..8bd607d3 100644
 -BIT N - ( scale < 50% ) ? 1 : 0
 -
 +- the analogue accelerator is two steps and the game needs BUTTON 1 held to go
-+  past speed 24 (measured live: the pedal alone holds 23, the pedal with the
++  past speed 24 (on the running game: the pedal alone holds 23, the pedal with the
 +  button reaches 33), which is faithful; what that button was on the cabinet is
 +  not known. The keyboard binds one key to both on purpose (see the inputs), so
 +  full throttle is one key there as it is one pedal-and-button on the cabinet
@@ -182,7 +182,7 @@ index 1de425fa..8bd607d3 100644
 +- word 4's low byte, with its bit 8 folded into bit 0x10 of word 8 by both
 +  raster-table builders, is a 9-bit value in the shape of the scrolls that
 +  Wheels & Fire ramps only during its two-car presentation; nothing in the model
-+  reads it and the screen is validated as it is
++  reads it, and the screens it appears on are drawn right without it
 +- the link between two cabinets (port 0x7c0000) answers as a cabinet alone, and
 +  that is measured for the shipped EEPROM (NUMBER OF PLAYERS 1): the poller takes
 +  its "nothing pending" exit every time and the protocol is never entered. With
@@ -192,16 +192,22 @@ index 1de425fa..8bd607d3 100644
  
  */
  
-@@ -101,6 +109,8 @@ BIT N - ( scale < 50% ) ? 1 : 0
+ #include "emu.h"
++
+ #include "cpu/m68000/m68000.h"
+ #include "machine/adc0808.h"
+ #include "machine/eepromser.h"
+@@ -101,19 +110,98 @@ BIT N - ( scale < 50% ) ? 1 : 0
  #include "machine/timer.h"
  #include "sound/dac.h"
  #include "video/ramdac.h"
 +
-+#include <algorithm>
  #include "emupal.h"
  #include "screen.h"
  #include "speaker.h"
-@@ -108,12 +118,88 @@ BIT N - ( scale < 50% ) ? 1 : 0
+ 
++#include <algorithm>
++
  
  namespace {
  
@@ -296,7 +302,7 @@ index 1de425fa..8bd607d3 100644
  
  class wheelfir_state : public driver_device
  {
-@@ -128,9 +214,7 @@ public:
+@@ -128,9 +216,7 @@ public:
  		m_blitter_data(*this, "blitram"),
  		m_tilepages(*this, "gfx1"),
  		m_maincpurom(*this, "maincpu"),
@@ -307,7 +313,7 @@ index 1de425fa..8bd607d3 100644
  	{ }
  
  	void wheelfir(machine_config &config);
-@@ -138,11 +222,9 @@ public:
+@@ -138,11 +224,9 @@ public:
  
  	int adc_eoc_r();
  
@@ -320,7 +326,7 @@ index 1de425fa..8bd607d3 100644
  	virtual void video_start() override ATTR_COLD;
  
  private:
-@@ -155,6 +237,13 @@ private:
+@@ -155,6 +239,13 @@ private:
  	std::unique_ptr<int32_t[]> m_zoom_table;
  	required_shared_ptr<uint16_t> m_blitter_data;
  	required_region_ptr<uint8_t> m_tilepages;
@@ -334,7 +340,7 @@ index 1de425fa..8bd607d3 100644
  	required_region_ptr<uint16_t> m_maincpurom;
  
  	int32_t m_direct_write_x0 = 0;
-@@ -163,10 +252,63 @@ private:
+@@ -163,10 +254,69 @@ private:
  	int32_t m_direct_write_y1 = 0;
  	int32_t m_direct_write_idx = 0;
  
@@ -346,7 +352,6 @@ index 1de425fa..8bd607d3 100644
  
  	std::unique_ptr<bitmap_ind16> m_tmp_bitmap[2]{};
  
-+
 +	// The two tables of 400 16-byte scale descriptors in the 68000 ROM, per axis (0 = horizontal);
 +	// -1 when the known answer does not find them, and the floating-point approximation is used.
 +	int32_t m_scale_desc[2] = { -1, -1 };
@@ -355,6 +360,13 @@ index 1de425fa..8bd607d3 100644
 +	uint32_t m_gfx_mask = 0;   // the gfx1 region's length - 1, a power of two
 +	// destination steps that asked for more source than fits in a 512 page, reported per frame
 +	int m_source_exhausted = 0;
++
++	bool m_blit_opaque = false;   // 0xff was written to word 13 since the arming
++
++	// The 9-bit background scroll, latched when the game writes the Y byte. Its bit 8s live in
++	// word 8, which every blit rewrites, so they are captured with the coordinates.
++	int32_t m_scroll_x_latched = 0;
++	int32_t m_scroll_y_latched = 0;
 +
 +	// A word of the 68000 ROM by BYTE address; an AND because the region is a power of two.
 +	uint16_t rom_w(uint32_t byteaddr) const
@@ -398,7 +410,7 @@ index 1de425fa..8bd607d3 100644
  	int32_t get_scale(int32_t index)
  	{
  		while (index < ZOOM_TABLE_SIZE)
-@@ -179,64 +321,88 @@ private:
+@@ -179,64 +329,82 @@ private:
  		}
  		return 0;
  	}
@@ -429,14 +441,9 @@ index 1de425fa..8bd607d3 100644
  
 -	bool m_force_extra_irq1;
 -	bool m_disable_raster_irq;
-+	int32_t m_current_yscroll = 0;
- 
+-
 -	int m_current_yscroll;
-+	// The 9-bit background scroll, latched when the game writes the Y byte. Its bit 8s live in
-+	// word 8, which every blit rewrites, so they are captured with the coordinates.
-+	bool m_blit_opaque = false;   // 0xff was written to word 13 since the arming
-+	int32_t m_scroll_x_latched = 0;
-+	int32_t m_scroll_y_latched = 0;
++	int32_t m_current_yscroll = 0;
  };
  
 -void wheelfir_state::wheelfir_scanline_cnt_w(offs_t offset, uint16_t data, uint16_t mem_mask)
@@ -524,7 +531,7 @@ index 1de425fa..8bd607d3 100644
  		// wheelfir sets 0xfc0000 and 0xf00000, both of which are out of range of any GFX ROM
  		// kongball sets 0xfc0000 but only on startup
  		m_direct_write_x0 = dst_x0;
-@@ -244,31 +410,39 @@ void wheelfir_state::do_blit()
+@@ -244,31 +412,39 @@ void wheelfir_state::do_blit()
  		m_direct_write_y0 = dst_y0;
  		m_direct_write_y1 = dst_y1;
  		m_direct_write_idx = 0;
@@ -579,7 +586,7 @@ index 1de425fa..8bd607d3 100644
  	}
  
  	float scale_u_step;
-@@ -297,46 +471,104 @@ void wheelfir_state::do_blit()
+@@ -297,46 +473,104 @@ void wheelfir_state::do_blit()
  	const int indexv = d1v | (d2v << 6) | (hflagv << 12) | (dflagv << 13);
  	const float scale_v = get_scale(indexv);
  
@@ -699,7 +706,7 @@ index 1de425fa..8bd607d3 100644
  }
  
  void wheelfir_state::do_direct_write(uint8_t sixdat)
-@@ -354,14 +586,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
+@@ -354,14 +588,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
  
  		if (x < 512 && y < 512)
  		{
@@ -716,7 +723,7 @@ index 1de425fa..8bd607d3 100644
  {
  	/*
  	Blitter data format ( offset in words, offset in bytes )
-@@ -375,35 +607,49 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -375,35 +609,49 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	3  6    --------
  	   7    YYYYYYYY   Y = dest_y1 bits 0-7
  	4  8    --------
@@ -778,7 +785,7 @@ index 1de425fa..8bd607d3 100644
  	if (offset == 0x6)
  	{
  		if (!ACCESSING_BITS_8_15)  //LSB only!
-@@ -413,25 +659,38 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -413,25 +661,38 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  		}
  	}
  
@@ -827,7 +834,7 @@ index 1de425fa..8bd607d3 100644
  		else
  		{
  			// writes 0x0000 before filling in some of the other params then sending 0xffff above
-@@ -440,84 +699,121 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -440,84 +701,117 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	}
  }
  
@@ -888,7 +895,7 @@ index 1de425fa..8bd607d3 100644
 +	// The displayed half of the sprite plane is the bit the game declared on LINE 0 of the frame,
 +	// which is above the horizon by construction: the road writer (0xdc7d0) reuses word 8 from line
 +	// 1 on without the bit. The High Scores time bar, which grows 2px per frame alternating halves,
-+	// is the neutral arbiter that settled it.
++	// is the screen that tells the possible readings apart.
 +	for (int y = cliprect.min_y; y <= cliprect.max_y; y++)
 +	{
 +		const int source_row = y + m_page_at_line0 * 256;
@@ -912,10 +919,10 @@ index 1de425fa..8bd607d3 100644
 -	else
 +	// A blit that asked for more source than fits in a page is reported once per frame, from the
 +	// line that raises the game's own vblank interrupt (not the screen's vblank, four lines
-+	// earlier), through the console because logerror needs -log.
++	// earlier).
 +	if (m_source_exhausted)
  	{
-+		osd_printf_warning("wheelfir: scale: %d destination steps with no source inside the page (frame %d)\n",
++		logerror("scale: %d destination steps with no source inside the page (frame %d)\n",
 +				m_source_exhausted, int(m_screen->frame_number()));
 +		m_source_exhausted = 0;
  	}
@@ -972,15 +979,15 @@ index 1de425fa..8bd607d3 100644
 +		data |= 0x2000;
  		data |= m_eeprom->do_read() << 15;
 -		//printf("%s eeprom read %04x %04x\n", machine().describe_context().c_str(), data, mem_mask);
- 	}
- 
- 	if (ACCESSING_BITS_0_7)
- 	{
+-	}
+-
+-	if (ACCESSING_BITS_0_7)
+-	{
 -		//printf("unknown read %04x %04x\n", data, mem_mask);
  	}
  
  	return data;
-@@ -530,26 +826,40 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
+@@ -530,26 +824,40 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
  	machine().bookkeeping().coin_counter_w(1, data & 0x02);
  }
  
@@ -1001,7 +1008,7 @@ index 1de425fa..8bd607d3 100644
 -	map(0x200000, 0x20ffff).ram().mirror(0x010000); // kongball either needs the mirror (or has more ram?)
 +	// Kong Ball keeps its level-5 handler and a few variables at 0x21xxxx, and every absolute
 +	// reference in its ROM to those bytes uses that spelling, so a partial decode and a second 64 KB
-+	// bank both fit what was measured: identical goldens, handler counts and screen at the same
++	// bank both fit what was measured: identical captures, handler counts and screens at the same
 +	// frames under each. The mirror is the cheaper board.
 +	map(0x200000, 0x20ffff).ram().mirror(0x010000);
  
@@ -1027,7 +1034,7 @@ index 1de425fa..8bd607d3 100644
  {
  	map(0x000000, 0x0fffff).rom();
  	map(0x200000, 0x20ffff).ram();
-@@ -561,6 +871,11 @@ void wheelfir_state::wheelfir_sub(address_map &map)
+@@ -561,6 +869,11 @@ void wheelfir_state::wheelfir_sub(address_map &map)
  }
  
  
@@ -1039,7 +1046,7 @@ index 1de425fa..8bd607d3 100644
  static INPUT_PORTS_START( pwball )
  	PORT_START("P1")    /* 16bit */
  	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
-@@ -600,69 +915,66 @@ INPUT_PORTS_END
+@@ -600,69 +913,66 @@ INPUT_PORTS_END
  static INPUT_PORTS_START( wheelfir )
  	PORT_INCLUDE(pwball)
  
@@ -1149,7 +1156,7 @@ index 1de425fa..8bd607d3 100644
  		}
  	}
  	else
-@@ -670,60 +982,13 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
+@@ -670,60 +980,13 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
  		if (param == NUM_SCANLINES) /* vblank */
  		{
  			m_maincpu->set_input_line(3, HOLD_LINE);
@@ -1211,24 +1218,12 @@ index 1de425fa..8bd607d3 100644
  void wheelfir_state::machine_start()
  {
  	m_zoom_table = std::make_unique<int32_t[]>(ZOOM_TABLE_SIZE);
-@@ -734,32 +999,89 @@ void wheelfir_state::machine_start()
+@@ -734,32 +997,91 @@ void wheelfir_state::machine_start()
  	}
  
  	for (int j = 0; j < 400; ++j)
--	{
--#if 0
--		// calculate index for zoom
--		uint16_t *ROM = (uint16_t *)m_maincpurom;
--		int i = j << 3;
--		int d1 = ROM[0x200 + i] & 0x1f;
--		int d0 = (ROM[0x200 + i] >> 8) & 0x1f;
--
--		d0 |= (ROM[0x200 + 1 + i] & 1) ? 0x20 : 0;
--		d1 |= (ROM[0x200 + 1 + i] & 4) ? 0x20 : 0;
 +		m_zoom_table[zoom_index[j]] = j;
- 
--		int hflag = (ROM[0x200 + 2 + i] & 0x100) ? 1 : 0;
--		int dflag = (ROM[0x200 + 1 + i] & 0x10) ? 1 : 0;
++
 +	// Locate the two scale descriptor tables in the ROM by the KNOWN ANSWER: scale 100 must be the
 +	// identity and 200 exactly double over all 256 columns. A ROM without them keeps the
 +	// approximation. The mask is only valid for a power-of-two region; otherwise it stays zero and
@@ -1237,14 +1232,19 @@ index 1de425fa..8bd607d3 100644
 +	m_rom_mask = ((rom_words & (rom_words - 1)) == 0) ? rom_words - 1 : 0;
 +	// the source wraps inside the gfx region with a mask, so the region has to be a power of two
 +	const uint32_t gfx_bytes = uint32_t(m_tilepages.length());
-+	if (gfx_bytes & (gfx_bytes - 1))
-+		fatalerror("wheelfir: the gfx1 region is %u bytes, not a power of two\n", gfx_bytes);
++	assert(!(gfx_bytes & (gfx_bytes - 1)));
 +	m_gfx_mask = gfx_bytes - 1;
 +
 +	const uint32_t rom_bytes = rom_words * 2;
 +	int found = 0;
 +	for (uint32_t off = 0; off + 400 * 16 <= rom_bytes && found < 2; off += 2)
-+	{
+ 	{
+-#if 0
+-		// calculate index for zoom
+-		uint16_t *ROM = (uint16_t *)m_maincpurom;
+-		int i = j << 3;
+-		int d1 = ROM[0x200 + i] & 0x1f;
+-		int d0 = (ROM[0x200 + i] >> 8) & 0x1f;
 +		// Cheap filter before the expensive check: in the scale 100 descriptor both tables must be
 +		// THE SAME, because only then can the mapping be the identity.
 +		const uint32_t d100 = off + 100 * 16;
@@ -1260,9 +1260,8 @@ index 1de425fa..8bd607d3 100644
 +			m_scale_desc[found++] = int32_t(off);
 +	}
  
--		int index = d0 | (d1 << 6) | (hflag << 12) | (dflag << 13);
--#endif
--		m_zoom_table[zoom_index[j]] = j;
+-		d0 |= (ROM[0x200 + 1 + i] & 1) ? 0x20 : 0;
+-		d1 |= (ROM[0x200 + 1 + i] & 4) ? 0x20 : 0;
 +	// The horizontal table must also decode to zoom_index[], which ties the two together.
 +	bool zoom_index_matches = (found == 2);
 +	for (int j = 0; j < 400 && zoom_index_matches; ++j)
@@ -1275,15 +1274,24 @@ index 1de425fa..8bd607d3 100644
 +		d1 |= (w1 & 4) ? 0x20 : 0;
 +		const int idx = d0 | (d1 << 6) | ((w2 & 0x100) ? 0x1000 : 0) | ((w1 & 0x10) ? 0x2000 : 0);
 +		zoom_index_matches = (idx == zoom_index[j]);
- 	}
-+
++	}
+ 
+-		int hflag = (ROM[0x200 + 2 + i] & 0x100) ? 1 : 0;
+-		int dflag = (ROM[0x200 + 1 + i] & 0x10) ? 1 : 0;
 +	m_board_scale = zoom_index_matches;
-+
-+	// through the console: a run handed over for judgement has to say which mode it ran in
-+	osd_printf_info("scale: %d tables (x=%06x y=%06x), zoom_index match %s, board law %s\n",
-+			found, m_scale_desc[0], m_scale_desc[1],
-+			zoom_index_matches ? "OK" : "FAILS",
-+			m_board_scale ? "ACTIVE" : "inactive: the match FAILS");
+ 
+-		int index = d0 | (d1 << 6) | (hflag << 12) | (dflag << 13);
+-#endif
+-		m_zoom_table[zoom_index[j]] = j;
+-	}
++	// once per start: which scale law this machine runs (Power Ball's program carries no descriptors,
++	// and none of its blits is scaled)
++	if (m_board_scale)
++		logerror("scale: the board's law, descriptor tables at x=%06x y=%06x\n", m_scale_desc[0], m_scale_desc[1]);
++	else if (found == 2)
++		logerror("scale: descriptor tables at x=%06x y=%06x do not decode to zoom_index; approximating\n", m_scale_desc[0], m_scale_desc[1]);
++	else
++		logerror("scale: no descriptor tables in this program; approximating\n");
 +
 +	// What influences future behaviour is saved; what startup reads out of the ROM is not, or a
 +	// loaded state would clobber what THIS machine measured.

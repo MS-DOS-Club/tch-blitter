@@ -1428,6 +1428,17 @@ blitter:
         0x1c or above (0x700000 or more, no ROM there) and so set bits 14 and 15'
       meaning: 'the six bits holding the graphics ROM page; a value of 0x1c or above names no ROM and
         opens the direct-write channel instead'
+      observed:
+        radendur_the_dump_names_such_a_page_only_once_hung: 'MEASURED on 2026-10-14 at the pin
+          74b9fae5 with a tap on word 6, 120 s each from a cold boot: 0 such pages in the attract of
+          radendur or radendurv2 and in a race of radendurv2 (control: every word-6 write counted,
+          424393 to 1905212 a run; Wheels & Fire, same tap, 6 in its attract). The dump, driven to a
+          race, names one from frame 341 on and keeps doing so while it hangs on the selection
+          screen, 1894126 times. (radendur_walks_off_the_sprite_plane saw no opening in a race of
+          radendur because the driver then still patched the dump''s faults, so it raced.) radendur.cpp now treats such a page as tch/wheelfir.cpp does (it
+          defines the window, on the plane the blit names, and draws nothing), and the dump''s
+          captures every 150 frames from 300 to 3150 are pixel for pixel those of the previous
+          driver (control: frames 300 and 450 differ by 82493 pixels).'
     - mask: 255
       name: direct_write_port
       state: confirmed
@@ -1499,6 +1510,12 @@ blitter:
       name: scale_u_data1
       state: open
       observed:
+        pwball_carries_no_scale_descriptors: 'MEASURED on 2026-10-14 at the pin 74b9fae5: the
+          search for the two 400-entry descriptor tables by the known answer (scale 100 the
+          identity, 200 exactly double) finds both in wheelfir and kongball and none in pwball,
+          and a count of every blit by its scale over 120 s of attract and of play gives pwball
+          261462 and 443836 blits, none of them scaled (kongball: 350 scaled in its attract, 0 in
+          play). So Power Ball never reaches the approximation its driver falls back to.'
         wheelfir: 'MEASURED on 2026-07-30 over the zooming logo of cycle 0, which runs through 46
           consecutive scales from 25 to 101. The SPURIOUS COLUMN on the right edge appears on TWO of
           those 46, and both are an EXACT HIT in zoom_index: scale 65 with index 0x0802 and scale 89
@@ -1653,6 +1670,18 @@ blitter:
           distinct step values), which is the combination he describes rather than a single counter.
           The known-answer control is the one the driver already carries and it passes in the same
           run: scale 100 is the identity and 200 is exactly double over all 256 columns.'
+        rltennis_a_blit_stays_inside_its_source_whatever_encodes_the_ratio: 'MEASURED on 2026-10-14
+          at the pin 74b9fae5, every blit logged over 120 s of attract and of play (scripts/drive.lua)
+          on both sets. The register values that decode to 1/1 without being zero, 0x8080 (4 blits a
+          run, both sets, a 1x1 source stretched to 255x255) and 0x0004 (set 2 only, 395 blits in the
+          attract: the spinning ball at (96,64), eight frames whose sources are 117 to 122 columns
+          wide in a 125 or 126 column box), all have a destination longer than their source. Held
+          inside the source span the ball is clean; walked on past it as 0x0000 was, the same frames
+          match pixel for pixel until frame 423, where one dark pixel at (221,179) comes from the
+          ROM column past the tile. So every blit is held inside its source span, 0x0000 included:
+          480 captures, every 50th frame of 100 s of attract and of play on both sets, are pixel for
+          pixel those of the previous driver (control: 102 to 113 of the 119 successive pairs of each
+          run differ).'
         rltennis_the_same_law_in_one_word: 'THE EARLIER BOARD CARRIES THE SAME SCALING LAW, in a
           single register, and that is MEASURED on 2026-09-15 on a live debug session of rltennis
           rather than inherited from the family. Reality Tennis writes its scale to 0x70000a, the
@@ -1719,7 +1748,9 @@ blitter:
           The far player drawn at 3/4 now stands inside its own shadow, where the widened blit
           drew it larger. The goldens 01_game of rltennis and rltennisa (frame 900 of the
           attract, which carries 0x2233 blits in frame 897) moved by 868 and 875 pixels, all
-          inside the same union, and were re-blessed; their other scenes are byte-identical.'
+          inside the same union, and were re-blessed; their other scenes are byte-identical.
+          Since 2026-10-14 the hold applies to every blit, 0x0000 included:
+          rltennis_a_blit_stays_inside_its_source_whatever_encodes_the_ratio.'
         rltennis_spans_are_8_bit_forward_distances: 'THE UNSCALED BLITS WHOSE SPANS DIFFER ARE NOT
           CLIPPED: every walk of the earlier board ends where the low 8 bits of its counter reach
           the end coordinate, so a span is (end - start) & 0xff in the walk''s own direction, on
@@ -1748,7 +1779,9 @@ blitter:
           blits; the column is court in the old build and the player''s edge in the new, and the
           law (24 source columns at 3/4 are 18) gives 18 where the old count gave 17. Control:
           two frames of the same build differ by 76800 pixels. The goldens of both sets pass
-          unchanged, 6 of 6.'
+          unchanged, 6 of 6. Since 2026-10-14 a destination longer than its source holds the
+          source''s last step instead of reading past it:
+          rltennis_a_blit_stays_inside_its_source_whatever_encodes_the_ratio.'
         wheelfir_spans_are_9_bit_forward_distances: 'WHEELS & FIRE DECLARES EVERY WALK SO THAT THE
           9-BIT FORWARD DISTANCE AND THE PLAIN DIFFERENCE AGREE, EXCEPT ON THE TORUS WRAPS. MEASURED on
           2026-10-03 on wheelfir, the earlier board''s method (rltennis_spans_are_8_bit_forward_distances)
@@ -2882,6 +2915,17 @@ ports:
     instruction of the sub CPU''s mix loop (recorded under word 8,
     radendur_the_right_rate_buys_seven_clean_seconds_at_the_latch)'
   observed:
+    radendur_the_latch_cannot_be_the_deferred_generic_latch: 'MEASURED on 2026-10-14 at the pin
+      74b9fae5, radendur.cpp built twice, its plain-register latch against MAME''s
+      generic_latch_16_device (whose write goes through scheduler().synchronize), 120 s from a cold
+      boot with scripts/drive.lua (coin, start, a race), the latch counted by taps (a read by the
+      sub''s block receiver, pc 0x2012da, with no main write since the previous read is a word read
+      twice) and the audio by -wavwrite (a second with more than 16 distinct sample values sounds).
+      Control, the known answer of radendurv2 with the plain register: 287376 block reads = 5987
+      blocks of 48, 11 read twice, 103 of 120 s with sound, as recorded before. radendurv2 with
+      the generic latch: 2077 blocks, 5 read twice, 195452 main writes no read took, 35 of 120 s
+      with sound, the last at second 41. The dump: 7 and 6 s with sound (its own faults stop it
+      either way). So the plain register stays, and radendur.cpp says why.'
     pwball_the_sub_cpus_latch_protocol_has_no_new_word_flag: 'READ on 2026-10-11 in the sub''s own code, one
       program for wheelfir, pwball and radendur (identical up to 0x4946). The IRQ1 mixer ends in a
       self-modified `jmp` whose target (0x20113a) is the protocol''s state: wait for 0xffff (0x632

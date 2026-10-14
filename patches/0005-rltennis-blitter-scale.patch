@@ -1,5 +1,5 @@
 diff --git a/src/mame/tch/rltennis.cpp b/src/mame/tch/rltennis.cpp
-index d86f2a72..3e528fcc 100644
+index d86f2a72..11736609 100644
 --- a/src/mame/tch/rltennis.cpp
 +++ b/src/mame/tch/rltennis.cpp
 @@ -1,9 +1,12 @@
@@ -200,12 +200,14 @@ index d86f2a72..3e528fcc 100644
  
  		int layer=(m_blitter[BLT_START] & BLTSTRT_LAYER )?BITMAP_BG:BITMAP_FG_1;
  
-@@ -316,12 +348,17 @@ void rltennis_state::blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask)
+@@ -316,12 +348,19 @@ void rltennis_state::blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask)
  			force_blit=true;
  		}
  
-+		// held inside the source span: a destination can be one step longer than the ratio gives
-+		const auto src_idx = [scale, scale_src, scale_dst] (int d, int limit) { return scale ? std::min(d * scale_src / scale_dst, limit) : d; };
++		// held inside the source span, whatever encodes the ratio: a destination can be longer than
++		// the ratio gives (one step on a scaled blit, a few columns on set 2's 1/1 ball animation,
++		// where the ROM's next columns are not part of the picture)
++		const auto src_idx = [scale_src, scale_dst] (int d, int limit) { return std::min(d * scale_src / scale_dst, limit); };
 +
  		for( int x=dst_x0, idx_x=0 ; idx_x<=blit_w1; x+=x_dst_step, idx_x++ )
  		{
@@ -220,7 +222,7 @@ index d86f2a72..3e528fcc 100644
  
  				if(force_blit)
  				{
-@@ -334,9 +371,9 @@ void rltennis_state::blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask)
+@@ -334,9 +373,9 @@ void rltennis_state::blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask)
  				int pix = m_gfx[address & (m_gfx.length() - 1)];
  				int screen_x=(x&0xff)+((m_blitter[BLT_FLAGS] & BLTFLAG_DST_LR )?256:0);
  
@@ -232,7 +234,7 @@ index d86f2a72..3e528fcc 100644
  				}
  			}
  		}
-@@ -354,6 +391,10 @@ void rltennis_state::video_start()
+@@ -354,6 +393,10 @@ void rltennis_state::video_start()
  	m_tmp_bitmap[BITMAP_FG_DISPLAY] = std::make_unique<bitmap_ind16>(512, 256);
  
  	save_item(NAME(m_blitter));
@@ -243,7 +245,7 @@ index d86f2a72..3e528fcc 100644
  }
  
  uint32_t rltennis_state::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
-@@ -443,7 +484,7 @@ INTERRUPT_GEN_MEMBER(rltennis_state::interrupt)
+@@ -443,7 +486,7 @@ INTERRUPT_GEN_MEMBER(rltennis_state::interrupt)
  {
  	++m_unk_counter; // Frame counter? verify
  	device.execute().set_input_line(4, HOLD_LINE);
@@ -252,7 +254,7 @@ index d86f2a72..3e528fcc 100644
  }
  
  void rltennis_state::machine_start()
-@@ -476,8 +517,10 @@ void rltennis_state::rltennis(machine_config &config)
+@@ -476,8 +519,10 @@ void rltennis_state::rltennis(machine_config &config)
  
  	screen_device &screen(SCREEN(config, "screen"));
  	screen.set_refresh_hz(RLT_REFRESH_RATE);

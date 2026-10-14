@@ -27,7 +27,9 @@ word 6. There is no arming step and nothing to reset between blits.
 **It scales.** Word 5 holds the ratio as two bytes whose high nibbles are `a` and `b`: the
 destination is `(a+1)/(b+1)` of the source on both axes. The game writes `0x0000` before each
 value, plays its matches at `0x2233` (3/4) and `0x1122` (2/3), and is only ever seen reducing. Unscaled blits
-are not clipped: every walk stops where the low 8 bits of its counter reach the end coordinate.
+are not clipped: every walk stops where the low 8 bits of its counter reach the end coordinate. A
+destination longer than its source holds the source's last column or row rather than reading past
+the rectangle the game declared.
 
 **Index 0 is transparent**, except in the colour fill, which no register asks for: the driver
 treats a blit whose source spans are 1 on both axes as a fill, repeating that source across the

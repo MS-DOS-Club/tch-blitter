@@ -87,6 +87,9 @@ and the page addressing are faithful.
 It is also the game that rules out overly aggressive video models: a double buffer that INFERS the
 page instead of reading it from the correct register leaves it black.
 
+It never zooms. Its program carries none of the scale descriptors Wheels & Fire and Kong Ball keep
+in theirs, and every blit it draws is 1:1, so the board's scaling law never comes into play.
+
 And it is the one game that selects opaque mode with a WORD write: three times
 (`move.w #$ffff,$70001a` at `0xec16`, `0xf706` and `0xf796`), never as a byte. The selector is
 the low byte of that word, so the word write reaches it and the driver honours it. All three land
