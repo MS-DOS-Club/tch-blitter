@@ -1,8 +1,8 @@
 diff --git a/src/mame/mame.lst b/src/mame/mame.lst
-index d4ea7265..72adab35 100644
+index dc1cace8..ab802f22 100644
 --- a/src/mame/mame.lst
 +++ b/src/mame/mame.lst
-@@ -46902,6 +46902,10 @@ kickgoala
+@@ -46949,6 +46949,10 @@ kickgoala
  @source:tch/littlerb.cpp
  littlerb
  
@@ -13,7 +13,7 @@ index d4ea7265..72adab35 100644
  @source:tch/rltennis.cpp
  rltennis
  rltennisa
-@@ -46915,7 +46919,6 @@ topdrive
+@@ -46962,7 +46966,6 @@ topdrive
  @source:tch/wheelfir.cpp
  kongball
  pwball

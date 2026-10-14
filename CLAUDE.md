@@ -44,9 +44,7 @@ travels, since `upstream/` is not committed:
 | `tch/radendur.cpp` | radendur, radendurv2 | `radendu` | `upstream/radendu` | `0001-radendur-driver-fixes.patch` |
 | `tch/rltennis.cpp` | rltennis, rltennisa | `rltennis` | `upstream/rltennis` | `0005-rltennis-blitter-scale.patch` |
 
-Three more patches are not drivers. `0006-ramdac-save-state.patch` registers the state of MAME's
-`ramdac_device`, shared by the three drivers, which registered none: a save state loaded in a fresh
-process left the palette RAM empty. `0003-lua-thread-context-race.patch` fixes a race in MAME's Lua
+Two more patches are not drivers. `0003-lua-thread-context-race.patch` fixes a race in MAME's Lua
 console thread, and `0004-gdbstub-one-thread-per-cpu.patch` makes the gdbstub serve one GDB thread
 per cpu, so a debugger reaches the sub cpu without moving the focus. `scripts/lib/patch_table.sh`
 says which MAME files each patch owns.

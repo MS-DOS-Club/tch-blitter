@@ -9,7 +9,6 @@ PATCHES="
 0003-lua-thread-context-race.patch|src/frontend/mame/luaengine.cpp
 0004-gdbstub-one-thread-per-cpu.patch|src/osd/modules/debugger/debuggdbstub.cpp
 0005-rltennis-blitter-scale.patch|src/mame/tch/rltennis.cpp
-0006-ramdac-save-state.patch|src/devices/video/ramdac.cpp
 "
 
 patch_table_names() { printf '%s\n' "$PATCHES" | cut -d'|' -f1 | sed '/^$/d'; }

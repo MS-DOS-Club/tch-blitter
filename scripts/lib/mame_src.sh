@@ -9,7 +9,7 @@
 unset GIT_DIR GIT_INDEX_FILE GIT_WORK_TREE
 
 # The pin, written once: the commit everything is built and verified against.
-MAME_PINNED_COMMIT="9c28def3407cf3386d5c6bea932312741acb7992"
+MAME_PINNED_COMMIT="62f8ddedceefa8d828431fde45387ec530493fa1"
 
 # clone_pinned <repository url> <dest> -- a shallow checkout of exactly MAME_PINNED_COMMIT.
 # `git clone --branch` takes a branch or a tag and never a SHA, so it is an init plus a fetch of
