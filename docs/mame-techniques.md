@@ -102,6 +102,15 @@ write or with the cpu stopped.
 For a debugger outside MAME, `make debug` runs `radendurv2` with the gdbstub; MAME's gdbstub
 speaks the 68000 natively.
 
+## Logging from a driver
+
+The drivers here are written to go upstream, so they log the way MAME's C++ guide asks: `logerror`
+for what a developer reads and `osd_printf_verbose` for what a user diagnoses, never a message at the
+default verbosity. A trace worth keeping for good, such as which scale law a Wheels & Fire machine
+runs, is one `logerror` line written once. `logerror` is only kept with `-log`, which writes
+`error.log` in the working directory: `scripts/lib/mame_run.sh` passes it to a played session, and
+any run that has to say what it ran reads it there.
+
 ## The cfg file
 
 A comment containing two consecutive hyphens is invalid XML: MAME prints `Error parsing XML

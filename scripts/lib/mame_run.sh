@@ -4,7 +4,7 @@
 #
 #   mame_run <set> [options] [-- extra MAME arguments]
 #     --mode quick     a small unthrottled window for unattended runs (the default); needs --seconds
-#     --mode session   a window at real speed for somebody to play, with no time limit
+#     --mode session   a window at real speed for somebody to play, with no time limit, and -log
 #     --seconds <n>    emulated seconds to run (-seconds_to_run)
 #     --lua <file>     an autoboot Lua script
 #     --snapshots <d>  where snapshots go
@@ -81,7 +81,9 @@ mame_cmd() {
             [ "$seconds" -lt 300 ] || { echo "mame_run: --seconds $seconds would leave MAME on its red warning; keep it under 300" >&2; return 2; }
             args+=(-resolution "${res:-320x240}" -nothrottle -seconds_to_run "$seconds") ;;
         session)
-            args+=(-resolution "${res:-960x720}")
+            # the drivers log through logerror, as MAME's C++ guide asks, so a played run keeps its
+            # log: error.log in the working directory says, among other things, which scale law ran
+            args+=(-resolution "${res:-960x720}" -log)
             [ -z "$seconds" ] || args+=(-seconds_to_run "$seconds") ;;
         *) echo "mame_run: unknown mode $mode (quick or session)" >&2; return 2 ;;
     esac
