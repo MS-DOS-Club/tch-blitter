@@ -23,7 +23,7 @@ index dc1cace8..ab802f22 100644
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/radendur.cpp b/src/mame/tch/radendur.cpp
 new file mode 100644
-index 00000000..680b0d28
+index 00000000..d780c518
 --- /dev/null
 +++ b/src/mame/tch/radendur.cpp
 @@ -0,0 +1,990 @@
@@ -47,8 +47,8 @@ index 00000000..680b0d28
 +  displayed, so the FG palette is snapshotted at the flip.
 +- The dump is emulated as it is: the prototype's own faults hang it on its grey
 +  exception screen. radendurv2 loads a maincpu ROM with those faults fixed in its
-+  code, its sound block moved after the drawing chain as the family's finished
-+  games place it, and, not the board's behaviour, its full scenery drawn: every
++  code, its sound block moved after the drawing chain as Power Ball and Kong
++  Ball place theirs, and, not the board's behaviour, its full scenery drawn: every
 +  prop near the view, in the row it belongs to.
 +
 +Original driver by Tomasz Slanina.

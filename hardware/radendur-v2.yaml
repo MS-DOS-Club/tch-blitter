@@ -1,7 +1,7 @@
 # Radical Enduro v2: the maincpu ROM the clone set radendurv2 loads in place of the dump, in three
 # layers: `fixes`, the prototype's four faults; `scenery`, NOT the board's behaviour, an enhancement
-# (its doc says what it does); `sound`, the sound block placed where the family's finished games
-# place it. Not the board's dump: `scripts/radendur-v2.py` builds it from the
+# (its doc says what it does); `sound`, the sound block placed where Power Ball and Kong Ball
+# place theirs. Not the board's dump: `scripts/radendur-v2.py` builds it from the
 # verified dump and refuses any other input; `--stage fixes` stops after the first layer.
 #
 # Every entry carries the words it expects to find; a word that is not there refuses the build.
@@ -251,7 +251,7 @@ layers:
       The prototype starts each sound block at line 0, under the drawing chain the frame opens
       with, whose handlers hold the 68000 at mask 7 past a line; the level-5 word then comes late
       and the sound CPU, which takes one word per line with no handshake, reads one twice and
-      runs garbage for good. The family's finished games start the block at line 99, after the
+      runs garbage for good. Power Ball and Kong Ball start the block at line 99, after the
       chain: their vblank handler loads the line counter with 100 where this one loads 1
       (registers.yaml: radendur_v2_the_block_at_line_99_keeps_the_sound). Loading 100 makes the
       first block after the masked boot start 100 lines after the vblank request the boot left

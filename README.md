@@ -135,8 +135,8 @@ a fixed scanline.
 
 **It is the exception on ROMs**: the faults are the prototype's own, so the driver emulates the
 dump as it is (`radendur`, which hangs on them), and a clone set, `radendurv2`, loads a maincpu ROM
-with the four faults fixed in its code, its sound block moved after the drawing as its finished
-siblings place it, and, as a layer that is **not the board's behaviour**,
+with the four faults fixed in its code, its sound block moved after the drawing as Power Ball
+and Kong Ball place theirs, and, as a layer that is **not the board's behaviour**,
 every prop near the view drawn where it belongs (the prototype's own engine leaves some zones
 out, and puts the props of a row the view scrolls down into its top row). That ROM is
 not distributed: `make v2` builds it from the verified dump, refusing any other input and any word

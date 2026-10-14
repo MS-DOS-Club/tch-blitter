@@ -1,7 +1,7 @@
 """Builds Radical Enduro v2, the clone set whose maincpu ROM has the prototype's faults fixed.
 
 Its table has three layers: the four faults, full scenery (not the board's behaviour), and the sound
-block moved after the drawing chain as the family's finished games place it.
+block moved after the drawing chain as Power Ball and Kong Ball place theirs.
 
 The board's dump has four faults that stop the game (`hardware/radendur-v2.yaml` says which and
 why). MAME's driver emulates that dump as it is, and the clone loads a corrected maincpu ROM

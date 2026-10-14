@@ -40,7 +40,7 @@ fixed in the ROM it boots, enters a game and its playable tracks finish the race
 |---|---|
 | year | no known date |
 | board | [the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A |
-| MAME set | `radendur` (the dump, which hangs on its own faults); `radendurv2`, a clone whose maincpu ROM has them fixed, its sound block placed where the finished siblings place it and, as an enhancement that is not the board's behaviour, its full scenery drawn, built from the dump by `make v2` |
+| MAME set | `radendur` (the dump, which hangs on its own faults); `radendurv2`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs and, as an enhancement that is not the board's behaviour, its full scenery drawn, built from the dump by `make v2` |
 | driver in MAME | `tch/wheelfir.cpp` |
 | driver in this repository | **its own driver**, `tch/radendur.cpp` |
 | status in MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: a comment in its driver says that some courses reach gameplay but crash quickly |
@@ -51,7 +51,7 @@ fixed in the ROM it boots, enters a game and its playable tracks finish the race
 With its faults fixed it boots, enters a game and **five tracks finish the race** with no grey
 screen. The faults that are the prototype's own are fixed in the code of the `radendurv2` ROM, never
 by the driver, which emulates the dump as it is. The same ROM starts each sound block after the
-drawing, as the finished siblings do, so the music lasts the race; and it draws every prop near the
+drawing, as Power Ball and Kong Ball do, so the music lasts the race; and it draws every prop near the
 view where it belongs, which the prototype's engine does not: an enhancement, not the board, which
 costs game speed: in some races a few steps of the race clock take more frames than without it.
 
@@ -62,8 +62,8 @@ The root causes, all read from the code rather than guessed:
   over the drawing list's cursors. Correcting that loop removes both the wrong colours and the
   overrun.
 - Three independent causes of an in-race hang: a register clobbered by the vblank handler, an
-  uninitialised search window in five copies of the same block, and the plane being cleared
-  several times per frame.
+  uninitialised search window in five copies of the same block, and an object drawer whose entry
+  count wraps round when a cell is busy.
 - The difficulty menu, which is in fact wired up: four levels and twelve legs.
 
 ## The tracks: what is there, what plays and what was left unfinished
@@ -222,7 +222,7 @@ counter while a block streams.
 scanline with no handshake, so a word that arrives a line late is a word read twice, and from there
 it runs garbage. The prototype starts each block at the top of the frame, exactly where its drawing
 chain holds the main 68000 with interrupts masked, and on the dump the music dies a few seconds in.
-Its finished siblings start the block a hundred lines down, after the drawing; `radendurv2` does the
+Power Ball and Kong Ball start the block a hundred lines down, after the drawing; `radendurv2` does the
 same, and keeps its music through the race.
 
 **Not fixable is the missing per-event triggering.** The game code calls the sound API once, where
