@@ -25,7 +25,10 @@ then is information about the fix.
 - The gate is the observed state, captured as goldens: a change that does not move the game forward,
   or breaks another set of the driver, is suspect.
 - Instrument before supposing: the gdbstub (`make debug`, the 68000 is supported natively) and the
-  driver's logging. A fault that no objective channel shows needs that channel first.
+  driver's logging. A fault that no objective channel shows needs that channel first. How to
+  instrument a run without being misled (the debugger from Lua and the six things a breakpoint
+  needs, unattended runs, the cfg traps) is `docs/mame-techniques.md`: read it before the first
+  harness.
 - On radendur a healthy boot is told by an invariant, not a count: the exception handler `0x25a4`
   stays silent while the vblank handler `0x4a0` runs thousands of times.
 

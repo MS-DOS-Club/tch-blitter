@@ -142,6 +142,7 @@ a record lives under `hardware/evidence/`, with the script that re-derives the r
 | doing... | read first |
 |----------|-----------|
 | running MAME, repairing a driver, choosing the check for a change | `.claude/rules/mame-operations.md` |
+| instrumenting a run: a Lua harness, a breakpoint, a capture, a palette read | `docs/mame-techniques.md` |
 | writing a script or a test, or what is published | `.claude/rules/checks.md` |
 | confirming or refuting a hardware fact | `.claude/rules/hardware.md` and `hardware/*.yaml` |
 | proposing a theory about a known fault | the records in `hardware/registers.yaml`, which keep their refutations |

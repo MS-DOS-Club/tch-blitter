@@ -243,6 +243,7 @@ upstream/rltennis -rompath run/mame_roms -verifyroms    # rltennis, rltennisa
 
 The MAME commit everything is built and checked against is pinned in `scripts/lib/mame_src.sh`.
 `make check` runs the checks. What each tool is for is in [scripts/README.md](scripts/README.md);
+the techniques for debugging these boards in MAME are in [docs/mame-techniques.md](docs/mame-techniques.md);
 how to report a fault or propose a change is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licence
