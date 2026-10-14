@@ -7,7 +7,7 @@
 #   ./scripts/radendur-session.sh stop              ends the instance this script started
 #
 # MACHINE=radendur runs the board's dump, which stops on the prototype's own faults; the default,
-# radendurv2, plays. `stop` never touches a run this script did not start: the instance is told
+# radendurh, plays. `stop` never touches a run this script did not start: the instance is told
 # apart by the snapshot directory it is given, or on Windows by the pid kept when it was launched.
 set -euo pipefail
 
@@ -18,7 +18,7 @@ cd "$PROJECT_DIR"
 # shellcheck source=lib/mame_run.sh
 . "$SCRIPT_DIR/lib/mame_run.sh"
 
-MACHINE="${MACHINE:-radendurv2}"
+MACHINE="${MACHINE:-radendurh}"
 GDB_PORT="${GDB_PORT:-23946}"
 MARK="-snapshot_directory $PROJECT_DIR/tmp/snap"
 

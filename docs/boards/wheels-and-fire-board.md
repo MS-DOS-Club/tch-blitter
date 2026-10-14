@@ -134,7 +134,7 @@ volume table, its read opcode and its step, the last four straight into the mixe
 zero meaning "keep what you have". Power Ball
 and Kong Ball start the block at line 99, after the frame's drawing; Wheels & Fire keeps the line
 counter running from line 0 while a game runs; the Radical Enduro dump starts it at line 0, under
-the drawing chain, where one late word desynchronises the sound CPU for good, and `radendurv2`
+the drawing chain, where one late word desynchronises the sound CPU for good, and `radendurh`
 starts it at line 99 like Power Ball and Kong Ball. There is no way back: the sound CPU never answers,
 never acknowledges and cannot ask for a word again.
 
@@ -587,10 +587,10 @@ Anything reached through a pointer is not included.
 | `wheelfir` | `tch/wheelfir.cpp` | `NOT_WORKING`, `IMPERFECT_GRAPHICS` |
 | `pwball` | `tch/wheelfir.cpp` | `NOT_WORKING`, `IMPERFECT_GRAPHICS`, "mostly complete" |
 | `kongball` | `tch/wheelfir.cpp` | `NOT_WORKING`, `NO_SOUND`, `IMPERFECT_GRAPHICS` |
-| `radendur` | `tch/wheelfir.cpp` | `NOT_WORKING`, `IMPERFECT_GRAPHICS`; in this repository it has its own driver |
+| `radendur` | `tch/wheelfir.cpp` | `NOT_WORKING`, `IMPERFECT_GRAPHICS` |
 
 `NOT_WORKING` here means the emulation is not faithful, not that nothing shows. This repository's
-own drivers carry their own flags, and the state of each game here is in the README's games table.
+drivers carry their own flags, and the state of each game here is in the README's games table.
 
 ## Sources
 

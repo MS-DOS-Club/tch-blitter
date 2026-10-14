@@ -20,7 +20,7 @@ mkdir -p "$IMG"
 [ -d "$TCH" ] || { echo "ERROR: tch drivers missing. make setup"; exit 1; }
 
 # set:region:driver. Kong Ball has no sub cpu image: its dump lacks the sound ROMs.
-TARGETS="${TARGETS:-radendur:maincpu:radendur.cpp radendur:subcpu:radendur.cpp \
+TARGETS="${TARGETS:-radendur:maincpu:wheelfir.cpp radendur:subcpu:wheelfir.cpp \
 wheelfir:maincpu:wheelfir.cpp wheelfir:subcpu:wheelfir.cpp \
 pwball:maincpu:wheelfir.cpp pwball:subcpu:wheelfir.cpp \
 kongball:maincpu:wheelfir.cpp \

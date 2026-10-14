@@ -89,8 +89,8 @@ gifs:
   duration_s: 5.03
   emulated_frames: 252
   mb: 0.12
-- file: radendurv2-race.gif
-  set: radendurv2
+- file: radendurh-race.gif
+  set: radendurh
   refresh_hz: 50.08
   gif_frames: 79
   fps: 16.7

@@ -55,13 +55,12 @@ it.
   (`CLAUDE.local.md`), and `CONTRIBUTING.md` asks for AI assistance to be disclosed. They are
   impersonal in everything else.
 - The exceptions, no wider than their words:
-  1. The three drivers (`wheelfir.cpp`, `radendur.cpp`, `rltennis.cpp`, and so the patches): the
+  1. The two drivers (`wheelfir.cpp`, `rltennis.cpp`, and so the patches): the
      `copyright-holders` line, because MAME attributes a driver to whoever wrote it, and the
      attribution block of each header, verbatim: `Original driver by Tomasz Slanina.`, then one
      sentence on what this repository did to that driver, ending `by Marcos Hernández, in
      collaboration, within MS-DOS Club's TCH preservation project
-     (github.com/MS-DOS-Club/tch-blitter).`; `radendur.cpp`'s block closes with a pointer to
-     `wheelfir.cpp` for the blitter notes.
+     (github.com/MS-DOS-Club/tch-blitter).`
   2. The line that closes `README.md` and each game page, verbatim: `Developed by Optimiza
      ([Marcos Hernández](https://www.linkedin.com/in/optimiza/)), in collaboration with [MS-DOS
      Club](https://msdos.club) and its [podcast](https://www.ivoox.com/podcast-ms-dos-club_sq_f11160693_1.html).`

@@ -122,7 +122,7 @@ images:
     level: verified
     evidence: 'READ: 0x71c or.w d3,d1 / 0x71e move.b d1,0x700011, 0x762 move.w #0x10,0x7a0000, 0x780 rte,
       0x5d0 move.l #0x640,0x20f90a; MEASURED 2026-10-13: never executed in 3000 frames of the dump''s attract
-      (control 0x4a0, 2977 hits) nor in a radendurv2 race trace'
+      (control 0x4a0, 2977 hits) nor in a radendurh race trace'
   - addr: 7978
     name: irq_blitter
     description: 'IRQ L1 handler (blitter), target of the RAM trampoline 0x20f918, which the main loop installs
@@ -138,7 +138,7 @@ images:
       at 0x209461 and calls 0x22bc, which enqueues the next one or declares the queue empty'
     level: verified
     evidence: 'READ: installed at 0x251a when walk_list finds a zero entry; dumps the block at 0x209461
-      into the blitter, fires 0xffff at 0x1f80 and calls enqueue_next; executed in a radendurv2 race trace
+      into the blitter, fires 0xffff at 0x1f80 and calls enqueue_next; executed in a radendurh race trace
       of 2026-10-13 (main cpu, 5026 frames from a cold boot through scripts/drive.lua)'
   - addr: 8084
     name: irq1_chain
@@ -173,7 +173,7 @@ images:
     level: verified
     evidence: 'READ: compares the cursor 0x203514 with the end 0x203518 (equal -> queue_empty), sets the
       busy byte 0x209460 and builds a block at 0x209461; the attract trace takes only its empty-queue exit,
-      the build ran in a radendurv2 race trace of 2026-10-13 merged into disasm/executed/radendur_maincpu.txt'
+      the build ran in a radendurh race trace of 2026-10-13 merged into disasm/executed/radendur_maincpu.txt'
   - addr: 9180
     name: queue_empty
     description: 'Queue empty: it lowers the busy flag (0x209460) and installs 0x1fe6 as the level 1 handler,
@@ -203,7 +203,7 @@ images:
       infinite loop at 0x25d4'
     level: verified
     evidence: 'READ: vector 0x0c holds 0x25a4, 0x08 and 0x60..0x7c hold 0x25a2 (rte), 0x64/0x74 the RAM
-      trampolines, 0x6c the vblank. MEASURED live 2026-10-13 on radendurv2: with A1 odd, clr.w (a1) at 0xf2210
+      trampolines, 0x6c the vblank. MEASURED live 2026-10-13 on radendurh: with A1 odd, clr.w (a1) at 0xf2210
       stops at a breakpoint on 0x25a4 and never at 0x25a2, after 300 healthy frames that touched neither
       (control 0x4a0)'
   - addr: 9692
@@ -239,7 +239,7 @@ images:
       cursor back; A6 is its link frame (four stack arguments)
     level: verified
     evidence: 'READ: 0xe2e06/0xe2e0c load 0x20350c and 0x203510, 0xe2e7e bclr #0,(a3), 0xe2ea6 move.w d0,(a0)+,
-      0xe2ec8 stores a0 to 0x203510; executed in a radendurv2 race trace of 2026-10-13 (main cpu, 5026 frames
+      0xe2ec8 stores a0 to 0x203510; executed in a radendurh race trace of 2026-10-13 (main cpu, 5026 frames
       from a cold boot through scripts/drive.lua)'
   - addr: 929494
     name: palette_range_copy
@@ -272,7 +272,7 @@ images:
       by 4 and jsrs to section_dispatch_table[index]'
     level: verified
     evidence: 'READ: clears the two 1024-word arrays at 0x201e64/0x202664, then jsr (a0) through the table
-      indexed by *(0x201006)+0xc4 with no bounds check (0xe5e0c..0xe5e22); executed in a radendurv2 race
+      indexed by *(0x201006)+0xc4 with no bounds check (0xe5e0c..0xe5e22); executed in a radendurh race
       trace of 2026-10-13 (main cpu, 5026 frames from a cold boot through scripts/drive.lua)'
   - addr: 965508
     name: object_update
@@ -281,7 +281,7 @@ images:
       with jsr object_update when its state changes. The largest function (6KB)'
     level: verified
     evidence: 'READ: 0xebc86/0xebbd2/0xebb9e test the fields; 0xebd18 lea 0xdfa6c,a2 / jsr (a2), 0xebe1e
-      lea 0xe23b4,a2 / jsr (a2); 0xebf0a jsr object_update; executed in a radendurv2 race trace of 2026-10-13
+      lea 0xe23b4,a2 / jsr (a2); 0xebf0a jsr object_update; executed in a radendurh race trace of 2026-10-13
       (main cpu, 5026 frames from a cold boot through scripts/drive.lua)'
   - addr: 991284
     name: reset
@@ -299,7 +299,7 @@ images:
       0xf2130 is the low word of the operand of `clr.w $203202.l` at 0xf212c, which decodes as `move.w
       d2,d1` only when decoding starts there. MEASURED live on 2026-10-13 with MAME''s tracer over the
       attract, the hot vblank address on the same cpu present in the trace as the control: 0xf2132 executes
-      and 0xf2130 never does, in the dump''s attract and in a radendurv2 race'
+      and 0xf2130 never does, in the dump''s attract and in a radendurh race'
   - addr: 991760
     name: crash_site
     description: clr.w (a1) with a1=*(0x203510); an odd pointer raises an address error, whose handler 0x25a4
@@ -324,7 +324,7 @@ images:
     level: verified
     evidence: 'READ: 0xf23d6 move.w #-1,0x740000, 0xf23de 0x31 to 0x202e86, 0xf23e6 0x64 to 0x7a0000, rte
       at 0xf2424; no reference to 0xf23d6 in the image; MEASURED 2026-10-13: never executed in 3000 frames
-      of the dump''s attract (control 0x4a0, 2977 hits) nor in a radendurv2 race trace'
+      of the dump''s attract (control 0x4a0, 2977 hits) nor in a radendurh race trace'
   - addr: 992318
     name: re_snd_stream_src
     description: radendur main. Source of the raster handler that emits the burst, copied to RAM 0x203164
@@ -343,7 +343,7 @@ images:
       overrunning the pointer corrupts instructions, not data'
     level: verified
     evidence: 'READ: copy loop 0xf2426..0xf243a (0xf243e..0xf24d0 to 0x203164); 0xf2474 move.w 0x20300c,0x740000,
-      operands patched at 0xf2476/0xf2480; its RAM copy 0x203164.. executed in a radendurv2 race trace of
+      operands patched at 0xf2476/0xf2480; its RAM copy 0x203164.. executed in a radendurh race trace of
       2026-10-13 '
     runs_from: 2109804
   - addr: 2109062
@@ -399,7 +399,7 @@ images:
     name: wf_zoom_desc_x
     description: '400 horizontal scale descriptors, 16 bytes each: +0..+4 five bytes the sprite builder
       ORs into the register (0xe4940..0xe4948), +6 the shift, +8 and +0xc pointers to the two tables. It
-      is the source of the zoom_index[400] the driver carries by hand, and it agrees on all 400'
+      is the source of the ZOOM_INDEX[400] the driver carries by hand, and it agrees on all 400'
     type: data
   - addr: 7440
     name: wf_zoom_desc_y
@@ -1274,7 +1274,7 @@ images:
     name: kongball_zoom_desc_x
     description: '400 horizontal scale descriptors, 16 bytes each: +0..+4 five bytes the sprite builder
       ORs into the register, +6 the shift, +8 and +0xc pointers to the two tables. It is the source of the
-      zoom_index[400] the driver carries by hand, and it agrees on all 400'
+      ZOOM_INDEX[400] the driver carries by hand, and it agrees on all 400'
     level: identical
     evidence: 256 bytes identical to wheelfir_maincpu 0x000400 (wf_zoom_desc_x)
     type: data
@@ -1445,7 +1445,7 @@ images:
       of the final `jmp`. 742 bytes, byte for byte identical in wheelfir, pwball and radendur.'
     level: verified
     evidence: 'Vector 0x064 = 0x201060; copy loop at 0x410. The three subcpu dumps are identical from 0x0
-      to 0x4946 (re-verified); MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurv2
+      to 0x4946 (re-verified); MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurh
       attract'
     runs_from: 2101344
   - addr: 1466
@@ -1456,7 +1456,7 @@ images:
     level: verified
     evidence: 'Bytes at 0x5ba: 33 c7 00 70 00 00. Between the `add.w` at 0x596 and 0x5b8 and this write
       there is no other instruction; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of
-      the radendurv2 attract'
+      the radendurh attract'
     runs_from: 2101446
   - addr: 1574
     name: snd_mix_out_r
@@ -1464,7 +1464,7 @@ images:
       is FIXED by register: there is no pan field anywhere.'
     level: verified
     evidence: 'Bytes at 0x626: 33 c7 00 74 00 00, preceded by `clr.w d7` at 0x5c0; MEASURED 2026-10-13:
-      its RAM copy executes in a sound-cpu trace of the radendurv2 attract'
+      its RAM copy executes in a sound-cpu trace of the radendurh attract'
     runs_from: 2101554
   - addr: 1580
     name: snd_isr_tail_jmp
@@ -1472,7 +1472,7 @@ images:
       Each tail chains itself by writing the next one there before its `rte`.'
     level: verified
     evidence: 'Bytes 4e f9 ff ff ff ff at 0x62c; the reset initialises it with `move.l #0x20113e, 0x20113a`
-      at 0x532; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurv2 attract'
+      at 0x532; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurh attract'
     runs_from: 2101560
   - addr: 1586
     name: snd_cmd_idle
@@ -1480,7 +1480,7 @@ images:
       and, when it arrives, chains to snd_cmd_apply_v12. It is the APPLY token the main CPU sends.'
     level: verified
     evidence: 'Bytes 0c 79 ff ff 00 78 00 00 at 0x632. On the main CPU, 0xdc490 `move.w #0xffff, 0x740000.l`;
-      MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurv2 attract'
+      MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurh attract'
     runs_from: 2101566
   - addr: 1608
     name: snd_cmd_apply_v12
@@ -1490,7 +1490,7 @@ images:
       is, it restarts the phase.'
     level: verified
     evidence: '0x648..0x6ba. Bytes 41 f9 00 20 10 00 (lea 0x201000,a0); guards 4a 90/66 06/41 e8 00 08 and
-      4a 50/66 06/41 e8 00 04; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurv2
+      4a 50/66 06/41 e8 00 04; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurh
       attract'
     runs_from: 2101588
   - addr: 1724
@@ -1498,14 +1498,14 @@ images:
     description: The same for voices 3 and 4, reading from 0x201020.
     level: verified
     evidence: '0x6bc, `lea 0x201020, a0` (bytes 41 f9 00 20 10 20); MEASURED 2026-10-13: its RAM copy executes
-      in a sound-cpu trace of the radendurv2 attract'
+      in a sound-cpu trace of the radendurh attract'
     runs_from: 2101704
   - addr: 1840
     name: snd_cmd_apply_v56
     description: The same for voices 5 and 6, reading from 0x201040. It chains to snd_cmd_wait_block.
     level: verified
     evidence: '0x730, `lea 0x201040, a0` (bytes 41 f9 00 20 10 40); tail at 0x798 `move.l #0x2012b0, 0x20113a`;
-      MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurv2 attract'
+      MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurh attract'
     runs_from: 2101820
   - addr: 1956
     name: snd_cmd_wait_block
@@ -1514,7 +1514,7 @@ images:
     level: verified
     evidence: 'Bytes 0c 79 a0 a0 00 78 00 00 at 0x7a4, then 48 40 42 40 48 40 (swap/clr.w/swap). On the
       main CPU, 0xdc4a6 `move.w #0xa0a0, (a2)+` heads the block it is about to emit; MEASURED 2026-10-13:
-      its RAM copy executes in a sound-cpu trace of the radendurv2 attract'
+      its RAM copy executes in a sound-cpu trace of the radendurh attract'
     runs_from: 2101936
   - addr: 1984
     name: snd_cmd_recv_word
@@ -1525,7 +1525,7 @@ images:
     evidence: 'Bytes 31 b9 00 78 00 00 00 00 (move.w latch,(0,a0,d0.w)), 54 40, 0c 40 00 60 at 0x7c0..0x7d6.
       On the wheelfir main CPU, 0xdc74e/0xdc78a/0xdc7c6 emit one word and re-arm the line counter with `move.w
       #1, 0x7a0000`, that is, one word per scanline; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu
-      trace of the radendurv2 attract'
+      trace of the radendurh attract'
     runs_from: 2101964
   - addr: 2022
     name: snd_voice_end_v1
@@ -1534,7 +1534,7 @@ images:
       not restart the phase.'
     level: verified
     evidence: 'Bytes 1e 3c 00 80 / 22 7c ff ff ff ff / 60 00 fd .. at 0x7e6; the `beq.w` that arrives here
-      is at 0x558; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurv2 attract'
+      is at 0x558; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurh attract'
     runs_from: 2102002
   - addr: 2036
     name: snd_voice_end_v3
@@ -1542,7 +1542,7 @@ images:
       `add.w d0,d7` at 0x596.'
     level: verified
     evidence: '0x7f4..0x802, `beq.w` from 0x578; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu
-      trace of the radendurv2 attract'
+      trace of the radendurh attract'
     runs_from: 2102016
   - addr: 2050
     name: snd_voice_end_v5
@@ -1550,7 +1550,7 @@ images:
       `add.w d0,d7` at 0x5b8.'
     level: verified
     evidence: '0x802..0x810, `beq.w` from 0x59a; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu
-      trace of the radendurv2 attract'
+      trace of the radendurh attract'
     runs_from: 2102030
   - addr: 2064
     name: snd_voice_end_v2
@@ -1558,7 +1558,7 @@ images:
       0x5e2.'
     level: verified
     evidence: '0x810..0x81e, `beq.w` from 0x5c4; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu
-      trace of the radendurv2 attract'
+      trace of the radendurh attract'
     runs_from: 2102044
   - addr: 2078
     name: snd_voice_end_v4
@@ -1566,7 +1566,7 @@ images:
       `add.w d0,d7` at 0x602.'
     level: verified
     evidence: '0x81e..0x82c, `beq.w` from 0x5e4; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu
-      trace of the radendurv2 attract'
+      trace of the radendurh attract'
     runs_from: 2102058
   - addr: 2092
     name: snd_voice_end_v6
@@ -1574,7 +1574,7 @@ images:
       `add.w d0,d7` at 0x624.'
     level: verified
     evidence: '0x82c..0x83a, `beq.w` from 0x606; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu
-      trace of the radendurv2 attract'
+      trace of the radendurh attract'
     runs_from: 2102072
   - addr: 2106
     name: snd_silence_loop
@@ -1616,8 +1616,8 @@ images:
   - addr: 2097152
     name: sub_ram
     description: RAM (0x200000-0x20ffff)
-    evidence: 'READ from the sound 68000 map in both drivers, and they are identical: wheelfir_sub() in
-      wheelfir.cpp and the sub map in radendur.cpp'
+    evidence: 'READ from the sound 68000 map for both state classes, and they share it: board_sub_map in
+      wheelfir.cpp, under sub_map and radendur_sub_map'
   - addr: 2101248
     name: snd_cmd_buffer
     description: Command buffer in RAM, 96 bytes = 6 registers of 16 (voice 1 at 0x201000, voice 2 at
@@ -1669,18 +1669,18 @@ images:
   - addr: 7340032
     name: ldac
     description: left DAC (data_w)
-    evidence: 'READ from the sound 68000 map in both drivers, and they are identical: wheelfir_sub() in
-      wheelfir.cpp and the sub map in radendur.cpp'
+    evidence: 'READ from the sound 68000 map for both state classes, and they share it: board_sub_map in
+      wheelfir.cpp, under sub_map and radendur_sub_map'
   - addr: 7602176
     name: rdac
     description: right DAC (data_w)
-    evidence: 'READ from the sound 68000 map in both drivers, and they are identical: wheelfir_sub() in
-      wheelfir.cpp and the sub map in radendur.cpp'
+    evidence: 'READ from the sound 68000 map for both state classes, and they share it: board_sub_map in
+      wheelfir.cpp, under sub_map and radendur_sub_map'
   - addr: 7864320
     name: soundlatch_r
     description: latch from the main CPU to the sub CPU (reads the main CPU's command)
-    evidence: 'READ from the sound 68000 map in both drivers, and they are identical: wheelfir_sub() in
-      wheelfir.cpp and the sub map in radendur.cpp'
+    evidence: 'READ from the sound 68000 map for both state classes, and they share it: board_sub_map in
+      wheelfir.cpp, under sub_map and radendur_sub_map'
   rltennis_maincpu,rltennisa_maincpu:
   - addr: 0
     name: rlt_rom

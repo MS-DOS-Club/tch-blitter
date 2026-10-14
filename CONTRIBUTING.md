@@ -13,7 +13,7 @@ a report carries:
 - **What it ran on:** the commit of this repository, the MAME commit it was built against (pinned
   in `scripts/lib/mame_src.sh`, so the same unless you changed it), and any build option you
   changed. For a video fault, the GPU and the video output; for an input fault, the controller.
-- **The set** (`wheelfir`, `pwball`, `kongball`, `radendur`, `radendurv2`, `rltennis`, `rltennisa`)
+- **The set** (`wheelfir`, `pwball`, `kongball`, `radendur`, `radendurh`, `rltennis`, `rltennisa`)
   and whether its romset passes `-verifyroms` (README, Getting started).
 - **The steps to reach it**, written for somebody who knows MAME but not necessarily the game: the
   frame or the moment, the inputs. A save state or an input recording helps more than a paragraph.
@@ -26,7 +26,7 @@ Questions and support are not issues.
 
 - **One topic per pull request.** A driver fix, a hardware fact, a tool: each on its own, so each
   can be judged, reverted or taken upstream alone.
-- **Build it and run it.** `make setup` builds the three binaries. A driver change is also built
+- **Build it and run it.** `make setup` builds the two binaries. A driver change is also built
   once with `DEBUG=1`, as MAME asks, so its assertions compile and do not trigger:
   `cd upstream && make SUBTARGET=wheelfir SOURCES=src/mame/tch/wheelfir.cpp REGENIE=1 DEBUG=1 -j8` builds
   `upstream/wheelfird`, which runs the set as `upstream/wheelfird -rompath run/mame_roms wheelfir`.

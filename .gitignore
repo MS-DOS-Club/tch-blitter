@@ -5,7 +5,7 @@ build/
 tmp/
 
 # The romsets are not distributed: each clone puts its own in run/mame_roms/ (README, Getting
-# started), and radendurv2.zip is built from the dump by scripts/radendur-v2.py.
+# started), and radendurh.zip is built from the dump by scripts/radendurh.py.
 run/mame_roms/*.zip
 
 # Notes a maintainer's clone keeps locally and does not publish.

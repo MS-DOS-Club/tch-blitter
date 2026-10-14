@@ -1,4 +1,4 @@
-"""scripts/radendur-v2.py: it refuses another dump, each hand-encoded routine decodes to its source
+"""scripts/radendurh.py: it refuses another dump, each hand-encoded routine decodes to its source
 operand for operand, and the built image holds every jsr, routine and fix where the table puts them.
 """
 
@@ -18,12 +18,12 @@ from capstone import (  # type: ignore[import-untyped]
 )
 from script_loader import load_script
 
-v2 = load_script("radendur_v2_mod", "radendur-v2.py")
+rh = load_script("radendurh_mod", "radendurh.py")
 
 MD = Cs(CS_ARCH_M68K, CS_MODE_BIG_ENDIAN | CS_MODE_M68K_000)
 # The tests that need the dump skip where conftest.py's do: a clone without the romsets.
 needs_rom = pytest.mark.skipif(
-    not (v2.ROMS / "radendur.zip").exists(),
+    not (rh.ROMS / "radendur.zip").exists(),
     reason="no run/mame_roms/radendur.zip: the romsets are not distributed (README)",
 )
 # An instruction that reads the condition codes another one left (Bcc, Scc, DBcc, the X users).
@@ -33,7 +33,7 @@ CC_READERS = re.compile(
 
 
 def table() -> dict[str, Any]:
-    t: dict[str, Any] = v2.load_table(v2.TABLE)
+    t: dict[str, Any] = rh.load_table(rh.TABLE)
     return t
 
 
@@ -50,7 +50,7 @@ def hooks_laid_out(t: dict[str, Any]) -> list[tuple[dict[str, Any], int, dict[st
     out = []
     base = t["hook_base"]
     for layer in t["layers"]:
-        labels, block = v2.layout(layer, base)
+        labels, block = rh.layout(layer, base)
         out.append((layer, base, labels))
         base += len(block)
     return out
@@ -75,7 +75,7 @@ def test_every_routine_decodes_to_its_source() -> None:
     checked = 0
     for layer, _, labels in hooks_laid_out(table()):
         for h in layer.get("hooks", []):
-            code = v2.words(h["words"])
+            code = rh.words(h["words"])
             ins = list(MD.disasm(code, labels[h["label"]]))
             assert sum(i.size for i in ins) == len(code), h["label"]
             assert len(ins) == len(h["source"]), h["label"]
@@ -100,7 +100,7 @@ def test_branches_land_on_their_labels() -> None:
     checked = decoded = 0
     for layer, _, labels in hooks_laid_out(table()):
         for h in layer.get("hooks", []):
-            ins = list(MD.disasm(v2.words(h["words"]), labels[h["label"]]))
+            ins = list(MD.disasm(rh.words(h["words"]), labels[h["label"]]))
             local = {
                 m.group(1): i.address
                 for line, i in zip(h["source"], ins, strict=True)
@@ -122,7 +122,7 @@ def test_every_routine_ends_or_falls_into_the_next() -> None:
     for layer in table()["layers"]:
         hooks = layer.get("hooks", [])
         for k, h in enumerate(hooks):
-            last = list(MD.disasm(v2.words(h["words"]), 0))[-1].mnemonic
+            last = list(MD.disasm(rh.words(h["words"]), 0))[-1].mnemonic
             if "falls_into" in h:
                 assert k + 1 < len(hooks) and hooks[k + 1]["label"] == h["falls_into"], h["label"]
             else:
@@ -134,7 +134,7 @@ def test_every_routine_ends_or_falls_into_the_next() -> None:
 
 @needs_rom
 def test_another_dump_is_refused(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    good = v2.ROMS / "radendur.zip"
+    good = rh.ROMS / "radendur.zip"
     for rom in ("endu.u21", "endu.u19"):
         bad = tmp_path / rom / "radendur.zip"
         bad.parent.mkdir()
@@ -144,9 +144,9 @@ def test_another_dump_is_refused(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
                 if n == rom:
                     data[0x1000] ^= 0xFF
                 zout.writestr(n, bytes(data))
-        monkeypatch.setattr(v2, "ROMS", bad.parent)
-        with pytest.raises(v2.InvalidError, match=f"{re.escape(rom)} sha1"):
-            v2.build(table(), None)
+        monkeypatch.setattr(rh, "ROMS", bad.parent)
+        with pytest.raises(rh.InvalidError, match=f"{re.escape(rom)} sha1"):
+            rh.build(table(), None)
 
 
 # --- the built image ---------------------------------------------------------------------------
@@ -155,18 +155,18 @@ def test_another_dump_is_refused(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 @needs_rom
 def test_the_image_holds_what_the_table_says() -> None:
     t = table()
-    img = image(v2.build(t, None)[0], t)
+    img = image(rh.build(t, None)[0], t)
     checked = 0
     for layer, base, labels in hooks_laid_out(t):
-        _, block = v2.layout(layer, base)
+        _, block = rh.layout(layer, base)
         assert img[base : base + len(block)] == block, layer["name"]
         for w in layer.get("words", []):
-            new = v2.words(w["new"])
+            new = rh.words(w["new"])
             assert img[w["addr"] : w["addr"] + len(new)] == new, w["why"]
             checked += 1
         for s in layer.get("sites", []):
             for at in s["at"]:
-                ins = list(MD.disasm(img[at : at + len(v2.words(s["old"]))], at))
+                ins = list(MD.disasm(img[at : at + len(rh.words(s["old"]))], at))
                 target = int(ins[0].op_str.lstrip("$").split(".")[0], 16)
                 assert ins[0].mnemonic == "jsr" and target == labels[s["hook"]], f"{at:06x}"
                 assert all(i.mnemonic == "nop" for i in ins[1:]), f"{s['hook']} at {at:06x}"
@@ -179,12 +179,12 @@ def test_condition_codes_are_read_only_after_a_site_that_sets_them() -> None:
     """A routine leaves its own flags, not the replaced instruction's: only a site marked
     sets_flags may be followed by an instruction that reads them."""
     t = table()
-    dump = bytes(v2.load_image(t))
+    dump = bytes(rh.load_image(t))
     checked = 0
     for layer in t["layers"]:
         for s in layer.get("sites", []):
             for at in s["at"]:
-                after = at + len(v2.words(s["old"]))
+                after = at + len(rh.words(s["old"]))
                 nxt = next(MD.disasm(dump[after : after + 10], after))
                 reads = bool(CC_READERS.match(nxt.mnemonic))
                 assert reads == bool(s.get("sets_flags")), f"{at:06x} then {nxt.mnemonic}"
@@ -203,18 +203,18 @@ def test_a_stand_in_reaches_the_drawer_its_sites_called() -> None:
     for layer in table()["layers"]:
         ends = {}
         for h in layer.get("hooks", []):
-            ins = list(MD.disasm(v2.words(h["words"]), 0))
+            ins = list(MD.disasm(rh.words(h["words"]), 0))
             calls = [i for i in ins if i.mnemonic == "jsr"]
             if ins[-1].mnemonic == "jmp":
                 ends[h["label"]] = _target(ins[-1])
             elif ins[-1].mnemonic == "rts" and len(calls) == 1:
                 ends[h["label"]] = _target(calls[0])
         for site in layer.get("sites", []):
-            if site["old"][0] == v2.JSR_ABS_L:
+            if site["old"][0] == rh.JSR_ABS_L:
                 assert site["hook"] in ends, f"{site['hook']} replaces a call and reaches no drawer"
             if site["hook"] in ends:
                 called = (site["old"][1] << 16) | site["old"][2]
-                assert site["old"][0] == v2.JSR_ABS_L and called == ends[site["hook"]], site
+                assert site["old"][0] == rh.JSR_ABS_L and called == ends[site["hook"]], site
                 checked += 1
     assert checked > 0, "no stub was examined"
 
@@ -222,11 +222,11 @@ def test_a_stand_in_reaches_the_drawer_its_sites_called() -> None:
 @needs_rom
 def test_a_stage_differs_from_the_full_build_only_where_later_layers_write() -> None:
     t = table()
-    first = image(v2.build(t, t["layers"][0]["name"])[0], t)
-    full = image(v2.build(t, None)[0], t)
+    first = image(rh.build(t, t["layers"][0]["name"])[0], t)
+    full = image(rh.build(t, None)[0], t)
     later: set[int] = set()
     for layer, base, _ in hooks_laid_out(t)[1:]:
-        later.update(range(base, base + len(v2.layout(layer, base)[1])))
+        later.update(range(base, base + len(rh.layout(layer, base)[1])))
         for site in layer.get("sites", []):
             for at in site["at"]:
                 later.update(range(at, at + 2 * len(site["old"])))
@@ -238,6 +238,6 @@ def test_a_stage_differs_from_the_full_build_only_where_later_layers_write() -> 
 
 @needs_rom
 def test_the_build_is_reproducible() -> None:
-    a, _ = v2.build(table(), None)
-    b, _ = v2.build(table(), None)
-    assert a and v2.zipped(a) == v2.zipped(b)
+    a, _ = rh.build(table(), None)
+    b, _ = rh.build(table(), None)
+    assert a and rh.zipped(a) == rh.zipped(b)

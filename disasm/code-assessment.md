@@ -45,6 +45,6 @@ reading one record past its array. It is the prototype's own overrun, not an una
 
 ## What that means for the restoration
 
-It is repairable, and the `radendurv2` ROM repairs it at the source (the environment loop that
+It is repairable, and the `radendurh` ROM repairs it at the source (the environment loop that
 reads one record past its array). What limits the game beyond that is its unfinished track data,
 not race entry.

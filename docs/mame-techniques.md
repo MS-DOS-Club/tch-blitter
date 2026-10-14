@@ -99,7 +99,7 @@ rest from the frame before. Where the pass falls is found
 first, with a write watchpoint logging `beamy`; a table whose pass reaches vblank is read at the
 write or with the cpu stopped.
 
-For a debugger outside MAME, `make debug` runs `radendurv2` with the gdbstub; MAME's gdbstub
+For a debugger outside MAME, `make debug` runs `radendurh` with the gdbstub; MAME's gdbstub
 speaks the 68000 natively.
 
 ## Logging from a driver
@@ -168,8 +168,7 @@ the field's default under that mask is not zero; otherwise it is skipped without
 
 ## Rebuilding a driver
 
-One driver is rebuilt on its own, where the subtarget is `wheelfir`, `radendu` (for
-`radendur.cpp`) or `rltennis`:
+One driver is rebuilt on its own, where the subtarget is `wheelfir` or `rltennis`:
 
 ```sh
 cd upstream && make SUBTARGET=<subtarget> SOURCES=src/mame/tch/<driver>.cpp REGENIE=1 -j<cores>

@@ -14,15 +14,17 @@ architectures and are out of scope.
 
 Its origin, and still its deepest work, is the restoration of **Radical Enduro** (TCH / Sator
 Videogames). In stock MAME the `radendur` set is `MACHINE_NOT_WORKING` inside `tch/wheelfir.cpp`,
-and a comment there says that some courses reach gameplay but crash quickly; here it has a driver of
-its own, `tch/radendur.cpp`, which emulates the dump as it is (`radendur`, which hangs on the
-prototype's own faults), and a clone set, `radendurv2`, whose maincpu ROM has those faults fixed in
+and a comment there says that some courses reach gameplay but crash quickly; here it stays in that
+driver as `radendur_state`, a subclass of the board's state that keeps what this game does
+differently (when the sprite plane flips, when its palette takes effect, a plain latch between the
+CPUs). It emulates the dump as it is (`radendur`, which hangs on the prototype's own faults), and a
+clone set, `radendurh`, whose maincpu ROM has those faults fixed in
 code: it boots, enters a game and finishes a race on the five playable tracks. The board's video
 model was resolved by reading the 68000 (`docs/boards/wheels-and-fire-board.md`).
 
 There is no source code of the games, only dumps, so nothing is assembled and the gate is the
 observed boot state captured as goldens, not a byte-identical SHA. The one ROM built here is
-radendurv2's, from the dump and a patch table (`make v2`).
+radendurh's, from the dump and a patch table (`make radendurh`).
 
 This is a retro-preservation repository: the public documentation is written for enthusiasts of
 vintage programming and arcade hardware, and says what is known, not how long it took to find out.
@@ -31,17 +33,16 @@ vintage programming and arcade hardware, and says what is known, not how long it
 
 The romsets are not distributed (`README.md`, Getting started, says how to get and check them).
 `make setup` clones MAME at the commit pinned in `scripts/lib/mame_src.sh` into `upstream/`
-(gitignored), applies `patches/`, builds the three binaries and radendurv2's ROM; `make doctor` says
-what a machine is missing; `make play` runs radendurv2; `make check` and `make check-all` run the
+(gitignored), applies `patches/`, builds the two binaries and radendurh's ROM; `make doctor` says
+what a machine is missing; `make play` runs radendurh; `make check` and `make check-all` run the
 checks (`.claude/rules/checks.md`). `scripts/README.md` says what each tool is for.
 
-Three drivers are this repository's own, and each patch is the only part of its driver that
+Two drivers are this repository's own, and each patch is the only part of its driver that
 travels, since `upstream/` is not committed:
 
 | driver | games | SUBTARGET | binary | patch |
 |--------|-------|-----------|--------|-------|
-| `tch/wheelfir.cpp` | wheelfir, pwball, kongball | `wheelfir` | `upstream/wheelfir` | `0002-wheelfir-video-model.patch` |
-| `tch/radendur.cpp` | radendur, radendurv2 | `radendu` | `upstream/radendu` | `0001-radendur-driver-fixes.patch` |
+| `tch/wheelfir.cpp` | wheelfir, pwball, kongball, radendur, radendurh | `wheelfir` | `upstream/wheelfir` | `0002-wheelfir-video-model.patch` (and `mame.lst`) |
 | `tch/rltennis.cpp` | rltennis, rltennisa | `rltennis` | `upstream/rltennis` | `0005-rltennis-blitter-scale.patch` |
 
 Two more patches are not drivers. `0003-lua-thread-context-race.patch` fixes a race in MAME's Lua
@@ -84,7 +85,7 @@ The detail is `docs/boards/wheels-and-fire-board.md`, generated from `hardware/r
 row of each tile is a one-pixel border in the graphics ROM, so a 1:1 blit samples one source row
 further in, and a scaled one never does (the offset would move with the zoom). The fix lives in two
 places and new blit code copies it: the `tile()` of `scripts/radendur_track_render.py` (`sv0+1`)
-and each E133 driver's `v_bias` (`radendur.cpp`, `wheelfir.cpp`). Reality Tennis's board has no
+and the E133 driver's `v_bias` (`wheelfir.cpp`). Reality Tennis's board has no
 seam, so `rltennis.cpp` carries none and must not get one. Widening the bias to every scale was
 measured and refuted (`hardware/registers.yaml`, `wheelfir_the_fpga_skew_does_not_widen_the_seam_bias`).
 
@@ -129,7 +130,7 @@ a record lives under `hardware/evidence/`, with the script that re-derives the r
 
 | game | page | the reflex before touching it |
 |------|------|-------------------------------|
-| Radical Enduro | `docs/games/radical-enduro.md` | an isometric sprite track, not raster; five playable sections; the dump hangs, `radendurv2` plays (its fixes, its sound block and its full-scenery layer are the patch table `hardware/radendur-v2.yaml`) |
+| Radical Enduro | `docs/games/radical-enduro.md` | an isometric sprite track, not raster; five playable sections; the dump hangs, `radendurh` plays (its fixes, its sound block and its full-scenery layer are the patch table `hardware/radendurh.yaml`) |
 | Wheels & Fire | `docs/games/wheels-and-fire.md` | the road by raster; sky and road in the same plane; clips in software against 336x256 |
 | Power Ball | `docs/games/power-ball.md` | the clean reference: it kills the aggressive video hypotheses |
 | Kong Ball | `docs/games/kong-ball.md` | draws the HUD in the upper half, so it shows at once whether the page model is broken |

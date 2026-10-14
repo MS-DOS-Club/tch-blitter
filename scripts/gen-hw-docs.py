@@ -53,7 +53,7 @@ ANALYSIS = ROOT / "disasm" / "analysis.txt"
 
 # Every `observed` key starts with the set it was measured on (the games behave differently, and
 # Reality Tennis is another board), then the topic after an underscore.
-MACHINES = ("wheelfir", "pwball", "kongball", "radendur", "rltennis", "rltennisa")
+MACHINES = ("wheelfir", "pwball", "kongball", "radendurh", "radendur", "rltennis", "rltennisa")
 
 
 def _split_key(key):

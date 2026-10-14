@@ -5,7 +5,7 @@ change is has to be looked at before anything is re-blessed.
 
 | game | how |
 |------|-----|
-| `radendurv2` | `make verify`. It has to navigate: coin, menu, and reach the starting line |
+| `radendurh` | `make verify`. It has to navigate: coin, menu, and reach the starting line |
 | `radendur` | `make verify` too: the board's dump, emulated as it is, pinned short of the starting line |
 | `wheelfir` | `make verify-family`. Fixed attract frames, no controls touched |
 | `kongball` | the same |
@@ -18,8 +18,8 @@ count nothing keeps true is a debt handed to whoever reads it next.
 
 ## Which binary they are blessed with
 
-With **ours**, never with upstream's: `upstream/radendu` for the two Radical Enduro sets,
-`upstream/wheelfir` for Wheels & Fire, Power Ball and Kong Ball, and `upstream/rltennis` for the two
+With **ours**, never with upstream's: `upstream/wheelfir` for Wheels & Fire, Power Ball, Kong Ball
+and the two Radical Enduro sets, and `upstream/rltennis` for the two
 Reality Tennis sets (`mame_binary_for_set` in `scripts/lib/mame_run.sh` is the table). Blessing
 against the wrong binary protects nothing, so the script states which one it is using on every run.
 
@@ -48,7 +48,7 @@ validated in RED before it is believed in green.
 
 Every run creates its NVRAM **clean**: an inherited EEPROM changes the attract and makes
 comparisons fail that should not. And Radical Enduro's goldens are tied to the driver's real CPU clock,
-with no multiplier ([radendurv2/README.md](radendurv2/README.md)).
+with no multiplier ([radendurh/README.md](radendurh/README.md)).
 
 ## The siblings' goldens are not a validated reference
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # setup-mame.sh -- builds this repository's MAME: clones MAME at the pinned commit into upstream/,
-# applies patches/, builds one binary per driver (radendu for radendur.cpp, wheelfir for wheelfir,
-# pwball and kongball, rltennis for rltennis and rltennisa), builds radendurv2's ROM from the
-# radendur dump, and checks every binary lists its sets. Run again, it skips what is done.
+# applies patches/, builds one binary per driver (wheelfir for wheelfir, pwball, kongball, radendur
+# and radendurh, rltennis for rltennis and rltennisa), builds radendurh's ROM from the radendur
+# dump, and checks every binary lists its sets. Run again, it skips what is done.
 #
 #   ./scripts/setup-mame.sh            make setup
 #   ./scripts/setup-mame.sh --doctor   make doctor: what this machine is missing; changes nothing
@@ -13,12 +13,11 @@
 set -euo pipefail
 
 MAME_REPO="https://github.com/mamedev/mame"
-# <subtarget>:<source>:<sets its binary lists>; radendur is the driver whose two names differ
-MAME_TARGETS="radendu:src/mame/tch/radendur.cpp:radendur,radendurv2
-wheelfir:src/mame/tch/wheelfir.cpp:wheelfir,pwball,kongball
+# <subtarget>:<source>:<sets its binary lists>
+MAME_TARGETS="wheelfir:src/mame/tch/wheelfir.cpp:wheelfir,pwball,kongball,radendur,radendurh
 rltennis:src/mame/tch/rltennis.cpp:rltennis,rltennisa"
 # the one set built here rather than dumped
-BUILT_SET="radendurv2"
+BUILT_SET="radendurh"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
@@ -67,9 +66,11 @@ doctor() {
         local head target bin
         if head=$(pinned_commit_state "$MAME_SRC"); then ok "at the pinned commit ${MAME_PINNED_COMMIT:0:12}"
         else miss "the pinned commit: it is at ${head:-nothing}, not ${MAME_PINNED_COMMIT:0:12}"; fi
-        while IFS=: read -r target _ _; do
+        while IFS=: read -r target _ sets; do
             bin=$(target_bin "$target")
-            if [ -x "$bin" ]; then ok "$(basename "$bin") built"; else miss "$(basename "$bin") (make setup)"; fi
+            if lists_sets "$bin" "$sets"; then ok "$(basename "$bin") built, listing ${sets//,/, }"
+            elif [ -x "$bin" ]; then miss "$(basename "$bin") listing ${sets//,/, } (make setup rebuilds it)"
+            else miss "$(basename "$bin") (make setup)"; fi
         done <<< "$MAME_TARGETS"
     fi
 
@@ -79,8 +80,8 @@ doctor() {
         if [ -f "run/mame_roms/$set.zip" ]; then ok "$set"; else miss "$set.zip"; fi
     done
     if [ -f run/mame_roms/radendur.zip ]; then
-        if uv run --no-sync scripts/radendur-v2.py --check >/dev/null 2>&1; then ok "radendurv2.zip matches the patch table"
-        else miss "radendurv2.zip up to date (make v2)"; fi
+        if uv run --no-sync scripts/radendurh.py --check >/dev/null 2>&1; then ok "radendurh.zip matches the patch table"
+        else miss "radendurh.zip up to date (make radendurh)"; fi
     fi
 
     info "Optional: the GIFs and the disassembly chain"
@@ -108,25 +109,36 @@ apply_patches() {
     local p
     for p in "$PROJECT_DIR"/patches/*.patch; do
         if git -C "$MAME_SRC" apply --check "$p" 2>/dev/null; then
-            info "applying $(basename "$p")"; git -C "$MAME_SRC" apply "$p"
+            info "applying $(basename "$p")"; git -C "$MAME_SRC" apply "$p"; PATCHED=1
         elif git -C "$MAME_SRC" apply --reverse --check "$p" 2>/dev/null; then
             info "$(basename "$p") already applied"
         else
-            die "$(basename "$p") does not apply; git -C $MAME_SRC checkout . and run again"
+            die "$(basename "$p") does not apply. In the checkout make setup made: git -C '$MAME_SRC' checkout . and git -C '$MAME_SRC' clean -n src, which lists the files an older patch created; remove those, then run again"
         fi
     done
 }
 
+# lists_sets <binary> <set,set,...> -- the binary exists and lists every set: one built before a
+# set was added or renamed fails it (a driver edit that keeps the sets is what PATCHED catches)
+lists_sets() {
+    local set
+    [ -x "$1" ] && [ -n "$2" ] || return 1
+    for set in ${2//,/ }; do
+        "$1" -listxml "$set" >/dev/null 2>&1 < /dev/null || return 1
+    done
+}
+
 build() {
-    local jobs target source bin
+    local jobs target source sets bin
     jobs="${JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)}"
-    while IFS=: read -r target source _; do
+    while IFS=: read -r target source sets; do
         bin=$(target_bin "$target")
-        if [ -x "$bin" ] && [ "$FORCE" != 1 ]; then info "$(basename "$bin") already built (--force rebuilds)"; continue; fi
+        if [ "$FORCE" != 1 ] && [ "$PATCHED" != 1 ] && lists_sets "$bin" "$sets"; then info "$(basename "$bin") already built (--force rebuilds)"; continue; fi
         info "building $(basename "$bin") with $jobs jobs (a long build the first time)"
         # REGENIE=1: a SUBTARGET's filtered driver list is cached, and a stale one builds a binary
-        # without the machine and without a warning
-        ( cd "$MAME_SRC" && make SUBTARGET="$target" SOURCES="$source" REGENIE=1 -j"$jobs" )
+        # without the machine and without a warning; stdin from /dev/null, or a make that reads it
+        # would swallow the targets after this one
+        ( cd "$MAME_SRC" && make SUBTARGET="$target" SOURCES="$source" REGENIE=1 -j"$jobs" ) < /dev/null
     done <<< "$MAME_TARGETS"
 }
 
@@ -139,10 +151,10 @@ validate() {
         done
         info "$(basename "$bin"): ${sets//,/, }"
     done <<< "$MAME_TARGETS"
-    info "ready: make play runs radendurv2, make check runs the checks"
+    info "ready: make play runs radendurh, make check runs the checks"
 }
 
-FORCE=0; DOCTOR=0; ASSUME_YES=0
+FORCE=0; DOCTOR=0; ASSUME_YES=0; PATCHED=0
 for arg in "$@"; do
     case "$arg" in
         --doctor) DOCTOR=1 ;;
@@ -163,6 +175,6 @@ fi
 [ -d "$MAME_SRC/.git" ] || clone
 apply_patches
 build
-info "building run/mame_roms/radendurv2.zip from the dump"
-uv run scripts/radendur-v2.py || die "the radendurv2 ROM could not be built"
+info "building run/mame_roms/radendurh.zip from the dump"
+uv run scripts/radendurh.py || die "the radendurh ROM could not be built"
 validate

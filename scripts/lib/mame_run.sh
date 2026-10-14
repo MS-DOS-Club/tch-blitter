@@ -20,20 +20,17 @@
 # mame_binary_for_set <set> -- the binary built for that set's driver.
 mame_binary_for_set() {
     case "${1:?mame_binary_for_set needs a set}" in
-        wheelfir|pwball|kongball) printf '%s\n' "$(mame_src_path)/wheelfir" ;;
+        wheelfir|pwball|kongball|radendur|radendurh) printf '%s\n' "$(mame_src_path)/wheelfir" ;;
         rltennis|rltennisa)       printf '%s\n' "$(mame_src_path)/rltennis" ;;
-        radendur|radendurv2)      printf '%s\n' "$(mame_src_path)/radendu" ;;
-        *) echo "mame_binary_for_set: unknown set '$1' (radendur radendurv2 wheelfir pwball kongball rltennis rltennisa)" >&2
+        *) echo "mame_binary_for_set: unknown set '$1' (radendur radendurh wheelfir pwball kongball rltennis rltennisa)" >&2
            return 2 ;;
     esac
 }
 
-# mame_driver_for_set <set> -- the SUBTARGET of a sibling set, which is also its .cpp's basename.
-# Radical Enduro's binary is `radendu`, built from radendur.cpp, so it is not derivable here.
+# mame_driver_for_set <set> -- the SUBTARGET of a set, which is also its .cpp's basename.
 mame_driver_for_set() {
     local bin
     bin="$(mame_binary_for_set "$1")" || return 2
-    [ "$(basename "$bin")" != radendu ] || { echo "mame_driver_for_set: $1 is built by make setup" >&2; return 2; }
     basename "$bin"
 }
 

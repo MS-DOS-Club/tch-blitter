@@ -23,7 +23,7 @@ formats:
       yoffset: '{ STEP512(0,4096) }'
       charincrement: 512*512*8
     status: declared
-    source: tch/radendur.cpp, radendur_512x512x8_texlayout (a graphics page is 512x512 at 8 bits)
+    source: tch/wheelfir.cpp, wheelfir512x5125x8_texlayout (a graphics page is 512x512 at 8 bits)
 
 assets:
   pages:
@@ -32,11 +32,11 @@ assets:
     palette: palette
     wrap: true
     status: declared
-    source: tch/radendur.cpp, do_blit (the source wraps inside its 512x512 page)
+    source: tch/wheelfir.cpp, do_blit (the source wraps inside its 512x512 page)
 
 commands:
   blit:
-    block: {address: 0x700000, words: 16, word_bytes: 2, cpu: maincpu, status: declared, source: 'tch/radendur.cpp, main_map (0x700000..0x70001f, blit_w and the blitram share)'}
+    block: {address: 0x700000, words: 16, word_bytes: 2, cpu: maincpu, status: declared, source: 'tch/wheelfir.cpp, board_main_map (0x700000..0x70001f, blit_w and the blitram share)'}
     fire: {word: 15, value: 0xffff, status: proved, source: hardware/registers.yaml blitter word 15 trigger (confirmed)}
     asset: pages
     fields:
@@ -45,7 +45,7 @@ commands:
           - {word: 0, mask: 0x00ff}
           - {word: 7, mask: 0x0040, at: 8}
         status: declared
-        source: tch/radendur.cpp do_blit; word 7 dst_x_bit8 is confirmed, word 0's low byte has no entry
+        source: tch/wheelfir.cpp do_blit; word 7 dst_x_bit8 is confirmed, word 0's low byte has no entry
       dest_y:
         parts:
           - {word: 2, mask: 0x00ff}
@@ -79,16 +79,17 @@ commands:
           - {word: 0, mask: 0xff00}
           - {word: 6, mask: 0x0100, at: 8}
         status: declared
-        source: tch/radendur.cpp do_blit; word 6 src_u_bit8 is confirmed, word 0's high byte has no entry
+        source: tch/wheelfir.cpp do_blit; word 6 src_u_bit8 is confirmed, word 0's high byte has no entry
       source_y:
         parts:
           - {word: 2, mask: 0xff00}
           - {word: 6, mask: 0x0200, at: 8}
         # At 1:1 the first row the blitter reads is the one after the origin (the seam fix,
-        # v_bias in both drivers): this is what an unscaled blit reads, not a scale law.
+        # v_bias in tch/wheelfir.cpp's do_blit; rltennis.cpp has none): this is what an unscaled
+        # blit reads, not a scale law.
         add: 1
         status: declared
-        source: tch/radendur.cpp do_blit, v_bias; the two parts are confirmed bits of words 2 and 6
+        source: tch/wheelfir.cpp do_blit, v_bias; the two parts are confirmed bits of words 2 and 6
       source_tile:
         parts: [{word: 6, mask: 0xfc00}]
         status: proved
@@ -102,7 +103,7 @@ commands:
         parts: [{word: 8, mask: 0x8000}]
         asserted: 1
         status: declared
-        source: tch/radendur.cpp do_blit; hardware/registers.yaml holds word 8 src_dir_y open
+        source: tch/wheelfir.cpp do_blit; hardware/registers.yaml holds word 8 src_dir_y open
       plane:
         parts: [{word: 7, mask: 0x0010}]
         status: proved
@@ -138,7 +139,7 @@ commands:
           - {word: 11, mask: 0x00ff}
           - {word: 8, mask: 0x0080, at: 8}
         status: declared
-        source: tch/radendur.cpp scanline_timer_callback; word 8 scroll_y_bit8 is confirmed, word 11's low byte has no entry
+        source: tch/wheelfir.cpp scanline_timer_callback; word 8 scroll_y_bit8 is confirmed, word 11's low byte has no entry
     planes:
       - name: sprites
         when: 0
@@ -148,7 +149,7 @@ commands:
         width: 512
         height: 512
         status: declared
-        source: tch/radendur.cpp flip_page and screen_update (two halves of 256 rows, one shown unscrolled)
+        source: tch/wheelfir.cpp, screen_update of wheelfir_state and radendur_state (two halves of 256 rows, one shown unscrolled)
       - name: background
         when: 1
         order: 0
@@ -157,7 +158,7 @@ commands:
         width: 512
         height: 512
         status: declared
-        source: tch/radendur.cpp screen_update (the background plane scrolled by words 10 and 11)
+        source: tch/wheelfir.cpp, screen_update of wheelfir_state and radendur_state (the background plane scrolled by words 10 and 11)
 
 palette_ports:
   ramdac:
@@ -169,4 +170,4 @@ palette_ports:
     component_bits: 8
     auto_increment: true
     status: declared
-    source: 'tch/radendur.cpp and tch/wheelfir.cpp, main_map (index_w at 0x720001, pal_w at 0x720003) and ramdac_map (ramdac_rgb888_w, 8 bits a component)'
+    source: 'tch/wheelfir.cpp, board_main_map (index_w at 0x720001, pal_w at 0x720003) and ramdac_map (ramdac_rgb888_w, 8 bits a component)'

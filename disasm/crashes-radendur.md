@@ -51,12 +51,12 @@ game's own RAM state.
 
 ## Where the fix lives
 
-In the code of the `radendurv2` ROM, never in the driver, which emulates the dump as it is: two
+In the code of the `radendurh` ROM, never in the driver, which emulates the dump as it is: two
 word patches of 32 words in total (2 + 5x6), for two faults that hang the game without a crash of
 their own here (the BT478 uploader returning with A0 moved under the object drawer, and the prop
 sweep reading its x window from a register it never sets, in five copies), and three routines that correct the data the game
 reads at the instructions that read it. Crash 1 has no fix of its own: its out-of-table index comes
 from the environment loop reading one record past its array, and the routine that corrects that
 loop removes the overrun at its source. The table that holds them, each with the words it expects
-beside its replacement, is `hardware/radendur-v2.yaml`; `scripts/radendur-v2.py` builds the ROM from
+beside its replacement, is `hardware/radendurh.yaml`; `scripts/radendurh.py` builds the ROM from
 the verified dump and refuses any word that is not what it expects.

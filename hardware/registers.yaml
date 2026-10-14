@@ -1431,7 +1431,7 @@ blitter:
       observed:
         radendur_the_dump_names_such_a_page_only_once_hung: 'MEASURED on 2026-10-14 at the pin
           74b9fae5 with a tap on word 6, 120 s each from a cold boot: 0 such pages in the attract of
-          radendur or radendurv2 and in a race of radendurv2 (control: every word-6 write counted,
+          radendur or radendurh and in a race of radendurh (control: every word-6 write counted,
           424393 to 1905212 a run; Wheels & Fire, same tap, 6 in its attract). The dump, driven to a
           race, names one from frame 341 on and keeps doing so while it hangs on the selection
           screen, 1894126 times. (radendur_walks_off_the_sprite_plane saw no opening in a race of
@@ -2208,7 +2208,7 @@ blitter:
           The fill and the next drawing blit on the sprite plane carry the same bit 0x20 of word 8
           on 8959 of 8959 chains in the attract and 2357 of 2358 in the race; the exception is
           frame 367, entering the race, with a 256-pen palette upload between the two. Letting
-          the fill decide the page there (radendur.cpp decides it on every sprite-plane blit)
+          the fill decide the page there (radendur_state in wheelfir.cpp decides it on every sprite-plane blit)
           shows the selection screen whole on frame 367; letting only the drawing blit decide it
           shows a nearly empty plane. RED: with the fill made to clear nothing and the flip clear gone, three of the five boot
           goldens fail and the opened captures show the SATOR logo and the starting grid smeared
@@ -2839,7 +2839,7 @@ ports:
       only), so the six addresses the program names and the driver does not
       map (0x700010, 0x700015, 0x700018, 0x780008, 0x78000c, 0x7c0000) were not accessed in that
       run either. What 0x7a0000 and 0x780000 are on the board is not settled by it'
-    radendur_v2_the_block_at_line_99_keeps_the_sound: 'MEASURED on 2026-10-12 on radendurv2, with
+    radendurh_the_block_at_line_99_keeps_the_sound: 'MEASURED on 2026-10-12 on radendurh, with
       the counter gated on bit 13. Radical Enduro''s vblank handler runs the same sequence as Power
       Ball''s (0xffff to the latch, 0x31 to the block count, the counter armed, bit 13 set) but arms
       the counter with 1 (0x538) where Power Ball arms 100 (0xf4da) and Kong Ball 100 (0x28850), so
@@ -2850,12 +2850,12 @@ ports:
       from the start, the boot kills it instead: the boot lowers the mask at 0xf2106 (stacked pc
       0xf210a) on line 137 of frame 12 with a vblank request pending, which arms 100, the block
       starts at line 237 and the vblank cuts it, as in Power Ball. Power Ball''s own boot clears bit
-      13 right after its first unmask; the v2''s sound layer does the same at 0xf210a. With that
+      13 right after its first unmask; radendurh''s sound layer does the same at 0xf210a. With that
       layer: seconds with sound out of 30, 23 in attract and 23 in a race (7 and 13 before); 103
       of 120 over two minutes of attract and play, the sub alive throughout, 11 words read twice in
       5987 blocks; the boot''s close lands on line 138. The silent seconds repeat at the same
       places in attract and in a race with the sub idle. The dump keeps its 1 and its goldens 5/5;
-      radendurv2''s 05_desert_scenery moved in its speedometer needle only, the view and the
+      radendurh''s 05_desert_scenery moved in its speedometer needle only, the view and the
       scenery identical.'
     pwball_bit_13_of_0x7c0000_enables_the_counter: 'MEASURED on 2026-10-12, every write to 0x7c0000''s high byte
       logged with its frame and line beside the latch and the counter, each set from a cold boot
@@ -2921,11 +2921,11 @@ ports:
       boot with scripts/drive.lua (coin, start, a race), the latch counted by taps (a read by the
       sub''s block receiver, pc 0x2012da, with no main write since the previous read is a word read
       twice) and the audio by -wavwrite (a second with more than 16 distinct sample values sounds).
-      Control, the known answer of radendurv2 with the plain register: 287376 block reads = 5987
-      blocks of 48, 11 read twice, 103 of 120 s with sound, as recorded before. radendurv2 with
+      Control, the known answer of radendurh with the plain register: 287376 block reads = 5987
+      blocks of 48, 11 read twice, 103 of 120 s with sound, as recorded before. radendurh with
       the generic latch: 2077 blocks, 5 read twice, 195452 main writes no read took, 35 of 120 s
       with sound, the last at second 41. The dump: 7 and 6 s with sound (its own faults stop it
-      either way). So the plain register stays, and radendur.cpp says why.'
+      either way). So the plain register stays, and the comment on radendur_state::latch_w in wheelfir.cpp says why.'
     pwball_the_sub_cpus_latch_protocol_has_no_new_word_flag: 'READ on 2026-10-11 in the sub''s own code, one
       program for wheelfir, pwball and radendur (identical up to 0x4946). The IRQ1 mixer ends in a
       self-modified `jmp` whose target (0x20113a) is the protocol''s state: wait for 0xffff (0x632
@@ -3033,11 +3033,11 @@ ports:
     radendur_c_changes_the_stream_and_does_not_save_the_sub: 'MEASURED on 2026-10-12, experiment C
       (a level-5 request withdrawn on the next line if not taken, level 3 withdrawn at line 0)
       written into radendur.cpp itself and into wheelfir.cpp, each build printing its mode in its
-      log. Seconds with sound out of 30, our driver then C: radendurv2 7 and 7 in attract, 13 and
+      log. Seconds with sound out of 30, our driver then C: radendurh 7 and 7 in attract, 13 and
       12 in a race (drive.lua); radendur 14 and 9, 7 and 11. Every radendur WAV differs between the
-      two, and the sub dies under both (it leaves its idle loop at frames 423 and 437 of radendurv2''s
+      two, and the sub dies under both (it leaves its idle loop at frames 423 and 437 of radendurh''s
       attract). Counting, in the first 450 frames, the block words the sub read with no write
-      from the main since its previous read: radendurv2 28 under our driver and 59 under C, and 0
+      from the main since its previous read: radendurh 28 under our driver and 59 under C, and 0
       in the same span of Wheels & Fire and of Power Ball under C, which sound. Those reads fall on
       the first lines of the frame, where the main sits at mask 7 at 0x1fc0, in the blitter
       interrupt chain, and reaches the level-5 handler a line late (frame 257: mask 7 on lines 0
@@ -3058,15 +3058,15 @@ memory:
     vector from 0.'
   description: 'The main 68000''s program and data, 1 MB as two interleaved 512 KB chips.'
   observed:
-    radendur_v2_hook_area_is_unused: 'MEASURED on 2026-10-12 on the board''s dump, twice: a read tap over
+    radendurh_hook_area_is_unused: 'MEASURED on 2026-10-12 on the board''s dump, twice: a read tap over
       0xf5800..0xf58ff, then over 0xf5800..0xf59ff when the scenery layer needed more room, each
       booting and racing the five playable sections to the end (3803 frames of race each; sections
       0, 1, 2, 4 and 8, reached by scripts/radendur/nav-phase.lua with PRESSES 0, 1, 2, 3 and 6):
       zero reads both times. The control, a read tap on the palette range table at 0xd6b12, fired 93
       to 214 times per section from 0xe2f0a/0xe2f1c/0xe2f24, so the tap sees reads of ROM data. On
-      the v2 ROM the same tap counts the hooks'' own fetches there, so it sees prefetch too. The area
-      is part of an all-zero run, 0xf56cf..0xf6dcb; hardware/radendur-v2.yaml puts its routines in it.'
-    radendur_v2_scenery_margins: 'MEASURED on 2026-10-12 on radendurv2 with the fixes-only ROM (before the
+      the radendurh ROM the same tap counts the hooks'' own fetches there, so it sees prefetch too. The area
+      is part of an all-zero run, 0xf56cf..0xf6dcb; hardware/radendurh.yaml puts its routines in it.'
+    radendurh_scenery_margins: 'MEASURED on 2026-10-12 on radendurh with the fixes-only ROM (before the
       scenery layer existed, so the widening could not feed back into it): the view origin
       (0x201736/0x201738) and the sweep cursors (0x201732/0x201734) logged every frame by an autoboot
       tap while scripts/radendur/nav-phase.lua raced each playable section to the end, then checked
@@ -3081,40 +3081,40 @@ memory:
       drawn range came from records 29..31 and 29 of the 50 entries in the window belonged to records
       23, 24, 25 and 28; with the layer, the stage tent, palms and bushes of the reference are drawn
       there (the captures of that one frame opened, against the reference crop).'
-    radendur_v2_scenery_cost: 'MEASURED on 2026-10-12 with the race clock, the elapsed seconds at 0x201e4a,
+    radendurh_scenery_cost: 'MEASURED on 2026-10-12 with the race clock, the elapsed seconds at 0x201e4a,
       which steps every 54 frames while a frame''s draw chain fits (radendur_the_race_clock_is_timed_in_loop_turns),
       logged per frame over the five playable sections raced to the end by scripts/radendur/nav-phase.lua.
       Counted: clock steps that took other than 54 frames (the worst step, in frames, in brackets),
-      control = the fixes-only ROM (scripts/radendur-v2.py --stage fixes) / the full v2: section 0:
+      control = the fixes-only ROM (scripts/radendurh.py --stage fixes) / the full radendurh: section 0:
       0 / 0; 1: 0 / 2 (59); 2: 0 / 2 (55); 4: 4 (56) / 22 (68); 8: 0 / 9 (59). Section 4 already
       misses in the control. Every race finishes in both. The span of entries that holds every
       visible prop, computed from the reference for every view, reaches 1482 in section 4. Inference,
       not measured: the slower steps are frames whose draw chain no longer fits. The five boot
-      goldens pass unchanged with the layer (radendur-goldens.sh verify radendurv2, rc 0). The
+      goldens pass unchanged with the layer (radendur-goldens.sh verify radendurh, rc 0). The
       per-cell lists the drawers append to (a 0x40-byte cell from 0x203522, room for 29 entries)
       peaked, read every race frame, at 20 with the layer and 18 without (section 4). Taken before
       scenery_strip_row existed: that routine adds a dozen instructions to each row the view adds
       vertically and moves the strip''s stamps from the top row to the row drawn; not re-measured.'
-    radendur_v2_reverse_scroll_cut: 'EXPLAINED AND FIXED in the v2, MEASURED on 2026-10-12, section 0
+    radendurh_reverse_scroll_cut: 'EXPLAINED AND FIXED in radendurh, MEASURED on 2026-10-12, section 0
       driven by scripts/drive.lua. The symptom: a band of bare sand at the bottom of frame
       1800, where the reference draws trees, a palm and a fence, with the fixes-only ROM and with the
-      full v2 alike, only while the view origin''s y grows (866 to 870 over frames 1787..1804, the
+      full radendurh alike, only while the view origin''s y grows (866 to 870 over frames 1787..1804, the
       view moving down the track as the bike falls) and gone once the view moves on. The cause, read
       in the code: the vertical scroll (0xe19ee..0xe1b80) resets the new row with 0xe059a and then
       calls the strip drawer 0xe0646 with that row, the view''s origin when it moves up and the
       origin plus 8, the grid''s last of 9 rows (0xe08ba draws origin..origin+8), when it moves down. 0xe059a addresses its row as 0x207922 + (row - origin) * 32;
       0xe0646 stamps at 0x207922 itself, the top row, whatever row it is handed. Measured live on
-      radendurv2 (a stop at the call site 0xe1b76, every grid cell''s plane and entry counts read
+      radendurh (a stop at the call site 0xe1b76, every grid cell''s plane and entry counts read
       before and after the call): frame 1787, view y 867, row 875 (origin + 8): row 875 stays at its
       base tile in all 12 cells while the top row gains the entries (one cell 3 to 14); control,
       frame 1895, view y 869, row 869 (origin + 0): the freshly reset top row gains its own. So
       moving down, the new bottom row keeps only its base tiles and its props are appended to the
-      top row: the game''s own code, which the v2''s fixes layer leaves untouched (the dump hangs
-      before a race can show it). Fixed in hardware/radendur-v2.yaml''s scenery layer
+      top row: the game''s own code, which radendurh''s fixes layer leaves untouched (the dump hangs
+      before a race can show it). Fixed in hardware/radendurh.yaml''s scenery layer
       (scenery_strip_row), not the board''s behaviour: the call points 0x207922 at the row being drawn and puts it
       back. With it, frame 1800 draws the band''s trees, palm and fence as the reference crop shows
       them (captures of frames 1800 and 1806 opened against scripts/radendur_track_render.py 0
-      --crop 5 868 17 879); radendur-goldens.sh verify radendurv2 is 6/6 with the same baseline; the
+      --crop 5 868 17 879); radendur-goldens.sh verify radendurh is 6/6 with the same baseline; the
       five playable sections (nav-phase.lua MODE=capture, PRESSES 0, 1, 2, 3 and 6, the section read
       in RAM before the photo) each finish on their own. While the pointer is moved for the call,
       no other code reads it: the three readers of 0x207922 outside the drawers and the row resets
@@ -3123,15 +3123,15 @@ memory:
       origin, over frames 1780..1830, and none fired, while the same three counted 8, 49 and 92
       passes in that window and the same condition at the routine''s own jsr (0xf5970) fired at
       frame 1787 with the pointer at the origin''s plus 0x100. Watched by the golden
-      goldens/radendurv2/06_desert_descent (frame 1800, view x 5, y 869), which goes red alone when
+      goldens/radendurh/06_desert_descent (frame 1800, view x 5, y 869), which goes red alone when
       the routine''s offset is neutralised (sub.w d0,d0) and the band comes back bare.'
-    radendur_v2_the_taps_become_rom_code: 'MEASURED on 2026-10-12, same runs. The driver''s three
-      data taps acted at exactly the sites hardware/radendur-v2.yaml rewrites as jsr: the count read
+    radendurh_the_taps_become_rom_code: 'MEASURED on 2026-10-12, same runs. The driver''s three
+      data taps acted at exactly the sites hardware/radendurh.yaml rewrites as jsr: the count read
       at 0xe15f0 (once per race); MAX read only by the drawers'' sub.w at 0xe00ae, 0xe0406,
       0xe0676, 0xe08e6, 0xe0bec, 0xe0ef2 inside the tapped range (0xe17dc''s clr.w reads it too,
       outside the range, and 0xe1214 was never reached); MIN written by the addq.w/#0/#$7fff/
       indexed sites the table lists, plus the boot RAM clear at 0x25f4 (clr.b of zeros, which the
-      clamp never touches). On the v2 clone every hooked site''s fetch count into the hook area is
+      clamp never touches). On radendurh every hooked site''s fetch count into the hook area is
       exactly twice its access count before, and the five races finish; the five boot goldens come
       out pixel-identical to the patched driver''s (they differ only in the PNG''s System text).'
 - range:

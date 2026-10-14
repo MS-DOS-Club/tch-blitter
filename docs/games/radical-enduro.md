@@ -1,7 +1,7 @@
 # Radical Enduro
 
 <p align="center">
-  <img src="../img/gifs/radendurv2-race.gif" width="672" alt="Radical Enduro motocross race: the bike rides down the track between billboards and scenery">
+  <img src="../img/gifs/radendurh-race.gif" width="672" alt="Radical Enduro motocross race: the bike rides down the track between billboards and scenery">
 </p>
 
 <p align="center"><em>The motocross race: the bike on the track, with the billboards and the scenery stacked by depth.</em></p>
@@ -9,14 +9,14 @@
 A TCH prototype attributed to **Sator Videogames**, never released. A motocross game whose track is
 built out of sprites stacked by depth, on the same blitter board as
 [Wheels & Fire](wheels-and-fire.md). In stock MAME it is `NOT_WORKING`, and a comment in its driver says that
-some courses reach gameplay but crash quickly; with this repository's own driver and its faults
+some courses reach gameplay but crash quickly; with this repository's driver and its faults
 fixed in the ROM it boots, enters a game and its playable tracks finish the race.
 
 <table>
 <tr>
 <td width="50%">
-  <img src="../img/radendurv2/title.png" width="100%" alt="Radical Enduro title screen of the radendurv2 clone">
-  <p align="center"><em><code>radendurv2</code>, the clone that plays: its title.</em></p>
+  <img src="../img/radendurh/title.png" width="100%" alt="Radical Enduro title screen of the radendurh clone">
+  <p align="center"><em><code>radendurh</code>, the clone that plays: its title.</em></p>
 </td>
 <td width="50%">
   <img src="../img/gifs/radendur-play.gif" width="100%" alt="The radendur dump reaching the stage selection, its globe corrupting and the screen freezing">
@@ -40,16 +40,16 @@ fixed in the ROM it boots, enters a game and its playable tracks finish the race
 |---|---|
 | year | no known date |
 | board | [the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A |
-| MAME set | `radendur` (the dump, which hangs on its own faults); `radendurv2`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs and, as an enhancement that is not the board's behaviour, its full scenery drawn, built from the dump by `make v2` |
+| MAME set | `radendur` (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs and, as an enhancement that is not the board's behaviour, its full scenery drawn, built from the dump by `make radendurh` |
 | driver in MAME | `tch/wheelfir.cpp` |
-| driver in this repository | **its own driver**, `tch/radendur.cpp` |
+| driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten and the game's differences in `radendur_state` |
 | status in MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: a comment in its driver says that some courses reach gameplay but crash quickly |
 <!-- end of generated block -->
 
 ## What was achieved here
 
 With its faults fixed it boots, enters a game and **five tracks finish the race** with no grey
-screen. The faults that are the prototype's own are fixed in the code of the `radendurv2` ROM, never
+screen. The faults that are the prototype's own are fixed in the code of the `radendurh` ROM, never
 by the driver, which emulates the dump as it is. The same ROM starts each sound block after the
 drawing, as Power Ball and Kong Ball do, so the music lasts the race; and it draws every prop near the
 view where it belongs, which the prototype's engine does not: an enhancement, not the board, which
@@ -222,7 +222,7 @@ counter while a block streams.
 scanline with no handshake, so a word that arrives a line late is a word read twice, and from there
 it runs garbage. The prototype starts each block at the top of the frame, exactly where its drawing
 chain holds the main 68000 with interrupts masked, and on the dump the music dies a few seconds in.
-Power Ball and Kong Ball start the block a hundred lines down, after the drawing; `radendurv2` does the
+Power Ball and Kong Ball start the block a hundred lines down, after the drawing; `radendurh` does the
 same, and keeps its music through the race.
 
 **Not fixable is the missing per-event triggering.** The game code calls the sound API once, where

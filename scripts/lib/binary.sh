@@ -15,7 +15,6 @@ binary_identity() {
 source_of_binary() {
     case "$1" in
         *wheelfir) echo "$(mame_src_path)/src/mame/tch/wheelfir.cpp" ;;
-        *radendu)  echo "$(mame_src_path)/src/mame/tch/radendur.cpp" ;;
         *rltennis) echo "$(mame_src_path)/src/mame/tch/rltennis.cpp" ;;
     esac
 }

@@ -33,7 +33,7 @@ WHAT IT DOES NOT ESTABLISH. MAME is a model, and the game computes each destinat
 from the ROM tables, so this proves what the blitter receives and what the game declares per
 blit, not that the FPGAs count that way.
 
-`--full` adds the known answer (the model over the driver's `zoom_index` against the real scale of
+`--full` adds the known answer (the model over the driver's `ZOOM_INDEX` against the real scale of
 each ROM descriptor) and the source-row coverage; both need the MAME clone, `make disasm` and the
 wheelfir romset, and a missing one is INVALID.
 
@@ -374,13 +374,14 @@ def frame_png(frame: int) -> Path:
 
 
 def zoom_index(driver: Path = DRIVER) -> list[int]:
-    parts = driver.read_text(encoding="utf-8").split("static const uint16_t zoom_index[400] =", 1)
+    declaration = "static constexpr uint16_t ZOOM_INDEX[400] ="
+    parts = driver.read_text(encoding="utf-8").split(declaration, 1)
     if len(parts) != 2:
-        raise InvalidRunError(f"{driver.name} declares no zoom_index[400]")
+        raise InvalidRunError(f"{driver.name} declares no ZOOM_INDEX[400]")
     body = parts[1]
     vals = [int(v, 16) for v in re.findall(r"0x[0-9a-fA-F]{4}", body.split("};", 1)[0])]
     if len(vals) != 400:
-        raise InvalidRunError(f"zoom_index holds {len(vals)} values, not 400")
+        raise InvalidRunError(f"ZOOM_INDEX holds {len(vals)} values, not 400")
     return vals
 
 

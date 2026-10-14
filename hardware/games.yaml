@@ -194,18 +194,16 @@ games:
     evidence: credits in kongball_maincpu 0x03f4a7
 - set: radendur
   name: Radical Enduro
-  # In the pinned MAME this set lives inside tch/wheelfir.cpp. This repository's own driver,
-  # tch/radendur.cpp, is a separate thing: this field says what is in MAME, not what is here.
   mame_driver: tch/wheelfir.cpp
   page:
     board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A"
-    driver_here: "**its own driver**, `tch/radendur.cpp`"
-    sets_note: " (the dump, which hangs on its own faults); `radendurv2`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs and, as an enhancement that is not the board's behaviour, its full scenery drawn, built from the dump by `make v2`"
+    driver_here: "the same `tch/wheelfir.cpp`, with the video model rewritten and the game's differences in `radendur_state`"
+    sets_note: " (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs and, as an enhancement that is not the board's behaviour, its full scenery drawn, built from the dump by `make radendurh`"
     status_note: ": a comment in its driver says that some courses reach gameplay but crash quickly"
   manufacturer:
     value: TCH / Sator Videogames
     level: verified
-    evidence: macro GAME of radendur.cpp
+    evidence: macro GAME of wheelfir.cpp
     nuance: 'What is VERIFIED is that MAME writes it this way, not that the attribution is backed. Looked
       into on 2026-08-04: the whole chain (MAME''s macro, recreativas.org and whatever copies them) goes
       back to ONE single observation, the logo drawn on the boot screen, with no independent corroboration.
@@ -234,7 +232,7 @@ games:
     level: verified
     evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
   driver_status:
-    value: NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurv2 clone,
+    value: NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurh clone,
       its maincpu ROM fixed (plus full scenery, not the board's) and built from the dump, finishes a
       race with its music at its real 16 MHz
     level: verified

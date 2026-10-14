@@ -1,7 +1,7 @@
 # Boot goldens
 
 The project's correctness gate. No ROM is assembled from source here, so there is no build SHA to
-verify: the gate is the **observed boot state**. `make verify` runs `radendurv2`, the clone whose
+verify: the gate is the **observed boot state**. `make verify` runs `radendurh`, the clone whose
 maincpu ROM has the prototype's faults fixed, its sound block placed as Power Ball and Kong Ball place
 theirs and its full scenery drawn, and then the dump `radendur` (`../radendur/`). It compares the
 SHA-256 of fixed-frame captures against `checksums.sha256`: the boot through the oracle
@@ -12,7 +12,7 @@ A **FAIL is never cosmetic**: it is either a regression, or an advance of the bo
 re-blessed on purpose with `make goldens` (`SET=radendur` for the dump's).
 
 The comparison is against the SHAs in `checksums.sha256`; shifting the first capture
-(`ORACLE_FRAMES=150,300,600,900 ./scripts/radendur-goldens.sh verify radendurv2`) shows it fail.
+(`ORACLE_FRAMES=150,300,600,900 ./scripts/radendur-goldens.sh verify radendurh`) shows it fail.
 
 ## What these capture
 
@@ -25,8 +25,8 @@ dump, emulated as it is, stops on its own faults; its baseline is `../radendur/`
 | `01_boot_5s`, `02_boot_10s` | intro |
 | `03_boot_15s` | attract: the globe, the logos and the difficulty selector. It guards the logo colours. |
 | `04_race_start` | **the desert starting line, bike stopped**. It is the gate of the colour IN A RACE: the first four cover intro and attract only. The section is verified in RAM before the picture (`nav-phase.lua`), so the start of another phase cannot slip in. |
-| `05_desert_scenery` | **the stage tent in the desert, mid-race**, driven by `scripts/drive.lua`: the tent, palms and bushes the prototype's own engine leaves out and the v2's full-scenery layer draws (not the board's behaviour). `scripts/radendur/scenery-shot.lua` writes the game's view origin with it, and the gate refuses a capture taken anywhere else. |
-| `06_desert_descent` | **the desert while the view scrolls DOWN the track**, driven the same way: the bottom row the view adds keeps its trees, palm and fence, which the v2's `scenery_strip_row` draws in the row it belongs to (the prototype's strip drawer leaves it bare). |
+| `05_desert_scenery` | **the stage tent in the desert, mid-race**, driven by `scripts/drive.lua`: the tent, palms and bushes the prototype's own engine leaves out and radendurh's full-scenery layer draws (not the board's behaviour). `scripts/radendur/scenery-shot.lua` writes the game's view origin with it, and the gate refuses a capture taken anywhere else. |
+| `06_desert_descent` | **the desert while the view scrolls DOWN the track**, driven the same way: the bottom row the view adds keeps its trees, palm and fence, which radendurh's `scenery_strip_row` draws in the row it belongs to (the prototype's strip drawer leaves it bare). |
 
 If the colour work changes any of those screens, the golden FAILS on purpose and is re-blessed once
 the change is checked to be the one that was sought.
@@ -41,7 +41,7 @@ The baselines are SHA-256 hashes of PNGs written by MAME at the pinned commit
 (`scripts/lib/mame_src.sh`), on an arm64 host. A host of another architecture, or with another PNG
 encoder, may write other bytes for the same picture. If `make verify` fails on a different machine,
 the first question is which of the two things it is, and it is answered by LOOKING at the captures
-in `tmp/goldens-verify-radendurv2/labeled/` against these PNGs:
+in `tmp/goldens-verify-radendurh/labeled/` against these PNGs:
 
 - **A visible difference** (different content): a regression or a real advance. It is diagnosed;
   only then `make goldens`.

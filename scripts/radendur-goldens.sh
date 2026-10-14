@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# radendur-goldens.sh -- Radical Enduro's goldens: the boot, the race start and, on radendurv2, two
+# radendur-goldens.sh -- Radical Enduro's goldens: the boot, the race start and, on radendurh, two
 # frames of the desert's scenery, against goldens/<set>/checksums.sha256.
 #
 #   ./scripts/radendur-goldens.sh verify [set]   exit 1 if any capture differs
 #   ./scripts/radendur-goldens.sh bless [set]    rewrites the baseline
 #
-# The set is radendurv2 (the default, the one that plays) or radendur (the dump, whose baseline is
+# The set is radendurh (the default, the one that plays) or radendur (the dump, whose baseline is
 # where it stops). A FAIL means the boot state changed: a regression, or the boot getting further
 # (re-bless with make goldens); goldens/README.md says how to tell.
 set -euo pipefail
 
-usage() { echo "Use: $0 verify|bless [radendurv2|radendur]" >&2; exit 2; }
+usage() { echo "Use: $0 verify|bless [radendurh|radendur]" >&2; exit 2; }
 [ "$#" -ge 1 ] && [ "$#" -le 2 ] || usage
 case "$1" in verify|bless) GMODE="$1" ;; *) usage ;; esac
-MACHINE="${2-radendurv2}"
-case "$MACHINE" in radendurv2|radendur) ;; *) usage ;; esac
+MACHINE="${2-radendurh}"
+case "$MACHINE" in radendurh|radendur) ;; *) usage ;; esac
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
@@ -63,7 +63,7 @@ shot() {
 # The race: the desert's starting line, bike stopped; nav-phase.lua checks the section in RAM.
 OUT="$PROJECT_DIR/$WORK/race.harness.log" shot race 60 scripts/radendur/nav-phase.lua "^START ok" 04_race_start
 
-# The scenery, radendurv2 only (the dump has no scenery layer): a frame of the desert race, accepted
+# The scenery, radendurh only (the dump has no scenery layer): a frame of the desert race, accepted
 # only where the game's view origin says it is; drive.lua's inputs are pinned because they decide
 # where the bike is at that frame.
 scenery() {
@@ -71,7 +71,7 @@ scenery() {
         shot "$1" "$(awk -v f="$2" -v r="$REFRESH" 'BEGIN { printf "%d", int(f / r) + 5 }')" \
             scripts/radendur/scenery-shot.lua "^SHOT f=$2 view $3\$" "$4"
 }
-if [ "$MACHINE" = radendurv2 ]; then
+if [ "$MACHINE" = radendurh ]; then
     scenery scenery 2025 "x=27 y=860" 05_desert_scenery
     scenery descent 1800 "x=5 y=869" 06_desert_descent
 fi

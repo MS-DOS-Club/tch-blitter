@@ -10,7 +10,7 @@
       "name": "Attach to MAME gdbstub (m68k guest)",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/upstream/radendu",
+      "program": "${workspaceFolder}/upstream/wheelfir",
       "miDebuggerServerAddress": "localhost:23946",
       "MIMode": "gdb",
       "miDebuggerPath": "m68k-elf-gdb",

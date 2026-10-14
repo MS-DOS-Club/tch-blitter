@@ -7,10 +7,10 @@ Python runs with `uv run scripts/<name>.py`, and every MAME launch goes through 
 
 | script | what it does |
 |--------|--------------|
-| `setup-mame.sh` | `make setup`: clones MAME at the pin into `upstream/`, applies `patches/`, builds `radendu`, `wheelfir` and `rltennis`, builds radendurv2's ROM; `--doctor` (`make doctor`) says what this machine is missing |
+| `setup-mame.sh` | `make setup`: clones MAME at the pin into `upstream/`, applies `patches/`, builds `wheelfir` and `rltennis`, builds radendurh's ROM; `--doctor` (`make doctor`) says what this machine is missing |
 | `radendur-session.sh` | `make play`, `fast`, `debug` (gdbstub) and `stop` for Radical Enduro |
 | `build-and-run.sh` | `make ref SET=<set>`: builds a sibling's binary if needed and opens it |
-| `radendur-v2.py` | `make v2`: builds radendurv2's maincpu ROM from the verified dump and the patch table `hardware/radendur-v2.yaml`; `--check` says whether the zip is current |
+| `radendurh.py` | `make radendurh`: builds radendurh's maincpu ROM from the verified dump and the patch table `hardware/radendurh.yaml`; `--check` says whether the zip is current |
 | `export-patch.sh` | `make patch`: writes the driver changes in `upstream/` into `patches/`; `--check` says whether they still match |
 | `verify-patches.sh` | the patches rebuild `upstream/`'s changes on a clean tree at the pin |
 | `verify-romset.sh <set>` | a romset against its driver's `ROM_START` |

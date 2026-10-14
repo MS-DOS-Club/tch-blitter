@@ -1,26 +1,26 @@
-"""Builds Radical Enduro v2, the clone set whose maincpu ROM has the prototype's faults fixed.
+"""Builds radendurh, the clone of Radical Enduro whose maincpu ROM has the prototype's faults fixed.
 
 Its table has three layers: the four faults, full scenery (not the board's behaviour), and the sound
 block moved after the drawing chain as Power Ball and Kong Ball place theirs.
 
-The board's dump has four faults that stop the game (`hardware/radendur-v2.yaml` says which and
+The board's dump has four faults that stop the game (`hardware/radendurh.yaml` says which and
 why). MAME's driver emulates that dump as it is, and the clone loads a corrected maincpu ROM
 instead. That ROM is somebody else's work with our changes on it, so what travels is this recipe
 and its table, never the bytes: anybody holding the verified dump builds the same ROM.
 
-What it refuses, as INVALID (exit 3), because a v2 built from the wrong thing would boot and look
-plausible: an input that is not the dump the parent's `ROM_LOAD` declares; a table that does not
-match that dump, or that does not say what it means (an unknown or missing key, two entries on
+What it refuses, as INVALID (exit 3), because a radendurh built from the wrong thing would boot and
+look plausible: an input that is not the dump the parent's `ROM_LOAD` declares; a table that does
+not match that dump, or that does not say what it means (an unknown or missing key, two entries on
 one byte, a routine past the hook area); and anything it could not read.
 
-The SHA1s and load offsets are read from the driver as it travels
-(`patches/0001-radendur-driver-fixes.patch`): the parent's are the input check and the clone's
-are the output check, so each is written once.
+The SHA1s and load offsets are read from the driver (`src/mame/tch/wheelfir.cpp` in the MAME
+checkout, patched): the parent's are the input check and the clone's are the output check, so each
+is written once.
 
 USE:
-    uv run scripts/radendur-v2.py                          # build run/mame_roms/<clone>.zip
-    uv run scripts/radendur-v2.py --check                  # 0 up to date, 1 stale or missing
-    uv run scripts/radendur-v2.py --stage fixes --out F    # stop after a layer, write elsewhere
+    uv run scripts/radendurh.py                          # build run/mame_roms/<clone>.zip
+    uv run scripts/radendurh.py --check                  # 0 up to date, 1 stale or missing
+    uv run scripts/radendurh.py --stage fixes --out F    # stop after a layer, write elsewhere
 """
 
 from __future__ import annotations
@@ -40,8 +40,11 @@ from typing import Any
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
-TABLE = ROOT / "hardware" / "radendur-v2.yaml"
-DRIVER_PATCH = ROOT / "patches" / "0001-radendur-driver-fixes.patch"
+TABLE = ROOT / "hardware" / "radendurh.yaml"
+# the driver as the checkout holds it, patched (MAME_SRC, else upstream/); export-patch.sh --check
+# and verify-patches.sh say it is what patches/ carries
+MAME_SRC = Path(os.environ.get("MAME_SRC") or ROOT / "upstream")
+DRIVER = MAME_SRC / "src" / "mame" / "tch" / "wheelfir.cpp"
 ROMS = ROOT / "run" / "mame_roms"
 JSR_ABS_L = 0x4EB9
 NOP = 0x4E71
@@ -102,15 +105,13 @@ def load_table(path: Path) -> dict[str, Any]:
 
 
 def rom_manifest(setname: str) -> dict[str, tuple[int, str, str]]:
-    """{rom: (load offset, crc32, sha1)} of ROM_START(setname) in the driver patch's added lines."""
-    added = "\n".join(
-        line[1:]
-        for line in DRIVER_PATCH.read_text(encoding="utf-8").splitlines()
-        if line.startswith("+")
-    )
-    m = re.search(rf"ROM_START\(\s*{re.escape(setname)}\s*\)(.*?)ROM_END", added, re.S)
+    """{rom: (load offset, crc32, sha1)} of ROM_START(setname) in the driver."""
+    if not DRIVER.is_file():
+        raise InvalidError(f"no driver at {DRIVER}: make setup")
+    source = DRIVER.read_text(encoding="utf-8")
+    m = re.search(rf"ROM_START\(\s*{re.escape(setname)}\s*\)(.*?)ROM_END", source, re.S)
     if not m:
-        raise InvalidError(f"ROM_START({setname}) is not in {DRIVER_PATCH.name}")
+        raise InvalidError(f"ROM_START({setname}) is not in {DRIVER}")
     out = {}
     # One ROM_LOAD line at a time, so a NO_DUMP entry can never borrow the next entry's hash.
     for line in m.group(1).splitlines():
@@ -275,12 +276,12 @@ def check(table: dict[str, Any], roms: dict[str, bytes], out: Path) -> int:
         print(f"{', '.join(stale)}: the table builds other bytes than ROM_START declares")
         return 1
     if not out.exists():
-        print(f"{out} is missing: make v2")
+        print(f"{out} is missing: make radendurh")
         return 1
     with zipfile.ZipFile(out) as z:
         on_disk = {n: sums(z.read(n)) for n in z.namelist()}
     if on_disk != want:
-        print(f"{out} is not what ROM_START declares: make v2")
+        print(f"{out} is not what ROM_START declares: make radendurh")
         return 1
     print(f"{table['clone']['set']}: up to date with the driver")
     return 0

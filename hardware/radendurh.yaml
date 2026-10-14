@@ -1,7 +1,7 @@
-# Radical Enduro v2: the maincpu ROM the clone set radendurv2 loads in place of the dump, in three
+# Radical Enduro, fixed: the maincpu ROM the clone set radendurh loads in place of the dump, in three
 # layers: `fixes`, the prototype's four faults; `scenery`, NOT the board's behaviour, an enhancement
 # (its doc says what it does); `sound`, the sound block placed where Power Ball and Kong Ball
-# place theirs. Not the board's dump: `scripts/radendur-v2.py` builds it from the
+# place theirs. Not the board's dump: `scripts/radendurh.py` builds it from the
 # verified dump and refuses any other input; `--stage fixes` stops after the first layer.
 #
 # Every entry carries the words it expects to find; a word that is not there refuses the build.
@@ -18,11 +18,11 @@ target:
   set: radendur
   roms: {even: endu.u21, odd: endu.u19}
 clone:
-  set: radendurv2
-  roms: {even: endu-v2.u21, odd: endu-v2.u19}
+  set: radendurh
+  roms: {even: endu-h.u21, odd: endu-h.u19}
 
 # Where the routines go, and how far they may reach: an area the game never reads (the record
-# radendur_v2_hook_area_is_unused in registers.yaml).
+# radendurh_hook_area_is_unused in registers.yaml).
 hook_base: 0x0f5800
 hook_limit: 0x0f5a00
 
@@ -49,7 +49,7 @@ layers:
       - {<<: *xwin, addr: 0x0e2102}
     hooks:
       # Each routine: its words, then its source. Branches are relative, so the block runs at any
-      # base; `scripts/radendur-v2.py` lays it out from hook_base and fills in each site's target.
+      # base; `scripts/radendurh.py` lays it out from hook_base and fills in each site's target.
       - label: env_count
         doc: >
           FAULT 3: the per-section environment loop at 0xe15f0 seeds its dbf with the prop count,
@@ -112,7 +112,7 @@ layers:
       - hook: drawer_max
         old: [0x9e79, 0x0020, 0x173c]
         # the six drawers inside 0xe0090..0xe0f00; the seventh copy, at 0xe1214, is left as the game
-        # wrote it: no race reaches it (registers.yaml: radendur_v2_the_taps_become_rom_code)
+        # wrote it: no race reaches it (registers.yaml: radendurh_the_taps_become_rom_code)
         at: [0x0e00ae, 0x0e0406, 0x0e0676, 0x0e08e6, 0x0e0bec, 0x0e0ef2]
       - hook: min_addq
         old: [0x5479, 0x0020, 0x173a]
@@ -123,7 +123,7 @@ layers:
         at: [0x0e19bc, 0x0e1b60, 0x0e1cf0, 0x0e1e80, 0x0e1ff4, 0x0e2188, 0x0e2388]
   - name: scenery
     doc: >
-      NOT THE BOARD'S BEHAVIOUR, an enhancement of the v2. The prototype's sweeps hand each drawer
+      NOT THE BOARD'S BEHAVIOUR, an enhancement of radendurh. The prototype's sweeps hand each drawer
       the entry range of the zone records their cursors accepted (a record: box x0, y0, x1, y1 in
       cells at +0..+6, its entries from index `c` at +12 up to `a` at +10, 44 bytes each), and a
       strip of the background is drawn from that range alone; a prop of a record the sweep did not
@@ -132,8 +132,8 @@ layers:
       12 x 10 window grown by the margins the routine's immediates hold (left and above subtracted
       from the window's origin; right and below added to its far edge, 11 and 9 cells from the
       origin). The margins are the largest any visible prop needed over the five playable sections,
-      not a bound (registers.yaml: radendur_v2_scenery_margins); the layer costs game speed
-      (radendur_v2_scenery_cost). The vertical scroll's strip drawer, which stamps a row the view
+      not a bound (registers.yaml: radendurh_scenery_margins); the layer costs game speed
+      (radendurh_scenery_cost). The vertical scroll's strip drawer, which stamps a row the view
       adds below it into the top row, is pointed at the right row (scenery_strip_row).
     hooks:
       - label: scenery_widen
@@ -217,7 +217,7 @@ layers:
           that 0x207922 points at, the view's top, while its caller hands it the new row, the top
           one when the view moves up and the grid's last (the origin plus 8: the grid holds 9 rows)
           when it moves down. Moving down, the drawer leaves that row at its base tiles and stamps
-          its props into the top row (registers.yaml: radendur_v2_reverse_scroll_cut). This points
+          its props into the top row (registers.yaml: radendurh_reverse_scroll_cut). This points
           0x207922 at the row being drawn for the call, the same addressing the row reset 0xe059a
           uses, and puts it back; moving up the offset is 0 and nothing changes. D0 is left as the
           drawer leaves it.
@@ -253,10 +253,10 @@ layers:
       and the sound CPU, which takes one word per line with no handshake, reads one twice and
       runs garbage for good. Power Ball and Kong Ball start the block at line 99, after the
       chain: their vblank handler loads the line counter with 100 where this one loads 1
-      (registers.yaml: radendur_v2_the_block_at_line_99_keeps_the_sound). Loading 100 makes the
+      (registers.yaml: radendurh_the_block_at_line_99_keeps_the_sound). Loading 100 makes the
       first block after the masked boot start 100 lines after the vblank request the boot left
       pending, which the next vblank cuts; Power Ball closes the counter's enable right after its
-      own first unmask for the same reason, and the v2 does as it does.
+      own first unmask for the same reason, and radendurh does as it does.
     words:
       - {addr: 0x00053a, old: [0x0001], new: [0x0064], why: "vblank arms the counter with 100, as the siblings do"}
     hooks:

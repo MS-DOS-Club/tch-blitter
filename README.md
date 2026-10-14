@@ -16,7 +16,7 @@ plus a fixed clone of one of them, one shared video architecture.
 <td width="20%"><img src="docs/img/gifs/wheelfir-race.gif" alt="Wheels &amp; Fire"></td>
 <td width="20%"><img src="docs/img/gifs/pwball-demo.gif" alt="Power Ball"></td>
 <td width="20%"><img src="docs/img/gifs/kongball-title.gif" alt="Kong Ball"></td>
-<td width="20%"><img src="docs/img/gifs/radendurv2-race.gif" alt="Radical Enduro"></td>
+<td width="20%"><img src="docs/img/gifs/radendurh-race.gif" alt="Radical Enduro"></td>
 </tr>
 <tr>
 <td align="center"><a href="docs/games/reality-tennis.md"><b>Reality Tennis</b></a></td>
@@ -36,7 +36,7 @@ plus a fixed clone of one of them, one shared video architecture.
 | [Wheels & Fire](docs/games/wheels-and-fire.md) | `wheelfir` | 1997 * | TCH | NOT_WORKING | works, with imperfect graphics; plays a race to its time out |
 | [Power Ball](docs/games/power-ball.md) | `pwball` | _unknown_ (`199?`) | TCH | NOT_WORKING (prototype), commented "mostly complete" | works, with imperfect graphics; plays a match to its game over |
 | [Kong Ball](docs/games/kong-ball.md) | `kongball` | 1997 | TCH / Digital Dreams Multimedia | NOT_WORKING (prototype), no sound | works, with no sound and imperfect graphics; plays to its game over |
-| [Radical Enduro](docs/games/radical-enduro.md) | `radendur` | _unknown_ (`199?`) | TCH / Sator Videogames | NOT_WORKING (early prototype) | NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurv2 clone, its maincpu ROM fixed (plus full scenery, not the board's) and built from the dump, finishes a race with its music at its real 16 MHz |
+| [Radical Enduro](docs/games/radical-enduro.md) | `radendur` | _unknown_ (`199?`) | TCH / Sator Videogames | NOT_WORKING (early prototype) | NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurh clone, its maincpu ROM fixed (plus full scenery, not the board's) and built from the dump, finishes a race with its music at its real 16 MHz |
 
 `*` from an external source, not verifiable in the binary. `⚠` sources contradict each other: the game's page says which ones and why this value is the published one. `199?` is MAME's own: the year of those games was lost, and is not filled in.
 <!-- end of generated block -->
@@ -126,20 +126,22 @@ emulation fault: the board its dump came from was missing the sound ROMs.
 **Radical Enduro is playable.** In stock MAME it is a `NOT_WORKING` prototype, and a comment in its
 driver says that some courses reach gameplay but crash quickly; here, with its faults fixed, it
 boots, enters a race, and **five of its tracks run to the finish**: the whole of Level 0 and the
-opening of the next two. It has its own driver, `tch/radendur.cpp`, split out from its siblings'.
+opening of the next two. It shares `tch/wheelfir.cpp` with its siblings, as a subclass that keeps
+what the game does differently on the same board: when the sprite plane flips, when its palette
+takes effect, and how its two CPUs talk.
 
-**`radendurv2` keeps its music through the race, and the game runs at the 16 MHz the board
+**`radendurh` keeps its music through the race, and the game runs at the 16 MHz the board
 specifies** with no clock multiplier. Both come from reading the 68000 rather than guessing: the sound is a sample streamer clocked by scanlines,
 and the blitter interrupt is a **held level** timed by the game's own interrupt mask, not a pulse on
 a fixed scanline.
 
 **It is the exception on ROMs**: the faults are the prototype's own, so the driver emulates the
-dump as it is (`radendur`, which hangs on them), and a clone set, `radendurv2`, loads a maincpu ROM
+dump as it is (`radendur`, which hangs on them), and a clone set, `radendurh`, loads a maincpu ROM
 with the four faults fixed in its code, its sound block moved after the drawing as Power Ball
 and Kong Ball place theirs, and, as a layer that is **not the board's behaviour**,
 every prop near the view drawn where it belongs (the prototype's own engine leaves some zones
 out, and puts the props of a row the view scrolls down into its top row). That ROM is
-not distributed: `make v2` builds it from the verified dump, refusing any other input and any word
+not distributed: `make radendurh` builds it from the verified dump, refusing any other input and any word
 that is not what it expects.
 
 Of its 16 track sections only five are playable: the rest carry data the prototype itself left
@@ -151,7 +153,7 @@ Two 68000 at 16 MHz, two Actel/TI TPC1020 FPGAs acting as a scaling blitter, a B
 ADC0808 for the wheel and a 10-bit R2R DAC for sound. The visible area is **336x252**: the board
 scans 256 lines and shows 252, which are two different properties.
 
-**Both drivers of this board (`tch/wheelfir.cpp` and `tch/radendur.cpp`) show those 252 lines.**
+**The board's driver (`tch/wheelfir.cpp`) shows those 252 lines for all four games.**
 Cropping the visible area does not disturb the sprite plane's palette upload, even though that
 palette is pushed from the vblank callback: the push happens at the END of vblank, and MAME makes
 vblank last exactly the lines the visible area does not, so the push lands on the frame boundary
@@ -232,7 +234,7 @@ files in `run/mame_roms/`, then:
 
 ```sh
 make setup      # clone MAME at the pinned commit, apply the patches, build
-make play       # run it (radendurv2: faults fixed, music kept, full scenery)
+make play       # run it (radendurh: faults fixed, music kept, full scenery)
 make doctor     # what a fresh machine is missing
 ```
 
@@ -243,12 +245,11 @@ list for it, plus `make`, `git`, `unzip`, `diffutils`, [uv](https://docs.astral.
 names whatever is missing. The binaries are `upstream/*.exe`, built on MAME's native Windows OSD
 rather than SDL, and the scripts call them by the same names.
 
-`make setup` also builds `radendurv2`, the fixed clone, from the `radendur` dump: its ROM is made
+`make setup` also builds `radendurh`, the fixed clone, from the `radendur` dump: its ROM is made
 here, never shipped. MAME itself checks the romsets, one binary per driver:
 
 ```sh
-upstream/wheelfir -rompath run/mame_roms -verifyroms    # wheelfir, pwball, kongball
-upstream/radendu  -rompath run/mame_roms -verifyroms    # radendur, radendurv2
+upstream/wheelfir -rompath run/mame_roms -verifyroms    # wheelfir, pwball, kongball, radendur, radendurh
 upstream/rltennis -rompath run/mame_roms -verifyroms    # rltennis, rltennisa
 ```
 

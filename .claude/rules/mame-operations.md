@@ -5,8 +5,8 @@ so this loads in every session.
 
 ## One game while investigating, every set when a fix closes
 
-Three sets share `wheelfir.cpp` (wheelfir, pwball, kongball), Reality Tennis's two share
-`rltennis.cpp`, and Radical Enduro's two share `radendur.cpp`. Sharing a driver is not a reason to
+Five sets share `wheelfir.cpp` (wheelfir, pwball, kongball and Radical Enduro's two, through
+`radendur_state`), and Reality Tennis's two share `rltennis.cpp`. Sharing a driver is not a reason to
 work on several at once: while investigating, run, measure and fix only the game under work, and
 judge by its symptom alone; read three games' symptoms at once and there are three explanations and
 no measurement. When the fix closes, `make check-all` walks every set, and a sibling that breaks
@@ -14,13 +14,13 @@ then is information about the fix.
 
 ## Driver work
 
-- The three drivers are this repository's: `upstream/src/mame/tch/wheelfir.cpp`, `radendur.cpp` and
-  `rltennis.cpp`, carried by `patches/`. Before touching `wheelfir.cpp` or `radendur.cpp`, re-read
+- The two drivers are this repository's: `upstream/src/mame/tch/wheelfir.cpp` and `rltennis.cpp`,
+  carried by `patches/`. Before touching `wheelfir.cpp`, re-read
   `docs/boards/wheels-and-fire-board.md`, and keep `rltennis.cpp` open as the blitter's reference
   (not the video model's: it is a much smaller board).
 - Rebuild only the driver touched: `cd upstream && make SUBTARGET=<subtarget>
-  SOURCES="src/mame/tch/<driver>.cpp" REGENIE=1 -j<cores>`, where the subtarget is `wheelfir`,
-  `rltennis`, or `radendu` for `radendur.cpp`. Without `REGENIE=1` a stale driver list can build a
+  SOURCES="src/mame/tch/<driver>.cpp" REGENIE=1 -j<cores>`, where the subtarget is `wheelfir` or
+  `rltennis`. Without `REGENIE=1` a stale driver list can build a
   binary without the machine, silently. Then `make patch`.
 - The gate is the observed state, captured as goldens: a change that does not move the game forward,
   or breaks another set of the driver, is suspect.
@@ -30,7 +30,7 @@ then is information about the fix.
   needs, unattended runs, the cfg traps) is `docs/mame-techniques.md`: read it before the first
   harness.
 - A driver logs the way MAME's C++ guide asks (`docs/source/contributing/cxx.rst`, Logging), because
-  the three drivers are proposed upstream: `logerror` for what a developer reads, `osd_printf_verbose`
+  the drivers are proposed upstream: `logerror` for what a developer reads, `osd_printf_verbose`
   for what a user diagnoses, never `osd_printf_*` at the default verbosity. A milestone trace (which
   scale law a machine runs, the first time a game does something) is kept for good, through
   `logerror`. `logerror` goes nowhere without `-log`: the launcher passes it to a played session, so
@@ -49,7 +49,7 @@ is the oracle for the hardware (the real palette, the paint order) and for check
 MAME's default map: any key dismisses the red NOT_WORKING warning, `5` is a coin, `1` start. In
 Wheels & Fire `LSHIFT` is full throttle (pedal and button 1), `LCTRL` the pedal alone (what the
 menus accept), `LALT` the brake, `SPACE` the turbo, the arrows the wheel; in Radical Enduro left
-`CTRL` accelerates and the arrows move the bike. `radendurv2` carries the crash fixes; `radendur`,
+`CTRL` accelerates and the arrows move the bike. `radendurh` carries the crash fixes; `radendur`,
 the dump, stops on its faults by design.
 
 ## The Wheels & Fire race is the reference

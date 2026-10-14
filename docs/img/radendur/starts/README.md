@@ -1,6 +1,6 @@
 # The 16 sections, one by one
 
-MAME captures of `radendurv2` at the board's 16 MHz, navigating the game's own menu
+MAME captures of `radendurh` at the board's 16 MHz, navigating the game's own menu
 (`scripts/radendur/nav-phase.lua` drove the menu to each one).
 
 | result | sections | how many |

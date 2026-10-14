@@ -50,7 +50,7 @@ MANIFEST: dict[str, list[tuple[int, str, str]]] = {
         (275, "title", "the title"),
         (1200, "attract", "the attract's globe"),
     ],
-    "radendurv2": [
+    "radendurh": [
         (275, "title", "the title of the clone that plays"),
     ],
 }

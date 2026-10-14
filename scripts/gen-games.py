@@ -272,7 +272,7 @@ def resources_table(data: dict) -> str:
         if not r:
             no_data.append(j["set"])
             continue
-        # The graphics region's name is not the same across the three drivers (`gfx` in rltennis,
+        # The graphics region's name is not the same across the two drivers (`gfx` in rltennis,
         # `gfx1` in the others), so it is looked up by prefix and not by equality.
         gfx = [k for k in r if k.startswith("gfx")]
         main_regions = {"maincpu", "subcpu", *gfx}

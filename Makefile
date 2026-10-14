@@ -2,13 +2,13 @@
 # `make help` lists the targets. The romsets are not distributed: they go in run/mame_roms/ first.
 
 .PHONY: help doctor setup setup-force play fast debug stop verify goldens verify-family bless-family \
-        savestate v2 ref disasm disasm-all ghidra-setup ghidra ghidra-export ghidra-gui patch hw-docs \
+        savestate radendurh ref disasm disasm-all ghidra-setup ghidra ghidra-export ghidra-gui patch hw-docs \
         test lint fmt check check-all clean distclean
 
 .DEFAULT_GOAL := help
 
 # <set>:<first frame> of each save-state check: a window where the planes the driver saves are drawn
-SAVESTATE_FRAMES := wheelfir:1100 pwball:2580 kongball:880 radendur:900 radendurv2:900 rltennis:900 rltennisa:900
+SAVESTATE_FRAMES := wheelfir:1100 pwball:2580 kongball:880 radendur:900 radendurh:900 rltennis:900 rltennisa:900
 
 help: ## Lists every target
 	@grep -hE '^[a-zA-Z0-9_-]+:.*?##' $(MAKEFILE_LIST) | \
@@ -17,30 +17,30 @@ help: ## Lists every target
 doctor: ## What this machine is missing (changes nothing)
 	./scripts/setup-mame.sh --doctor
 
-setup: ## Clones MAME at the pin, applies patches/, builds the three binaries and radendurv2's ROM
+setup: ## Clones MAME at the pin, applies patches/, builds the two binaries and radendurh's ROM
 	./scripts/setup-mame.sh
 
 setup-force: ## As setup, rebuilding the binaries
 	./scripts/setup-mame.sh --force
 
-play: ## Plays radendurv2 (the fixed clone) at real speed
+play: ## Plays radendurh (the fixed clone) at real speed
 	./scripts/radendur-session.sh play
 
-fast: ## radendurv2 unthrottled
+fast: ## radendurh unthrottled
 	./scripts/radendur-session.sh fast
 
-debug: ## radendurv2 with the gdbstub on :23946
+debug: ## radendurh with the gdbstub on :23946
 	./scripts/radendur-session.sh debug
 
 stop: ## Ends the instance play, fast or debug started
 	./scripts/radendur-session.sh stop
 
-verify: ## Radical Enduro's goldens: radendurv2, then the dump
-	@rc=0; ./scripts/radendur-goldens.sh verify radendurv2 || rc=1; \
+verify: ## Radical Enduro's goldens: radendurh, then the dump
+	@rc=0; ./scripts/radendur-goldens.sh verify radendurh || rc=1; \
 	  ./scripts/radendur-goldens.sh verify radendur || rc=1; exit $$rc
 
-goldens: ## Re-blesses one Radical Enduro set's goldens. SET=radendurv2 (default) | radendur
-	./scripts/radendur-goldens.sh bless $(or $(SET),radendurv2)
+goldens: ## Re-blesses one Radical Enduro set's goldens. SET=radendurh (default) | radendur
+	./scripts/radendur-goldens.sh bless $(or $(SET),radendurh)
 
 verify-family: ## The siblings' goldens (wheelfir, pwball, kongball, rltennis, rltennisa)
 	./scripts/goldens-family.sh verify
@@ -52,10 +52,10 @@ savestate: ## A save state loaded in a fresh process gives the same frames, ever
 	@rc=0; for sf in $(SAVESTATE_FRAMES); do \
 	  ./scripts/savestate-gate.sh "$${sf#*:}" 20 "$${sf%%:*}" || rc=1; done; exit $$rc
 
-v2: ## Builds run/mame_roms/radendurv2.zip from the dump and hardware/radendur-v2.yaml
-	uv run scripts/radendur-v2.py
+radendurh: ## Builds run/mame_roms/radendurh.zip from the dump and hardware/radendurh.yaml
+	uv run scripts/radendurh.py
 
-ref: ## Builds a sibling if needed and opens it. SET=pwball|wheelfir|kongball|rltennis|rltennisa
+ref: ## Builds a set's driver if needed and opens it. SET=pwball|wheelfir|kongball|radendur|radendurh|rltennis|rltennisa
 	./scripts/build-and-run.sh $(or $(SET),pwball)
 
 disasm: ## The 68000 program images, disasm/img/
