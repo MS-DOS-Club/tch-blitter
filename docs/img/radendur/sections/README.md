@@ -5,8 +5,8 @@ the blitter in Python. **The emulator takes no part**, so they answer a question
 cannot answer on their own: when a section cannot be played, is it because its DATA is unfinished,
 or because the emulation fails?
 
-`radendur_tracks_all.py` deliberately discards the sections with impossible coordinates; this
-script renders them anyway, omitting the out-of-range entries and counting how many there were.
+`radendur_tracks_all.py` renders only the five playable sections (0, 1, 2, 4 and 8) as maps; this
+script renders all sixteen, omitting the out-of-range entries and counting how many there were.
 
 | sec | level/seg | good entries | garbage | what the ROM render shows |
 |----:|:---------:|-------------:|--------:|---------------------------|
@@ -50,7 +50,7 @@ cannot be played" are two independent axes: this document reads the ROM data alo
 ## Regenerating
 
 Every image here is versioned; only `../tracks/full/`, the full-resolution renders, is not. They
-regenerate from the ROM with:
+regenerate from the `radendur` romset in `run/mame_roms/` with:
 
 ```sh
 uv run scripts/radendur_tracks_all.py

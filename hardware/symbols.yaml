@@ -629,6 +629,20 @@ images:
       of wf_sprite_dispatch, all inside this handler, plus wf_clear_screen_3, wf_build_scroll_table, wf_highscores_loop,
       wf_video_reset and wf_clear_screen_end. 0xdc274, where the table carried it before, is inside a
       coin-purse routine (0xdc26e) and never executes'
+  - addr: 945586
+    name: wf_engine_pitch
+    description: 'wheelfir main. Sets voice 5 (register 0x20cde8: read opcode at +12, step at +14) from
+      the field at 0x20692e+0x38: a playback rate in Hz, scaled from that field, plus 16000 or 6000 by
+      the field at +0x3c, capped at 24000, then raised by 6000 more while the flag at +0x20 is set, so
+      up to 30000. Above 15625, the mixer''s modulus (snd_v1_step), it writes the rate minus 15625 as
+      the step and the post-increment read opcode (0x101d instead of 0x1015), so the voice takes one
+      sample per interrupt plus the phase-accumulated remainder: the octave trick of snd_v1_opcode.
+      Named for the engine by its use in the race, not by anything the game prints'
+    level: verified
+    evidence: 'READ: 0xe6e1e..0xe6e28 addi.w #0x3e80 or #0x1770 by tst.w (0x3c,a4); 0xe6e2c cmp.w
+      #0x5dc0 and the cap; 0xe6e42 addi.w #0x1770 under tst.w (0x20,a2);
+      0xe6e4c..0xe6e5a move.w #0x1015, cmp.w #0x3d09, subi.w #0x3d09, move.w #0x101d; written through
+      a0 = 0x20cdf4 at 0xe6e5e..0xe6e60'
   - addr: 902288
     name: wf_snd_commit
     description: 'wheelfir main. `move.w 0xffff, 0x740000.l` in the vblank: the "apply the block" order.

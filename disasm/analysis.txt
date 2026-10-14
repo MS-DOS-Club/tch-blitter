@@ -3109,7 +3109,7 @@ void reset(void)
   000e6cf4  FUN_000e6cf4              64 bytes
   000e6d34  FUN_000e6d34              74 bytes
   000e6d7e  FUN_000e6d7e              52 bytes
-  000e6db2  FUN_000e6db2              288 bytes
+  000e6db2  wf_engine_pitch           288 bytes
   000e6ed2  FUN_000e6ed2              262 bytes
   000e6fd8  FUN_000e6fd8              50 bytes
   000e700a  FUN_000e700a              232 bytes
@@ -3246,6 +3246,7 @@ void reset(void)
   000e550e  wf_sprite_mode4
   000e5584  wf_arm_register
   000e55ea  wf_arm_flags
+  000e6db2  wf_engine_pitch
   000e8d3c  wf_video_reset
   000e8f4a  wf_pal_upload
   000e8f68  wf_pal_fill

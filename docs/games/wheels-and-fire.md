@@ -80,9 +80,9 @@ carries the list: gaps and extra rows of pixels, zoom by lookup table
 instead of by parameters, double buffering not applied, layer clearing, wrong coordinates for
 the intro sprites, and unidentified layer enable bits.
 
-**Of the eight points on that list, SIX are closed** and two remain open. Closed in this
-repository's driver: in MAME all eight are still open, because these fixes have not been
-submitted. Point by point, against the TODO exactly as it is written:
+**Of the eight points on that list, SIX are closed** and two remain open. The closures are in this
+repository's driver; in stock MAME all eight are still open. Point by point, against the TODO
+exactly as it is written:
 
 | author's point | status |
 |----------------|--------|
@@ -202,12 +202,13 @@ one that reveals the faults that go unnoticed in Power Ball or Kong Ball.
 
 ## Two linked cabinets
 
-The board's service menu has a COMUNICATION page, with NUMBER OF PLAYERS, PLAYER NUMBER and
-WAITING FOR ANOTHER PLAYER (strings read from the ROM and photographed in the menu), so two boards
-could race each other. The physical half comes from the programmer's account from the period: the link ran over the VGA connector already noted on the PCB, and the cable also
-synchronised the horizontal-line interrupts of both boards, which is why the handshake between two
-cabinets uses the same technique as the one between the two CPUs of a single board. MAME does not
-model the link, and it is part of what "fully emulated" means for this board.
+The board's service menu has a COMUNICATION page, with NUMBER OF PLAYERS, PLAYER NUMBER and WAITING
+FOR ANOTHER PLAYER (strings read from the ROM), so two boards could race each other. The physical
+half comes from the programmer's account from the period: the link ran over the VGA connector
+already noted on the PCB, and the cable also synchronised the horizontal-line interrupts of both
+boards, which is why the handshake between two cabinets uses the same technique as the one between
+the two CPUs of a single board. MAME does not model the link, and it is part of what "fully
+emulated" means for this board.
 
 ## How it is driven in MAME
 

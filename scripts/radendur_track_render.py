@@ -12,7 +12,7 @@ Data model (reverse engineered from the driver):
         tv&0x7fff -> tile table 0xabf22 (16B): +0 w1 +2 h1 +4 xoff +6 yoff +8 xoff2
                      +0xc srcLONG=[b0 b1 b2 b3]
           blit size = (w1+1)x(h1+1); page=(b3>>2)*0x40000; su0=b2+256*(b3&1);
-          sv0=b0+256*(b3&2); tileval bit15 = FLIP-X (uses xoff2 at +8)
+          sv0=b0+256*((b3>>1)&1); tileval bit15 = FLIP-X (uses xoff2 at +8)
     props 44B (at ptr+0xC+count1*6): +0x1c env-id -> palette arg 0x13+id
 
 Render (the hardware's REAL model, read from the disassembly):

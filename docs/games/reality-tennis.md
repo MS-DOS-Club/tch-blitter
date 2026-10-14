@@ -118,10 +118,10 @@ or removed: set 2 is a revision by its own authors, not somebody else's rebadge.
 `0x127f5`: set 1's green `0x457035` becomes `0x6f6e52` and `0x807d4d`, that is, from saturated
 grass to olive and straw.
 
-**The credits counter.** The seventh stretch is 509 bytes at `0x00fa03`, with every value shifted
-by exactly **+4**. On the title screen the only difference between the two sets is an **8x9 pixel**
-box at `x 296..303, y 217..225`: the counter's digit. Set 1 always writes
-`CREDITS 0`; set 2 leaves a bare `CREDITS` until the counter changes value.
+**The credits counter.** The seventh stretch spans 509 bytes from `0x00fa03`, and every
+odd-addressed byte in it is shifted by exactly **+4**. On the title screen the only difference
+between the two sets is an **8x9 pixel** box at `x 296..303, y 217..225`: the counter's digit. Set 1
+always writes `CREDITS 0`; set 2 leaves a bare `CREDITS` until the counter changes value.
 
 ### And they are two BOARD revisions, not just two programs
 

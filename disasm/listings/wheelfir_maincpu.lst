@@ -20525,7 +20525,7 @@ LAB_000e5dc4:
 000e5de2  427900201c68          clr.w (DAT_00201c68).l
 LAB_000e5de8:
 000e5de8  45f90020692e          lea (DAT_0020692e).l,A2
-000e5dee  61000fc2              bsr.w FUN_000e6db2
+000e5dee  61000fc2              bsr.w wf_engine_pitch
 000e5df2  4a6a001c              tst.w (0x1c,A2)
 000e5df6  6652                  bne.b LAB_000e5e4a
 000e5df8  42790020bebe          clr.w (DAT_0020bebe).l
@@ -21645,7 +21645,15 @@ LAB_000e6d88:
 000e6dac  4cdf0101              movem.l (SP)+,{ D0 A0}
 000e6db0  4e75                  rts
 
-FUN_000e6db2:
+
+; wf_engine_pitch: wheelfir main. Sets voice 5 (register 0x20cde8: read opcode at +12, step at +14)
+;   from the field at 0x20692e+0x38: a playback rate in Hz, scaled from that field, plus 16000 or
+;   6000 by the field at +0x3c, capped at 24000, then raised by 6000 more while the flag at +0x20 is
+;   set, so up to 30000. Above 15625, the mixer's modulus (snd_v1_step), it writes the rate minus
+;   15625 as the step and the post-increment read opcode (0x101d instead of 0x1015), so the voice
+;   takes one sample per interrupt plus the phase-accumulated remainder: the octave trick of
+;   snd_v1_opcode. Named for the engine by its use in the race, not by anything the game prints
+wf_engine_pitch:
 000e6db2  4a790020bec8          tst.w (DAT_0020bec8).l
 000e6db8  6702                  beq.b LAB_000e6dbc
 000e6dba  4e75                  rts
@@ -21899,7 +21907,7 @@ LAB_000e70d2:
 000e70da  33fc00000020bd5a      move.w #0x0,(DAT_0020bd5a).l
 LAB_000e70e2:
 000e70e2  357c0003003c          move.w #0x3,(0x3c,A2)
-000e70e8  6100fcc8              bsr.w FUN_000e6db2
+000e70e8  6100fcc8              bsr.w wf_engine_pitch
 000e70ec  4cdf3dff              movem.l (SP)+,{ D0 D1 D2 D3 D4 D5 D6 D7 A0 A2 A3 A4 A5}
 000e70f0  4e75                  rts
 LAB_000e70f2:

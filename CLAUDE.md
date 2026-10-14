@@ -13,12 +13,12 @@ other games (Little Robin, Speed Spin, Monsters World, Kick Goal, Action Hollywo
 architectures and are out of scope.
 
 Its origin, and still its deepest work, is the restoration of **Radical Enduro** (TCH / Sator
-Videogames). In MAME the `radendur` set was `MACHINE_NOT_WORKING` inside `tch/wheelfir.cpp` and never
-passed the boot screen; here it has a driver of its own, `tch/radendur.cpp`, which emulates the dump
-as it is (`radendur`, which hangs on the prototype's own faults), and a clone set, `radendurv2`,
-whose maincpu ROM has those faults fixed in code: it boots, enters a game and finishes a race on the
-five playable tracks. The board's video model was resolved by reading the 68000
-(`docs/boards/wheels-and-fire-board.md`).
+Videogames). In stock MAME the `radendur` set is `MACHINE_NOT_WORKING` inside `tch/wheelfir.cpp`,
+and a comment there says that some courses reach gameplay but crash quickly; here it has a driver of
+its own, `tch/radendur.cpp`, which emulates the dump as it is (`radendur`, which hangs on the
+prototype's own faults), and a clone set, `radendurv2`, whose maincpu ROM has those faults fixed in
+code: it boots, enters a game and finishes a race on the five playable tracks. The board's video
+model was resolved by reading the 68000 (`docs/boards/wheels-and-fire-board.md`).
 
 There is no source code of the games, only dumps, so nothing is assembled and the gate is the
 observed boot state captured as goldens, not a byte-identical SHA. The one ROM built here is
@@ -74,8 +74,8 @@ The detail is `docs/boards/wheels-and-fire-board.md`, generated from `hardware/r
   the 0x4000 planes into the background, then the high 0x8000 ones on top as a list of objects),
   with descending index within a cell. Two framebuffer planes, the track below and the bike always
   on top. Full detail in `docs/radendur-track-system.md`.
-- Reproduced in Python (`scripts/radendur_track_render.py`, numpy); every track by
-  `scripts/radendur_tracks_all.py`. Specific 68000 functions decompile with
+- Reproduced in Python (`scripts/radendur_track_render.py`, numpy); the five playable
+  tracks by `scripts/radendur_tracks_all.py`. Specific 68000 functions decompile with
   `scripts/ghidra/DumpFuncs.java`.
 - Palette: BT478, 256 colours of 8 bits (no `<<2`), one shared bank, assembled by ranges from
   `0xd6b12` plus an environment overlay by environment id.

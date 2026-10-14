@@ -117,6 +117,8 @@ symbols:
     name: wf_volume_matrix_table
   - addr: 0x000e5274
     name: wf_irq_sprite_list
+  - addr: 0x000e6db2
+    name: wf_engine_pitch
   - addr: 0x000dc490
     name: wf_snd_commit
   - addr: 0x000dc49c

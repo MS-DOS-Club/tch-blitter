@@ -155,7 +155,7 @@ blitter:
         symptom: subtracting those 256 rows leaves rubbish WORSE than not erasing at all, and it
           breaks a golden into the bargain
       meaning: the blit ALSO writes index 0 instead of letting the background through. With bit 2 it
-        is a color fill, the blit the word 14 mark turns into a band clear; alone it is an erase that
+        is a colour fill, the blit the word 14 mark turns into a band clear; alone it is an erase that
         walks its destination in columns
     - field: plane
       name: plane

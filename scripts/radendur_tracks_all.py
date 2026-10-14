@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""radendur_tracks_all.py -- renders ALL of radendur's tracks (complete maps) from the ROM with
-the real hardware model (see radendur_track_render.py), for verification and documentation.
+"""radendur_tracks_all.py -- renders radendur's five playable tracks (complete maps) from the ROM
+with the real hardware model (see radendur_track_render.py), for verification and documentation.
 It saves the ORIGINAL at full resolution in docs/img/radendur/tracks/full/ and a RESCALED version
 (for the README) in docs/img/radendur/tracks/.
 
@@ -20,11 +20,11 @@ OUT = os.path.join(ROOT, "docs/img/radendur/tracks")
 FULL = os.path.join(OUT, "full")
 README_MAXW = 1400  # maximum width of the README's rescaled version
 
-# Only the sections with COHERENT data (0% rubbish entries). Verified with section_is_clean():
-# sections L1 seg1+, L2 seg1+ and L3 have ~49% of entries with impossible coords (an interleaved
-# 2-good-2-rubbish pattern) = a different/incomplete format of the prototype (never finished); they
-# do not form tracks and are NOT rendered as maps. Only L0 is finished (segs 0-2; seg 3 = a
-# byte-identical duplicate of 2) plus the starts of L1 and L2.
+# The five playable sections, chosen by hand: L0 segs 0-2 and the starts of L1 and L2. The others
+# are left out: seg 3 of L0 is a byte-identical duplicate of seg 2, section 13 (L3 seg 1) is a
+# clean road with no scenery, and the rest hold a large share of entries at impossible coords (an
+# interleaved 2-good-2-rubbish pattern, the prototype's unfinished format). section_is_clean() is a
+# guard on the five, not the selector.
 MAPS = [
     (0, "L0-seg0_start", "Level 0, seg 0 -- Start (desert / Egyptian motifs)"),
     (1, "L0-seg1", "Level 0, seg 1 -- Desert"),

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""radendur-sections-broken.py -- renders ALL sections from the ROM, including the ones
-`radendur_tracks_all.py` discards for having impossible coordinates.
+"""radendur-sections-broken.py -- renders ALL sections from the ROM, including the
+unfinished ones `radendur_tracks_all.py` leaves out (it renders only the five playable sections).
 
 It exists to answer ONE question with a proof independent of the emulator: when a section
 cannot be played, is it because its DATA is unfinished, or because the emulation fails?

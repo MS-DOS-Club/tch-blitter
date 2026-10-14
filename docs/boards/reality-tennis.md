@@ -29,7 +29,7 @@ destination is `(a+1)/(b+1)` of the source on both axes. The game writes `0x0000
 value, plays its matches at `0x2233` (3/4) and `0x1122` (2/3), and is only ever seen reducing. Unscaled blits
 are not clipped: every walk stops where the low 8 bits of its counter reach the end coordinate.
 
-**Index 0 is transparent**, except in the color fill, which no register asks for: the driver
+**Index 0 is transparent**, except in the colour fill, which no register asks for: the driver
 treats a blit whose source spans are 1 on both axes as a fill, repeating that source across the
 whole destination and writing it even when it is index 0. Its own comment says it "seems to be"
 the fill.
@@ -57,7 +57,7 @@ full-screen pictures on that corner and, as far as anyone has looked, draws noth
 column 0 or row 0. Its own clock counts 60 vertical blanks to a second.
 
 No scroll is known: a background that moves is redrawn with the blitter. The palette is the same
-Bt478 as on the bigger board, 256 colors at 8 bits a component, the index written to `0x720001`,
+Bt478 as on the bigger board, 256 colours at 8 bits a component, the index written to `0x720001`,
 the components to `0x720003`, and a third port at `0x720007` for reading.
 
 ## The sound: two DACs on the ROMs' data lines
@@ -82,7 +82,7 @@ against the addresses that write them, so the table is the truth, not the names.
 | level | source | used for |
 |-------|--------|----------|
 | 4 | vblank | the end of a frame; it also steps the counter the game reads in the top three bits of `0x7e0000` |
-| 1 | blitter | on the board a level held while the blitter is idle; the driver stands in with a pulse on every blit strobe and one at vblank |
+| 1 | blitter | on the board a level held while the blitter is idle; the driver stands in with one interrupt request on every blit strobe and one at vblank |
 
 The game emits one blit of a list per level 1 interrupt and starts a list by unmasking it, which
 only makes sense if the line stays up while the blitter is idle. The driver's blits take no time,

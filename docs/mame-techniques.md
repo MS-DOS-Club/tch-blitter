@@ -16,14 +16,14 @@ machine did something. The paths under `src/` are MAME's, in the checkout `make 
 - **`-video none` on macOS does not mean "no window".** It takes over the whole display instead.
   A small window, `-window -nomaximize -resolution 320x240`, is what an unattended capture uses.
 - **`-nothrottle` changes the wall clock, not the frames.** Throttling only paces the host, and
-  with the default `-snapview native -snapsize auto` a snapshot is the emulated screen at its
-  native size whatever the window. A user's `mame.ini` can change those defaults; the launcher
-  passes `-inipath run` so none is read.
+  with the default `-snapsize auto` a snapshot is the emulated screen at its native size whatever
+  the window. A user's `mame.ini` can change that default; the launcher passes `-inipath run` so
+  none is read.
 - **`-seconds_to_run` counts emulated seconds**, and it only advances while emulation does: a
   machine stopped in the debugger never reaches it.
-- **When `-seconds_to_run` ends the run, MAME writes one more numbered snapshot per screen**
-  (`src/emu/video.cpp`), up to a few frames after the bound on a still picture. A script that
-  counts or pairs captures keeps the first N it asked for.
+- **When `-seconds_to_run` ends the run, MAME writes one more numbered snapshot** (one per screen
+  under `-snapview native`; `src/emu/video.cpp`), up to a few frames after the bound on a still
+  picture. A script that counts or pairs captures keeps the first N it asked for.
 - **A frame notifier runs one ahead of `screen:frame_number()`.** It fires at the start of
   vblank, before the screen's counter moves, so a counter kept in the notifier from boot reads one
   more: its fifth call sees frame number 4. After a soft reset the autoboot script runs again
@@ -99,7 +99,7 @@ rest from the frame before. Where the pass falls is found
 first, with a write watchpoint logging `beamy`; a table whose pass reaches vblank is read at the
 write or with the cpu stopped.
 
-For a debugger outside MAME, `make debug` runs Radical Enduro with the gdbstub; MAME's gdbstub
+For a debugger outside MAME, `make debug` runs `radendurv2` with the gdbstub; MAME's gdbstub
 speaks the 68000 natively.
 
 ## The cfg file
@@ -108,10 +108,11 @@ A comment containing two consecutive hyphens is invalid XML: MAME prints `Error 
 configuration file` on stderr, loads the defaults and rewrites the file on exit. A `<port>` binds
 only when its `tag`, `type` and `mask` match the driver's `PORT_BIT`, and its `defvalue` too when
 the field's default under that mask is not zero; otherwise it is skipped without a word
-(`src/emu/ioport.cpp`). The shape, with the values of the driver's own `PORT_BIT`:
+(`src/emu/ioport.cpp`). The shape, with the values of Wheels & Fire's own `PORT_BIT` for button 1
+(mask `0x0010`, active low, so its default under the mask is the mask itself):
 
 ```xml
-<port tag=":P1" type="P1_BUTTON1" mask="64" defvalue="64">
+<port tag=":P1" type="P1_BUTTON1" mask="16" defvalue="16">
     <newseq type="standard">KEYCODE_DOWN</newseq>
 </port>
 ```
@@ -158,8 +159,15 @@ the field's default under that mask is not zero; otherwise it is skipped without
 
 ## Rebuilding a driver
 
-The command, with each driver's SUBTARGET, is in `.claude/rules/mame-operations.md`; what it does
-not say:
+One driver is rebuilt on its own, where the subtarget is `wheelfir`, `radendu` (for
+`radendur.cpp`) or `rltennis`:
+
+```sh
+cd upstream && make SUBTARGET=<subtarget> SOURCES=src/mame/tch/<driver>.cpp REGENIE=1 -j<cores>
+```
+
+`REGENIE=1` regenerates the subtarget's driver list, which a stale cache would build without the
+machine. What the command does not say:
 
 - The binary is shared: whatever was built last is what every run executes, and a failed build
   leaves the previous one in place. `scripts/lib/binary.sh` warns when a driver source is newer

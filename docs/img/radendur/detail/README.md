@@ -40,4 +40,4 @@ The empirical sweep of the 16 sections (which draw, which hang, which are playab
 
 ## Regenerating
 
-They are versioned, and regenerate from the ROM with `uv run scripts/radendur-track-details.py` (the other renders: `../sections/README.md`).
+They are versioned, and regenerate from the `radendur` romset in `run/mame_roms/` with `uv run scripts/radendur-track-details.py` (the other renders: `../sections/README.md`).

@@ -5,7 +5,8 @@ disperses. But the code is still there.
 
 **The names are in the README**, credited game by game beside whoever preserved them. This document
 is the other half: **where each one comes from**, with the exact address, so that anyone can check
-rather than take it on trust. It reproduces whole:
+rather than take it on trust. Once `make disasm` has built the program images, it reproduces
+whole:
 
 ```sh
 uv run scripts/signatures.py
@@ -24,7 +25,7 @@ two names, nobody added and nobody removed. The revision is by its own authors.
 
 ---
 
-## Reality Tennis (1993): a hidden signature, in Spanish
+## Reality Tennis: a hidden signature, in Spanish
 
 At `0x001000` of `rltennis_maincpu`, readable in each half separately, repeated **four times** in a
 row and surrounded by `0xFF` on both sides:
@@ -49,7 +50,7 @@ building the image: **a piece of an Amiga program that ended up inside the arcad
 
 ---
 
-## Wheels & Fire (1997): the whole team, with job titles
+## Wheels & Fire: the whole team, with job titles
 
 At `0x0e3894` of `wheelfir_maincpu`, fourteen NUL-terminated strings, pairs of label and name, and
 68000 code starting right behind them:
@@ -63,9 +64,9 @@ At `0x0e3894` of `wheelfir_maincpu`, fourteen NUL-terminated strings, pairs of l
 | Auxiliar programming | Fernando Jimenez |
 | Graphics | Javier Martinez, Francisco Bocanegra, **Joaquin Perez** |
 
-**The two names in bold above are the same ones that sign Reality Tennis years earlier.** David
-Sandoval designs the Wheels & Fire hardware and Antonio Carrillo programs it; the two sign the 1993
-game together: the 1997 board and its 1993 predecessor carry the same two names.
+**The two names in bold above are the same ones that sign Reality Tennis.** David Sandoval designs
+the Wheels & Fire hardware and Antonio Carrillo programs it; on Reality Tennis the same two sign the
+game together.
 
 ### And the silicon carries a name
 

@@ -118,7 +118,7 @@ def write_manifest():
         "",
         "## Regenerating",
         "",
-        "They are versioned, and regenerate from the ROM with "
+        "They are versioned, and regenerate from the `radendur` romset in `run/mame_roms/` with "
         "`uv run scripts/radendur-track-details.py` (the other renders: "
         "`../sections/README.md`).",
         "",

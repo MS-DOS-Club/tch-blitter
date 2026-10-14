@@ -24,7 +24,7 @@ Key findings:
 | `radendur` | `0xf2034` | 184 | 204 | 49 |
 | `rltennis` | `0x02000` | 139 | 287 | 12 |
 | `rltennisa` | `0x02000` | 139 | 287 | 12 |
-| `wheelfir` | `0xea3da` | 211 | 265 | 126 |
+| `wheelfir` | `0xea3da` | 211 | 265 | 127 |
 
 <!-- end of generated block -->
 
@@ -48,7 +48,7 @@ and confirmed one by one by disassembling both windows.
 Its image is built the same way, interleaving `tch1.u19` (odd bytes) and `tch2.u21` (even). The
 resulting reset vector is SP `0x201000`, PC `0x0ea3da`.
 
-After `make disasm`, it reads with rizin without needing to re-analyse anything:
+After `make disasm`, it reads with [rizin](https://rizin.re) without needing to re-analyse anything:
 
 ```sh
 rizin -a m68k -b 32 -qc "e cfg.bigendian=true; s 0xe5300; pd 40" disasm/img/wheelfir_maincpu.bin

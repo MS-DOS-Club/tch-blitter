@@ -65,7 +65,8 @@ games:
       rltennis_track: 'six stretches of RGB triplets between 0x12658 and 0x127f5 swap the court''s
         greens for olive and straw tones: 0x457035 becomes 0x6f6e52 and 0x807d4d. On screen, 75.40%
         of the pixels of frame 1120 differ between the two sets'
-      rltennisa_counter: 'a 509-byte stretch at 0x00fa03 with every value shifted by +4. On frame
+      rltennisa_counter: 'a 509-byte stretch from 0x00fa03 in which every odd-addressed byte is
+        shifted by +4. On frame
         300 the only difference between the two sets is an 8x9 px box at x 296..303, y 217..225,
         0.08% of the screen, which is the credit counter''s digit: set 1 shows CREDITS 0 and set 2
         only CREDITS'
@@ -200,7 +201,7 @@ games:
     board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A"
     driver_here: "**its own driver**, `tch/radendur.cpp`"
     sets_note: " (the dump, which hangs on its own faults); `radendurv2`, a clone whose maincpu ROM has them fixed, its sound block placed where the finished siblings place it and, as an enhancement that is not the board's behaviour, its full scenery drawn, built from the dump by `make v2`"
-    status_note: ": it gets no further than the boot screen"
+    status_note: ": a comment in its driver says that some courses reach gameplay but crash quickly"
   manufacturer:
     value: TCH / Sator Videogames
     level: verified
@@ -212,7 +213,9 @@ games:
       person and no other title: the developer entry lists exactly this game. And there is NO ASCII string
       "SATOR" anywhere in the set''s 18 ROMs, checked with `uv run scripts/signatures.py`. The attribution
       is published because it is MAME''s, with this warning beside it, which is more honest than repeating
-      it flat.'
+      it flat. Seen on 2026-10-14: the same name is also drawn on the trackside banners of the race
+      (docs/img/radendur/detail/detail_L0_seg0_start_desert.png, rendered from the ROM), which is the
+      game''s own graphics again, not a corroboration.'
     not_exhausted:
     - The OEPM trademark search (a POST form, not reachable automatically). A "SATOR" trademark in class
       9 or 28 between 1993 and 1998 would give a holder, an address and dates, which is exactly what is

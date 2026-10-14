@@ -24,7 +24,9 @@ world cell coordinates**, per section, with triple indirection.
   `+4/+8` X offsets (normal / flip) · `+6` Y offset · `+0xC` LONG source. The real
   tile measures `(w1+1) x (h1+1)`, not a fixed 32x32. Source address in the graphics
   ROM: `page = b3>>2` (512x512 pages, 8bpp), `su0 = b2 + 256*(b3&1)`,
-  `sv0 = b0 + 256*(b3&2)`. **Bit 15 of the tileval = flip-X** (uses the `+8` offset).
+  `sv0 = b0 + 256*((b3>>1)&1)`. A 1:1 blit samples from row `sv0+1`, because the first source
+  row of each tile is a one-pixel border; a scaled one does not. **Bit 15 of the tileval = flip-X**
+  (uses the `+8` offset).
 
 ## The two planes and the paint order (hardware model)
 
@@ -73,7 +75,8 @@ front or behind): it is purely positional (cell) plus the emission order.
 
 `scripts/radendur_track_render.py` reconstructs any screen by reading the ROM: it emulates
 the blitter's tile sampling (vectorised with numpy), the per cell order of the three
-passes and the assembled palette. `scripts/radendur_tracks_all.py` renders the coherent
-tracks in full (it skips the prototype's incomplete sections, listed in
-[docs/img/radendur/sections/](img/radendur/sections/README.md)) into `docs/img/radendur/tracks/`:
-the light versions stay there, the full-resolution ones go to `tracks/full/`.
+passes and the assembled palette. `scripts/radendur_tracks_all.py` renders the five
+playable sections (0, 1, 2, 4 and 8) in full into `docs/img/radendur/tracks/`: the light versions
+stay there, the full-resolution ones go to `tracks/full/`. All sixteen, the unfinished ones
+included, are rendered by `scripts/radendur-sections-broken.py` into
+[docs/img/radendur/sections/](img/radendur/sections/README.md).

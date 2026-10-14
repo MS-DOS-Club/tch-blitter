@@ -6,11 +6,11 @@
 
 <p align="center"><em>The motocross race: the bike on the track, with the billboards and the scenery stacked by depth.</em></p>
 
-A TCH prototype developed by **Sator Videogames**, never released. A motocross game whose track
-is built out of sprites stacked by depth, on the same blitter board as
-[Wheels & Fire](wheels-and-fire.md). In stock MAME it gets no further than the boot screen; with
-this repository's own driver and its faults fixed in the ROM it boots, enters a game and its
-playable tracks finish the race.
+A TCH prototype attributed to **Sator Videogames**, never released. A motocross game whose track is
+built out of sprites stacked by depth, on the same blitter board as
+[Wheels & Fire](wheels-and-fire.md). In stock MAME it is `NOT_WORKING`, and a comment in its driver says that
+some courses reach gameplay but crash quickly; with this repository's own driver and its faults
+fixed in the ROM it boots, enters a game and its playable tracks finish the race.
 
 <table>
 <tr>
@@ -43,7 +43,7 @@ playable tracks finish the race.
 | MAME set | `radendur` (the dump, which hangs on its own faults); `radendurv2`, a clone whose maincpu ROM has them fixed, its sound block placed where the finished siblings place it and, as an enhancement that is not the board's behaviour, its full scenery drawn, built from the dump by `make v2` |
 | driver in MAME | `tch/wheelfir.cpp` |
 | driver in this repository | **its own driver**, `tch/radendur.cpp` |
-| status in MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: it gets no further than the boot screen |
+| status in MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: a comment in its driver says that some courses reach gameplay but crash quickly |
 <!-- end of generated block -->
 
 ## What was achieved here
@@ -52,7 +52,10 @@ With its faults fixed it boots, enters a game and **five tracks finish the race*
 screen. The faults that are the prototype's own are fixed in the code of the `radendurv2` ROM, never
 by the driver, which emulates the dump as it is. The same ROM starts each sound block after the
 drawing, as the finished siblings do, so the music lasts the race; and it draws every prop near the
-view where it belongs, which the prototype's engine does not: an enhancement, not the board. The root causes, all read from the code rather than guessed:
+view where it belongs, which the prototype's engine does not: an enhancement, not the board, which
+costs game speed: in some races a few steps of the race clock take more frames than without it.
+
+The root causes, all read from the code rather than guessed:
 
 - A buffer overrun in the game itself when entering a race: the race palette loop reads one element
   past the end of its array, the palette copier is handed a range outside its table, and it writes
@@ -168,7 +171,7 @@ of the objects at impossible coordinates.
 | Section 5 (MEDIUM leg 1) | Section 12 (EXPERT start) | Section 13 (EXPERT leg 1) |
 |---|---|---|
 | ![Section 5, fragmented](../img/radendur/readme/broken-sec05_L1s1.png) | ![Section 12, fragmented](../img/radendur/readme/broken-sec12_L3s0.png) | ![Section 13, undressed layout](../img/radendur/readme/broken-sec13_L3s1.png) |
-| You can make out where the layout was going, but half the objects are missing. | Four loose fragments: the EXPERT level was never built. | **The different case**: no garbage and a continuous layout, but **no scenery at all**. A track with the road laid down and nothing dressing it. |
+| You can make out where the layout was going, but half the objects are missing. | A fragmented trail: the EXPERT level was never built. | **The different case**: no garbage and a continuous layout, but **no scenery at all**. A track with the road laid down and nothing dressing it. |
 
 That last one is the most interesting of the three: it is not corrupt data, it is an earlier
 stage of development. The EXPERT level road is laid out and the game was dumped before it
