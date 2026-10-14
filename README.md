@@ -1,5 +1,7 @@
 # TCH's blitter board family
 
+[![check](https://github.com/MS-DOS-Club/tch-blitter/actions/workflows/check.yml/badge.svg)](https://github.com/MS-DOS-Club/tch-blitter/actions/workflows/check.yml)
+
 TCH SA was an arcade manufacturer from **Murcia, Spain**. Between 1993 and 1997 it built a line of
 boards whose central idea was a **scaling blitter implemented in FPGA**: there are no tilemaps and no
 sprite hardware. Everything on screen was copied there by the blitter, rectangle by rectangle, out of
