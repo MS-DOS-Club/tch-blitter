@@ -1,0 +1,42 @@
+name: check
+
+# What a pull request can break without MAME or the romsets: the Python and the shell. The
+# documents check reads the drivers' ROM_START (`upstream/`), and the goldens and save states need
+# a MAME build and the dumps, so those stay in a maintainer's `make check`.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.2.0
+
+      # A mirror that never answers looks like a slow one, so the install has its own bound and
+      # the step after it proves the tool is there rather than letting `make lint` find out.
+      - name: Install shellcheck
+        timeout-minutes: 3
+        run: |
+          for attempt in 1 2 3; do
+            sudo apt-get update -q && sudo apt-get install -y -q shellcheck && break
+            sleep 10
+          done
+          shellcheck --version
+
+      - name: Lint
+        run: make lint
+
+      - name: Test
+        run: make test

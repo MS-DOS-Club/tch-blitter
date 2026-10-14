@@ -19,6 +19,9 @@ paths:
 - `make check` before a pull request, once `make setup` has run: lint (ruff, mypy, shellcheck), the
   tests, the documentation against its data, the patches against `upstream/`. `make check-all` adds
   every golden and the save-state check, which boot MAME.
+- GitHub Actions (`.github/workflows/check.yml`) runs `make lint` and `make test` on every push
+  to `main` and every pull request: the part of `make check` that needs neither MAME nor the
+  romsets. The documents and the patches are checked against `upstream/`, so they stay local.
 - While investigating one game, its own gate only (`goldens-family.sh verify <set>`, or
   `make verify` for Radical Enduro); the whole family when the fix closes.
 - A change to `hardware/*.yaml` or a document cannot move a golden: `make hw-docs` and
