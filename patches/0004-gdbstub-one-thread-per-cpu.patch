@@ -1,0 +1,834 @@
+diff --git a/src/osd/modules/debugger/debuggdbstub.cpp b/src/osd/modules/debugger/debuggdbstub.cpp
+index 0e0b3f08..ce59deb1 100644
+--- a/src/osd/modules/debugger/debuggdbstub.cpp
++++ b/src/osd/modules/debugger/debuggdbstub.cpp
+@@ -754,21 +754,18 @@ public:
+ 		osd_module(OSD_DEBUG_PROVIDER, "gdbstub"), debug_module(),
+ 		m_readbuf_state(PACKET_START),
+ 		m_machine(nullptr),
+-		m_maincpu(nullptr),
+-		m_state(nullptr),
+-		m_memory(nullptr),
+-		m_address_space(nullptr),
+ 		m_debugger_cpu(nullptr),
+ 		m_debugger_console(nullptr),
+ 		m_debugger_host(),
+ 		m_debugger_port(0),
+ 		m_socket(OPEN_FLAG_WRITE | OPEN_FLAG_CREATE),
+-		m_is_be(false),
+ 		m_initialized(false),
+ 		m_dettached(false),
+ 		m_extended_mode(false),
+ 		m_send_stop_packet(false),
+ 		m_target_xml_sent(false),
++		m_g_thread(0),
++		m_stop_thread(0),
+ 		m_triggered_breakpoint(nullptr),
+ 		m_triggered_watchpoint(nullptr),
+ 		m_readbuf_len(0),
+@@ -788,14 +785,10 @@ public:
+ 	virtual void wait_for_debugger(device_t &device, bool firststop) override;
+ 	virtual void debugger_update() override;
+ 
+-	std::string get_register_string(int gdb_regnum);
+-	bool parse_register_string(uint64_t *pvalue, const char *buf, int gdb_regnum);
+-
+ 	bool parse_zZ(int *ptype, uint64_t *paddress, int *pkind, const char *buf);
+ 
+-	void set_register_value(int gdb_regnum, uint64_t value);
+-
+-	bool is_thread_id_ok(const char *buf);
++	int parse_thread_id(const char *buf);
++	int visible_thread_id();
+ 
+ 	void handle_character(char ch);
+ 	void send_nack();
+@@ -840,8 +833,6 @@ public:
+ 
+ 	readbuf_state m_readbuf_state;
+ 
+-	void generate_target_xml();
+-
+ 	int readchar();
+ 
+ 	void send_reply(std::string_view str);
+@@ -849,16 +840,11 @@ public:
+ 
+ private:
+ 	running_machine *m_machine;
+-	device_t *m_maincpu;
+-	device_state_interface *m_state;
+-	device_memory_interface *m_memory;
+-	address_space *m_address_space;
+ 	debugger_cpu *m_debugger_cpu;
+ 	debugger_console *m_debugger_console;
+ 	std::string m_debugger_host;
+ 	int m_debugger_port;
+ 	emu_file m_socket;
+-	bool m_is_be;
+ 	bool m_initialized;
+ 	bool m_dettached;
+ 	bool m_extended_mode;
+@@ -875,17 +861,42 @@ private:
+ 		const device_state_entry *state_entry;  // nullptr for a placeholder
+ 		bool is_placeholder() const { return state_entry == nullptr; }
+ 	};
+-	std::vector<gdb_register> m_gdb_registers;
+-	std::set<int> m_stop_reply_registers;
+-	std::string m_gdb_arch;
++
++	// One GDB thread per CPU, numbered from 1 in the order the machine enumerates its CPUs:
++	// thread 1 is the first CPU, which a client that never sends 'H' is served. 'Hg' picks the
++	// thread that 'g', 'G', 'p', 'P', 'm', 'M' and target.xml describe, and a stop reply makes
++	// the stopped thread the selected one, as gdbserver does. 'Hc' makes that CPU the debugger's
++	// visible one, which is what 'c', 's', 'Z' and 'z' act through.
++	struct gdb_thread
++	{
++		cpu_device *cpu;
++		device_state_interface *state;
++		device_memory_interface *memory;
++		address_space *space;
++		bool is_be;
++		bool has_map;               // false: no register map for this CPU, so its register packets answer an error
++		std::vector<gdb_register> registers;
++		std::set<int> stop_reply_registers;
++		std::string arch;
++		std::string target_xml;
++	};
++
++	void init_thread(gdb_thread &thread);
++	gdb_thread &visible_thread();
++	void generate_target_xml(gdb_thread &thread);
++	std::string get_register_string(const gdb_thread &thread, int gdb_regnum);
++	bool parse_register_string(const gdb_thread &thread, uint64_t *pvalue, const char *buf, int gdb_regnum);
++	void set_register_value(const gdb_thread &thread, int gdb_regnum, uint64_t value);
++
++	std::vector<gdb_thread> m_threads;
++	size_t m_g_thread;          // index into m_threads of the thread 'Hg' selected
++	int m_stop_thread;          // the thread id of the CPU that stopped last, 0 when not a CPU
+ 
+ 	std::map<offs_t, uint64_t> m_address_map;
+ 
+ 	debug_breakpoint *m_triggered_breakpoint;
+ 	debug_watchpoint *m_triggered_watchpoint;
+ 
+-	std::string m_target_xml;
+-
+ 	uint8_t  m_readbuf[512];
+ 	uint32_t m_readbuf_len;
+ 	uint32_t m_readbuf_offset;
+@@ -968,7 +979,7 @@ static std::string escape_packet(std::string_view src)
+ }
+ 
+ //-------------------------------------------------------------------------
+-void debug_gdbstub::generate_target_xml()
++void debug_gdbstub::generate_target_xml(gdb_thread &thread)
+ {
+ 	// Note: we do not attempt to replicate the regnum values from old
+ 	//       GDB clients that did not support target.xml.
+@@ -976,9 +987,9 @@ void debug_gdbstub::generate_target_xml()
+ 	target_xml += "<?xml version=\"1.0\"?>\n";
+ 	target_xml += "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">\n";
+ 	target_xml += "<target version=\"1.0\">\n";
+-	target_xml += string_format("<architecture>%s</architecture>\n", m_gdb_arch);
++	target_xml += string_format("<architecture>%s</architecture>\n", thread.arch);
+ 	std::string feature_name;
+-	for ( const auto &reg: m_gdb_registers )
++	for ( const auto &reg: thread.registers )
+ 	{
+ 		if (feature_name != reg.gdb_feature_name)
+ 		{
+@@ -999,148 +1010,171 @@ void debug_gdbstub::generate_target_xml()
+ 	if (!feature_name.empty())
+ 		target_xml += "  </feature>\n";
+ 	target_xml += "</target>\n";
+-	m_target_xml = escape_packet(target_xml);
++	thread.target_xml = escape_packet(target_xml);
+ }
+ 
+ //-------------------------------------------------------------------------
+-void debug_gdbstub::wait_for_debugger(device_t &device, bool firststop)
++// Build one thread's register list: its CPU's own map, then the visible
++// state of every other device. A CPU with no map keeps an empty list and
++// answers an error to the register packets of its thread, rather than
++// stopping the machine: on a board with several CPUs, the others are
++// still worth serving.
++void debug_gdbstub::init_thread(gdb_thread &thread)
+ {
+-	if ( m_dettached )
+-		return;
+-
+-	if ( firststop && !m_initialized )
++	thread.cpu->interface(thread.state);
++	assert(thread.state != nullptr);
++	thread.cpu->interface(thread.memory);
++	assert(thread.memory != nullptr);
++	// a CPU with no program space answers an error to the memory packets of its thread
++	thread.space = thread.memory->has_space(AS_PROGRAM) ? &thread.memory->space(AS_PROGRAM) : nullptr;
++	thread.is_be = thread.space != nullptr && thread.space->endianness() == ENDIANNESS_BIG;
++
++	const char *cpuname = thread.cpu->shortname();
++	auto it = gdb_register_maps.find(cpuname);
++	thread.has_map = it != gdb_register_maps.end();
++	if ( !thread.has_map )
+ 	{
+-		// find the "main" CPU, which is the first CPU (gdbstub doesn't have any notion of switching CPUs)
+-		m_maincpu = device_interface_enumerator<cpu_device>(m_machine->root_device()).first();
+-		if (!m_maincpu)
+-			fatalerror("gdbstub: cannot find any CPUs\n");
+-
+-		const char *cpuname = m_maincpu->shortname();
+-		auto it = gdb_register_maps.find(cpuname);
+-		if ( it == gdb_register_maps.end() )
+-			fatalerror("gdbstub: cpuname %s not found in gdb stub descriptions\n", cpuname);
+-
+-		m_maincpu->interface(m_state);
+-		assert(m_state != nullptr);
+-		m_memory = &m_maincpu->memory();
+-		m_address_space = &m_memory->space(AS_PROGRAM);
+-		m_debugger_cpu = &m_machine->debugger().cpu();
+-		m_debugger_console = &m_machine->debugger().console();
+-
+-		m_is_be = m_address_space->endianness() == ENDIANNESS_BIG;
++		osd_printf_info("gdbstub: cpuname %s (%s) not found in gdb stub descriptions, so its registers are not served\n", cpuname, thread.cpu->tag());
++		return;
++	}
+ 
+ #if 0
+-		for ( const auto &entry: m_state->state_entries() )
+-		{
+-			const char *symbol = entry->symbol();
+-			uint8_t datasize = entry->datasize();
+-			uint64_t datamask = entry->datamask();
+-			int index = entry->index();
+-			const std::string &format_string = entry->format_string();
+-			osd_printf_info("[%3d] datasize %d mask %016" PRIx64 " [%s] [%s]\n", index, datasize, datamask, symbol, format_string);
+-		}
++	for ( const auto &entry: thread.state->state_entries() )
++	{
++		const char *symbol = entry->symbol();
++		uint8_t datasize = entry->datasize();
++		uint64_t datamask = entry->datamask();
++		int index = entry->index();
++		const std::string &format_string = entry->format_string();
++		osd_printf_info("[%3d] datasize %d mask %016" PRIx64 " [%s] [%s]\n", index, datasize, datamask, symbol, format_string);
++	}
+ #endif
+ 
+-		const gdb_register_map &register_map = it->second;
+-		m_gdb_arch = register_map.arch;
+-		int cur_gdb_regnum = 0;
+-		for ( const auto &feature: register_map.features )
+-			for ( const auto &reg: feature.registers )
++	const gdb_register_map &register_map = it->second;
++	thread.arch = register_map.arch;
++	int cur_gdb_regnum = 0;
++	for ( const auto &feature: register_map.features )
++		for ( const auto &reg: feature.registers )
++		{
++			const device_state_entry *entry_found = nullptr;
++			if ( reg.state_name != nullptr )
+ 			{
+-				const device_state_entry *entry_found = nullptr;
+-				if ( reg.state_name != nullptr )
+-				{
+-					for ( const auto &entry: m_state->state_entries() )
+-						if ( entry->symbol() == reg.state_name )
+-						{
+-							entry_found = entry.get();
+-							break;
+-						}
+-					if ( entry_found == nullptr )
++				for ( const auto &entry: thread.state->state_entries() )
++					if ( entry->symbol() == reg.state_name )
+ 					{
+-						osd_printf_info("gdbstub: could not find register [%s]\n", reg.gdb_name);
+-						continue;
++						entry_found = entry.get();
++						break;
+ 					}
+-				}
+-				else if ( reg.override_bitsize <= 0 || (reg.override_bitsize % 8) != 0 )
++				if ( entry_found == nullptr )
+ 				{
+-					fatalerror("gdbstub: placeholder register [%s] needs a bitsize that is a multiple of 8\n", reg.gdb_name);
++					osd_printf_info("gdbstub: could not find register [%s] on %s\n", reg.gdb_name, thread.cpu->tag());
++					continue;
+ 				}
+-				gdb_register new_reg;
+-				new_reg.gdb_feature_name = feature.feature_name;
+-				new_reg.gdb_name = reg.gdb_name;
+-				new_reg.gdb_regnum = cur_gdb_regnum;
+-				new_reg.gdb_type = reg.gdb_type;
+-				if ( reg.override_bitsize != -1 )
+-					new_reg.gdb_bitsize = reg.override_bitsize;
+-				else
+-					new_reg.gdb_bitsize = entry_found->datasize() * 8;
+-				new_reg.state_entry = entry_found;
+-				m_gdb_registers.push_back(std::move(new_reg));
+-				if ( reg.stop_packet )
+-					m_stop_reply_registers.insert(cur_gdb_regnum);
+-				cur_gdb_regnum++;
+ 			}
++			else if ( reg.override_bitsize <= 0 || (reg.override_bitsize % 8) != 0 )
++			{
++				fatalerror("gdbstub: placeholder register [%s] needs a bitsize that is a multiple of 8\n", reg.gdb_name);
++			}
++			gdb_register new_reg;
++			new_reg.gdb_feature_name = feature.feature_name;
++			new_reg.gdb_name = reg.gdb_name;
++			new_reg.gdb_regnum = cur_gdb_regnum;
++			new_reg.gdb_type = reg.gdb_type;
++			if ( reg.override_bitsize != -1 )
++				new_reg.gdb_bitsize = reg.override_bitsize;
++			else
++				new_reg.gdb_bitsize = entry_found->datasize() * 8;
++			new_reg.state_entry = entry_found;
++			thread.registers.push_back(std::move(new_reg));
++			if ( reg.stop_packet )
++				thread.stop_reply_registers.insert(cur_gdb_regnum);
++			cur_gdb_regnum++;
++		}
+ 
+-		// append the visible state entries of every other device
++	// append the visible state entries of every other device
++	{
++		std::set<std::string> used_names;
++		auto sanitize = [](std::string &s, bool keep_slash)
+ 		{
+-			std::set<std::string> used_names;
+-			auto sanitize = [](std::string &s, bool keep_slash)
+-			{
+-				for (char &c : s)
+-					if ( !isalnum(c) && c != '_' && (!keep_slash || c != '/') )
+-						c = '_';
+-			};
+-			for ( const auto &reg: m_gdb_registers )
+-				used_names.insert(reg.gdb_name);
+-			for (device_state_interface &state : device_interface_enumerator<device_state_interface>(m_machine->root_device()))
++			for (char &c : s)
++				if ( !isalnum(c) && c != '_' && (!keep_slash || c != '/') )
++					c = '_';
++		};
++		for ( const auto &reg: thread.registers )
++			used_names.insert(reg.gdb_name);
++		for (device_state_interface &state : device_interface_enumerator<device_state_interface>(m_machine->root_device()))
++		{
++			if ( &state.device() == thread.cpu )
++				continue;
++			// ':' -> '/' keeps the path hierarchy unambiguous: device
++			// tags may contain '_' themselves
++			std::string tag = state.device().tag();
++			std::replace(tag.begin(), tag.end(), ':', '/');
++			sanitize(tag, true);
++			tag.erase(0, tag.find_first_not_of("_/"));
++			tag.erase(tag.find_last_not_of("_/") + 1);
++			tag.insert(tag.begin(), '/');
++			std::string feature_name = "mame." + tag;
++			for ( const auto &entry: state.state_entries() )
+ 			{
+-				if ( &state.device() == m_maincpu )
++				if ( !entry->visible() || entry->divider() )
+ 					continue;
+-				// ':' -> '/' keeps the path hierarchy unambiguous: device
+-				// tags may contain '_' themselves
+-				std::string tag = state.device().tag();
+-				std::replace(tag.begin(), tag.end(), ':', '/');
+-				sanitize(tag, true);
+-				tag.erase(0, tag.find_first_not_of("_/"));
+-				tag.erase(tag.find_last_not_of("_/") + 1);
+-				tag.insert(tag.begin(), '/');
+-				std::string feature_name = "mame." + tag;
+-				for ( const auto &entry: state.state_entries() )
++				std::string name = entry->symbol();
++				sanitize(name, false);
++				if ( name.empty() )
++					continue;
++				if ( !isalpha(name[0]) && name[0] != '_' )
++					name.insert(0, 1, '_');
++				if ( used_names.count(name) != 0 )
+ 				{
+-					if ( !entry->visible() || entry->divider() )
+-						continue;
+-					std::string name = entry->symbol();
++					name = tag + "_" + name;
+ 					sanitize(name, false);
+-					if ( name.empty() )
+-						continue;
+-					if ( !isalpha(name[0]) && name[0] != '_' )
+-						name.insert(0, 1, '_');
+ 					if ( used_names.count(name) != 0 )
+-					{
+-						name = tag + "_" + name;
+-						sanitize(name, false);
+-						if ( used_names.count(name) != 0 )
+-							continue;
+-					}
+-					used_names.insert(name);
+-					gdb_register new_reg;
+-					new_reg.gdb_feature_name = feature_name;
+-					new_reg.gdb_name = name;
+-					new_reg.gdb_regnum = cur_gdb_regnum++;
+-					new_reg.gdb_type = TYPE_INT;
+-					new_reg.gdb_bitsize = std::min(entry->datasize() * 8, 64);
+-					new_reg.state_entry = entry.get();
+-					m_gdb_registers.push_back(std::move(new_reg));
++						continue;
+ 				}
++				used_names.insert(name);
++				gdb_register new_reg;
++				new_reg.gdb_feature_name = feature_name;
++				new_reg.gdb_name = name;
++				new_reg.gdb_regnum = cur_gdb_regnum++;
++				new_reg.gdb_type = TYPE_INT;
++				new_reg.gdb_bitsize = std::min(entry->datasize() * 8, 64);
++				new_reg.state_entry = entry.get();
++				thread.registers.push_back(std::move(new_reg));
+ 			}
+ 		}
++	}
++}
++
++//-------------------------------------------------------------------------
++void debug_gdbstub::wait_for_debugger(device_t &device, bool firststop)
++{
++	if ( m_dettached )
++		return;
++
++	if ( firststop && !m_initialized )
++	{
++		for (cpu_device &cpu : device_interface_enumerator<cpu_device>(m_machine->root_device()))
++		{
++			gdb_thread thread{};
++			thread.cpu = &cpu;
++			init_thread(thread);
++			m_threads.push_back(std::move(thread));
++		}
++		if ( m_threads.empty() )
++			fatalerror("gdbstub: cannot find any CPUs\n");
+ 
++		m_debugger_cpu = &m_machine->debugger().cpu();
++		m_debugger_console = &m_machine->debugger().console();
++		m_stop_thread = visible_thread_id();
+ 
+ 		m_initialized = true;
+ 	}
+ 	else
+ 	{
++		// the debugger made the CPU that stopped the visible one; remember it before an 'Hc'
++		// moves the visible CPU, so the stop reply keeps naming the thread that stopped
++		m_stop_thread = visible_thread_id();
+ 		device_debug *debug = m_debugger_console->get_visible_cpu()->debug();
+ 		m_triggered_watchpoint = debug->triggered_watchpoint();
+ 		m_triggered_breakpoint = debug->triggered_breakpoint();
+@@ -1252,13 +1286,14 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_D(const char *buf)
+ // Read general registers.
+ debug_gdbstub::cmd_reply debug_gdbstub::handle_g(const char *buf)
+ {
+-	if ( !m_target_xml_sent )
++	const gdb_thread &thread = m_threads[m_g_thread];
++	if ( !m_target_xml_sent || !thread.has_map )
+ 		return REPLY_ENN;
+ 	if ( *buf != '\0' )
+ 		return REPLY_UNSUPPORTED;
+ 	std::string reply;
+-	for ( const auto &reg: m_gdb_registers )
+-		reply += get_register_string(reg.gdb_regnum);
++	for ( const auto &reg: thread.registers )
++		reply += get_register_string(thread, reg.gdb_regnum);
+ 	send_reply(reply);
+ 	return REPLY_NONE;
+ }
+@@ -1267,14 +1302,15 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_g(const char *buf)
+ // Write general registers.
+ debug_gdbstub::cmd_reply debug_gdbstub::handle_G(const char *buf)
+ {
+-	if ( !m_target_xml_sent )
++	const gdb_thread &thread = m_threads[m_g_thread];
++	if ( !m_target_xml_sent || !thread.has_map )
+ 		return REPLY_ENN;
+-	for ( const auto &reg: m_gdb_registers )
++	for ( const auto &reg: thread.registers )
+ 	{
+ 		uint64_t value;
+-		if ( !parse_register_string(&value, buf, reg.gdb_regnum) )
++		if ( !parse_register_string(thread, &value, buf, reg.gdb_regnum) )
+ 			return REPLY_ENN;
+-		set_register_value(reg.gdb_regnum, value);
++		set_register_value(thread, reg.gdb_regnum, value);
+ 		buf += (reg.gdb_bitsize / 8) * 2;
+ 	}
+ 	if ( *buf != '\0' )
+@@ -1286,11 +1322,27 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_G(const char *buf)
+ // Set thread for subsequent operations.
+ debug_gdbstub::cmd_reply debug_gdbstub::handle_H(const char *buf)
+ {
+-	// accept threads 'any', 1, and 'all'
+-	if ( (buf[0] == 'c' || buf[0] == 'g') && is_thread_id_ok(buf + 1) )
+-		return REPLY_OK;
+-	// otherwise silently ignore
+-	return REPLY_UNSUPPORTED;
++	if ( buf[0] != 'c' && buf[0] != 'g' )
++		return REPLY_UNSUPPORTED;
++	int const id = parse_thread_id(buf + 1);
++	if ( id < -1 )
++		return REPLY_ENN;
++	// 'any' (0) and 'all' (-1) leave the selection where it is
++	if ( id > 0 )
++	{
++		if ( buf[0] == 'g' )
++			m_g_thread = id - 1;
++		else
++		{
++			// the visible CPU is what 'c', 's', 'Z' and the console act through; setting it
++			// touches no ignore flag, so unlike the console's 'focus' nothing runs. An ignored
++			// CPU is refused: it never executes under the debugger, so a step on it would not end
++			if ( !m_threads[id - 1].cpu->debug()->observing() )
++				return REPLY_ENN;
++			m_debugger_console->set_visible_cpu(m_threads[id - 1].cpu);
++		}
++	}
++	return REPLY_OK;
+ }
+ 
+ //-------------------------------------------------------------------------
+@@ -1313,9 +1365,10 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_m(const char *buf)
+ 	if ( sscanf(buf, "%" PRIx64 ",%" PRIx64, &address, &length) != 2 )
+ 		return REPLY_ENN;
+ 
++	const gdb_thread &thread = m_threads[m_g_thread];
+ 	offs_t offset = address;
+ 	address_space *tspace;
+-	if ( !m_memory->translate(m_address_space->spacenum(), device_memory_interface::TR_READ, offset, tspace) )
++	if ( thread.space == nullptr || !thread.memory->translate(thread.space->spacenum(), device_memory_interface::TR_READ, offset, tspace) )
+ 		return REPLY_ENN;
+ 
+ 	// Disable side effects while reading memory.
+@@ -1359,9 +1412,10 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_M(const char *buf)
+ 	if ( sscanf(buf, "%" PRIx64 ",%" PRIx64 ":%n", &address, &length, &buf_offset) != 2 )
+ 		return REPLY_ENN;
+ 
++	const gdb_thread &thread = m_threads[m_g_thread];
+ 	offs_t offset = address;
+ 	address_space *tspace;
+-	if ( !m_memory->translate(m_address_space->spacenum(), device_memory_interface::TR_READ, offset, tspace) )
++	if ( thread.space == nullptr || !thread.memory->translate(thread.space->spacenum(), device_memory_interface::TR_READ, offset, tspace) )
+ 		return REPLY_ENN;
+ 
+ 	std::vector<uint8_t> data;
+@@ -1380,12 +1434,13 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_M(const char *buf)
+ // Read the value of register n.
+ debug_gdbstub::cmd_reply debug_gdbstub::handle_p(const char *buf)
+ {
+-	if ( !m_target_xml_sent )
++	const gdb_thread &thread = m_threads[m_g_thread];
++	if ( !m_target_xml_sent || !thread.has_map )
+ 		return REPLY_ENN;
+ 	int gdb_regnum;
+-	if ( sscanf(buf, "%x", &gdb_regnum) != 1 || gdb_regnum >= m_gdb_registers.size() )
++	if ( sscanf(buf, "%x", &gdb_regnum) != 1 || gdb_regnum >= thread.registers.size() )
+ 		return REPLY_ENN;
+-	std::string reply = get_register_string(gdb_regnum);
++	std::string reply = get_register_string(thread, gdb_regnum);
+ 	send_reply(reply);
+ 	return REPLY_NONE;
+ }
+@@ -1394,17 +1449,18 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_p(const char *buf)
+ // Write register n... with value r... .
+ debug_gdbstub::cmd_reply debug_gdbstub::handle_P(const char *buf)
+ {
+-	if ( !m_target_xml_sent )
++	const gdb_thread &thread = m_threads[m_g_thread];
++	if ( !m_target_xml_sent || !thread.has_map )
+ 		return REPLY_ENN;
+ 	int gdb_regnum;
+ 	int buf_offset;
+-	if ( sscanf(buf, "%x=%n", &gdb_regnum, &buf_offset) != 1 || gdb_regnum >= m_gdb_registers.size() )
++	if ( sscanf(buf, "%x=%n", &gdb_regnum, &buf_offset) != 1 || gdb_regnum >= thread.registers.size() )
+ 		return REPLY_ENN;
+ 	buf += buf_offset;
+ 	uint64_t value;
+-	if ( !parse_register_string(&value, buf, gdb_regnum) )
++	if ( !parse_register_string(thread, &value, buf, gdb_regnum) )
+ 		return REPLY_ENN;
+-	set_register_value(gdb_regnum, value);
++	set_register_value(thread, gdb_regnum, value);
+ 	return REPLY_OK;
+ }
+ 
+@@ -1415,8 +1471,11 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_q(const char *buf)
+ 	// First check for packets that predate the qname:params convention.
+ 	if ( *buf == 'C' )
+ 	{
+-		// Return the current thread ID.
+-		send_reply("QC1");
++		// Return the current thread ID: the one 'Hg' selected, which a stop
++		// reply moves to the thread that stopped, as gdbserver answers it.
++		if ( m_threads.empty() )
++			return REPLY_ENN;
++		send_reply(string_format("QC%x", int(m_g_thread + 1)));
+ 		return REPLY_NONE;
+ 	}
+ 	else if ( *buf == 'P' )
+@@ -1488,21 +1547,28 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_q(const char *buf)
+ 			int length = 0;
+ 			if ( sscanf(params.c_str() + 14, "target.xml:%x,%x", &offset, &length) == 2 )
+ 			{
+-				if ( m_target_xml.empty() )
+-					generate_target_xml();
++				// the description of the thread 'Hg' selected
++				if ( m_threads.empty() )
++					return REPLY_ENN;
++				gdb_thread &thread = m_threads[m_g_thread];
++				if ( !thread.has_map )
++					return REPLY_ENN;
++				if ( thread.target_xml.empty() )
++					generate_target_xml(thread);
++				const std::string &target_xml = thread.target_xml;
+ 				if ( offset < 0 )
+ 					offset = 0;
+-				length = std::min(length, (int) m_target_xml.length()-offset);
+-				if ( offset > (int) m_target_xml.length() )
+-					offset = m_target_xml.length();
++				length = std::min(length, (int) target_xml.length()-offset);
++				if ( offset > (int) target_xml.length() )
++					offset = target_xml.length();
+ 				if ( length < 0 )
+ 					length = 0;
+ 				std::string reply;
+-				if ( offset + length < m_target_xml.length() )
++				if ( offset + length < target_xml.length() )
+ 					reply += 'm';
+ 				else
+ 					reply += 'l';
+-				reply += m_target_xml.substr(offset, length);
++				reply += target_xml.substr(offset, length);
+ 				send_reply(reply);
+ 				m_target_xml_sent = true;
+ 				return REPLY_NONE;
+@@ -1511,7 +1577,11 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_q(const char *buf)
+ 	}
+ 	else if ( name == "fThreadInfo" )
+ 	{
+-		send_reply("m1");
++		// 'l' alone is the protocol's "no threads", before the first stop builds them
++		std::string reply = m_threads.empty() ? "l" : "m";
++		for ( size_t i = 0; i < m_threads.size(); i++ )
++			reply += string_format(i == 0 ? "%x" : ",%x", i + 1);
++		send_reply(reply);
+ 		return REPLY_NONE;
+ 	}
+ 	else if ( name == "sThreadInfo" )
+@@ -1519,6 +1589,18 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_q(const char *buf)
+ 		send_reply("l");
+ 		return REPLY_NONE;
+ 	}
++	else if ( strncmp(buf, "ThreadExtraInfo,", 16) == 0 )
++	{
++		// the thread's CPU tag, hex encoded, so a client maps ids to CPUs from the stub itself
++		int const id = parse_thread_id(buf + 16);
++		if ( id < 1 )
++			return REPLY_ENN;
++		std::string reply;
++		for ( const char *tag = m_threads[id - 1].cpu->tag(); *tag != '\0'; tag++ )
++			reply += string_format("%02x", *tag);
++		send_reply(reply);
++		return REPLY_NONE;
++	}
+ 
+ 	return REPLY_UNSUPPORTED;
+ }
+@@ -1540,7 +1622,7 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_s(const char *buf)
+ // Find out if the thread XX is alive.
+ debug_gdbstub::cmd_reply debug_gdbstub::handle_T(const char *buf)
+ {
+-	if ( is_thread_id_ok(buf) )
++	if ( parse_thread_id(buf) >= -1 )
+ 		return REPLY_OK;
+ 
+ 	// thread is dead
+@@ -1590,7 +1672,8 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_z(const char *buf)
+ 	address_space *tspace;
+ 	if ( type == 2 || type == 3 || type == 4 )
+ 	{
+-		if ( !m_memory->translate(m_address_space->spacenum(), device_memory_interface::TR_READ, offset, tspace) )
++		gdb_thread const &thread = visible_thread();
++		if ( thread.space == nullptr || !thread.memory->translate(thread.space->spacenum(), device_memory_interface::TR_READ, offset, tspace) )
+ 			return REPLY_ENN;
+ 		m_address_map.erase(offset);
+ 	}
+@@ -1632,7 +1715,8 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_Z(const char *buf)
+ 	address_space *tspace;
+ 	if ( type == 2 || type == 3 || type == 4 )
+ 	{
+-		if ( !m_memory->translate(m_address_space->spacenum(), device_memory_interface::TR_READ, offset, tspace) )
++		gdb_thread const &thread = visible_thread();
++		if ( thread.space == nullptr || !thread.memory->translate(thread.space->spacenum(), device_memory_interface::TR_READ, offset, tspace) )
+ 			return REPLY_ENN;
+ 		m_address_map[offset] = address;
+ 	}
+@@ -1648,15 +1732,15 @@ debug_gdbstub::cmd_reply debug_gdbstub::handle_Z(const char *buf)
+ 			return REPLY_OK;
+ 		case 2:
+ 			// write watchpoint
+-			debug->watchpoint_set(*m_address_space, read_or_write::WRITE, offset, kind);
++			debug->watchpoint_set(*visible_thread().space, read_or_write::WRITE, offset, kind);
+ 			return REPLY_OK;
+ 		case 3:
+ 			// read watchpoint
+-			debug->watchpoint_set(*m_address_space, read_or_write::READ, offset, kind);
++			debug->watchpoint_set(*visible_thread().space, read_or_write::READ, offset, kind);
+ 			return REPLY_OK;
+ 		case 4:
+ 			// access watchpoint
+-			debug->watchpoint_set(*m_address_space, read_or_write::READWRITE, offset, kind);
++			debug->watchpoint_set(*visible_thread().space, read_or_write::READWRITE, offset, kind);
+ 			return REPLY_OK;
+ 	}
+ 
+@@ -1687,9 +1771,17 @@ void debug_gdbstub::send_stop_packet()
+ 		uint64_t address = m_address_map[offset];
+ 		reply += string_format(":%" PRIx64 ";", address);
+ 	}
+-	if ( m_target_xml_sent )
+-		for ( const auto &gdb_regnum: m_stop_reply_registers )
+-			reply += string_format("%02x:%s;", gdb_regnum, get_register_string(gdb_regnum));
++	// the thread that stopped, which becomes the selected one for 'g', 'm' and the rest
++	int const id = m_stop_thread;
++	if ( id != 0 )
++	{
++		m_g_thread = id - 1;
++		reply += string_format("thread:%x;", id);
++		const gdb_thread &thread = m_threads[id - 1];
++		if ( m_target_xml_sent && thread.has_map )
++			for ( const auto &gdb_regnum: thread.stop_reply_registers )
++				reply += string_format("%02x:%s;", gdb_regnum, get_register_string(thread, gdb_regnum));
++	}
+ 	send_reply(reply);
+ }
+ 
+@@ -1703,7 +1795,13 @@ void debug_gdbstub::handle_packet()
+ 	cmd_reply reply = REPLY_UNSUPPORTED;
+ 
+ 	const char *buf = (const char *) m_packet_buf+1;
+-	switch ( m_packet_buf[0] )
++	// the threads are built at the first stop: before it, a packet that
++	// addresses one has nothing to address and answers an error
++	char const op = m_packet_buf[0];
++	bool const needs_thread = op == 'g' || op == 'G' || op == 'p' || op == 'P' || op == 'm' || op == 'M' || op == 'z' || op == 'Z';
++	if ( needs_thread && m_threads.empty() )
++		reply = REPLY_ENN;
++	else switch ( op )
+ 	{
+ 		case '!': reply = handle_exclamation(buf); break;
+ 		case '?': reply = handle_question(buf); break;
+@@ -1732,9 +1830,9 @@ void debug_gdbstub::handle_packet()
+ }
+ 
+ //-------------------------------------------------------------------------
+-std::string debug_gdbstub::get_register_string(int gdb_regnum)
++std::string debug_gdbstub::get_register_string(const gdb_thread &thread, int gdb_regnum)
+ {
+-	const gdb_register &reg = m_gdb_registers[gdb_regnum];
++	const gdb_register &reg = thread.registers[gdb_regnum];
+ 	if ( reg.is_placeholder() )
+ 		return std::string(reg.gdb_bitsize / 4, '0');
+ 	const char *fmt = (reg.gdb_bitsize == 64) ? "%016" PRIx64
+@@ -1744,7 +1842,7 @@ std::string debug_gdbstub::get_register_string(int gdb_regnum)
+ 	uint64_t value = reg.state_entry->value();
+ 	if ( reg.gdb_bitsize < 64 )
+ 		value &= (1ULL << reg.gdb_bitsize) - 1;
+-	if ( !m_is_be )
++	if ( !thread.is_be )
+ 	{
+ 		value = (reg.gdb_bitsize == 64) ? swapendian_int64(value)
+ 			  : (reg.gdb_bitsize == 32) ? swapendian_int32(value)
+@@ -1755,9 +1853,9 @@ std::string debug_gdbstub::get_register_string(int gdb_regnum)
+ }
+ 
+ //-------------------------------------------------------------------------
+-bool debug_gdbstub::parse_register_string(uint64_t *pvalue, const char *buf, int gdb_regnum)
++bool debug_gdbstub::parse_register_string(const gdb_thread &thread, uint64_t *pvalue, const char *buf, int gdb_regnum)
+ {
+-	const gdb_register &reg = m_gdb_registers[gdb_regnum];
++	const gdb_register &reg = thread.registers[gdb_regnum];
+ 	if ( reg.is_placeholder() )
+ 	{
+ 		if ( strlen(buf) < size_t(reg.gdb_bitsize / 4) )
+@@ -1772,7 +1870,7 @@ bool debug_gdbstub::parse_register_string(uint64_t *pvalue, const char *buf, int
+ 	uint64_t value;
+ 	if ( sscanf(buf, fmt, &value) != 1 )
+ 		return false;
+-	if ( !m_is_be )
++	if ( !thread.is_be )
+ 	{
+ 		value = (reg.gdb_bitsize == 64) ? swapendian_int64(value)
+ 			  : (reg.gdb_bitsize == 32) ? swapendian_int32(value)
+@@ -1784,27 +1882,55 @@ bool debug_gdbstub::parse_register_string(uint64_t *pvalue, const char *buf, int
+ }
+ 
+ //-------------------------------------------------------------------------
+-void debug_gdbstub::set_register_value(int gdb_regnum, uint64_t value)
++void debug_gdbstub::set_register_value(const gdb_thread &thread, int gdb_regnum, uint64_t value)
+ {
+-	const gdb_register &reg = m_gdb_registers[gdb_regnum];
++	const gdb_register &reg = thread.registers[gdb_regnum];
+ 	if ( reg.is_placeholder() )
+ 		return;
+ 	reg.state_entry->set_value(value);
+ }
+ 
+ //-------------------------------------------------------------------------
+-bool debug_gdbstub::is_thread_id_ok(const char *buf)
++// A thread id as GDB sends it: -1 for 'all', 0 for 'any', 1..N for a CPU,
++// and -2 for anything else, a number naming no CPU included.
++int debug_gdbstub::parse_thread_id(const char *buf)
+ {
+-	// 'any'
+-	if ( buf[0] == '0' && buf[1] == '\0' )
+-		return true;
+-	// The thread id we reported.
+-	if ( buf[0] == '1' && buf[1] == '\0' )
+-		return true;
+-	// 'all'
+ 	if ( buf[0] == '-' && buf[1] == '1' && buf[2] == '\0' )
+-		return true;
+-	return false;
++		return -1;
++	unsigned long id = 0;
++	for ( const char *p = buf; *p != '\0'; p++ )
++	{
++		if ( !isxdigit(uint8_t(*p)) || id > m_threads.size() )
++			return -2;
++		id = id * 16 + (isdigit(uint8_t(*p)) ? *p - '0' : (tolower(uint8_t(*p)) - 'a' + 10));
++	}
++	if ( buf[0] == '\0' || id > m_threads.size() )
++		return -2;
++	return int(id);
++}
++
++//-------------------------------------------------------------------------
++// The thread of the debugger's visible CPU, or 0 when the visible device
++// is not one of the CPUs the threads stand for.
++int debug_gdbstub::visible_thread_id()
++{
++	if ( m_debugger_console == nullptr )
++		return 0;
++	device_t const *const visible = m_debugger_console->get_visible_cpu();
++	for ( size_t i = 0; i < m_threads.size(); i++ )
++		if ( m_threads[i].cpu == visible )
++			return int(i + 1);
++	return 0;
++}
++
++//-------------------------------------------------------------------------
++// The visible CPU's thread, whose program space 'Z' and 'z' place and find
++// a watchpoint in, as its debugger lists it; the first CPU's when the
++// visible device is not one of the CPUs.
++debug_gdbstub::gdb_thread &debug_gdbstub::visible_thread()
++{
++	int const id = visible_thread_id();
++	return m_threads[id != 0 ? id - 1 : 0];
+ }
+ 
+ //-------------------------------------------------------------------------

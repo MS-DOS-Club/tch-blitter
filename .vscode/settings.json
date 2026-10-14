@@ -1,0 +1,25 @@
+{
+  // The MAME clone (upstream/) weighs several GB. Without excluding its 3rdparty
+  // and its build from the watcher and from search, VS Code drags. upstream/src
+  // stays VISIBLE and searchable: that is where wheelfir.cpp and rltennis.cpp live.
+  "files.watcherExclude": {
+    "**/upstream/3rdparty/**": true,
+    "**/upstream/build/**": true,
+    "**/build/**": true,
+    "**/tmp/**": true
+  },
+  "search.exclude": {
+    "upstream/3rdparty": true,
+    "upstream/build": true,
+    "build": true,
+    "tmp": true
+  },
+  "files.associations": {
+    "*.lua": "lua"
+  },
+  "[cpp]": {
+    // The patches to the driver follow MAME's own style (upstream/.clang-format),
+    // not a style of our own. Do not force a repo formatter here.
+    "editor.formatOnSave": false
+  }
+}

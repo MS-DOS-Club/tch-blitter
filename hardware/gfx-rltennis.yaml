@@ -1,0 +1,49 @@
+# Reality Tennis's graphics as data: the format its blitter reads the gfx ROM in, and the BT478
+# RAMDAC's two ports. It is the earlier board's own manifest beside `gfx.yaml`, because the blit
+# command there (sixteen words, fired by one value) is not this board's.
+#
+# No blit command is stated. A blit fires on bit 14 of 0x70000c going 0 to 1, and the game writes
+# that word with whatever layer and ROM bits the blit carries, so no single written value names a
+# blit; and the eight registers are a write-only latch with no memory behind them.
+#
+# The format is gfx.yaml's: the same schema, and the same quoting of plain scalars that another
+# YAML reader would type differently.
+#
+# `status`: `declared` when transcribed from the driver and not established on its own. No measured
+# figure lives here: the measurements are in `registers.yaml`'s evidence.
+schema: 1
+systems: [rltennis, rltennisa]
+
+formats:
+  page_512x512x8:
+    layout:
+      width: 512
+      height: 512
+      planes: 8
+      planeoffset: '{ 0, 1, 2, 3, 4, 5, 6, 7 }'
+      xoffset: '{ STEP512(0,8) }'
+      yoffset: '{ STEP512(0,4096) }'
+      charincrement: 512*512*8
+    status: declared
+    source: tch/rltennis.cpp, blitter_w (one byte a pixel, address yy*512+xx, the page picked by the ROM number bits of 0x700008 and the ROM MSB of 0x70000c)
+
+assets:
+  pages:
+    format: page_512x512x8
+    tag: gfx
+    palette: palette
+    wrap: false
+    status: declared
+    source: tch/rltennis.cpp, blitter_w (the source address runs on through the region, it does not wrap inside a page)
+
+palette_ports:
+  ramdac:
+    palette: palette
+    cpu: maincpu
+    index_port: 0x720001
+    data_port: 0x720003
+    order: [r, g, b]
+    component_bits: 8
+    auto_increment: true
+    status: declared
+    source: 'tch/rltennis.cpp, rltennis_main (index_w at 0x720001, pal_w at 0x720003) and ramdac_map (ramdac_rgb888_w, 8 bits a component)'

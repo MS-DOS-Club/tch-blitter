@@ -1,0 +1,278 @@
+# Radical Enduro v2: the maincpu ROM the clone set radendurv2 loads in place of the dump, in three
+# layers: `fixes`, the prototype's four faults; `scenery`, NOT the board's behaviour, an enhancement
+# (its doc says what it does); `sound`, the sound block placed where the family's finished games
+# place it. Not the board's dump: `scripts/radendur-v2.py` builds it from the
+# verified dump and refuses any other input; `--stage fixes` stops after the first layer.
+#
+# Every entry carries the words it expects to find; a word that is not there refuses the build.
+# Addresses are in the 68000's program space (the interleaved u21/u19 image).
+#
+# Two of the fixes are data corrections on one access each, so they are 68000 code here: each
+# affected access becomes a `jsr` to a routine in `hooks`, which applies the correction and returns;
+# an 8-byte site gets the 6-byte `jsr` plus a `nop`. A site marked `sets_flags` is followed by an
+# instruction that reads the condition codes, and its routine leaves them as the replaced
+# instruction would; after every other site the next instruction sets its own. The scenery sites
+# replace a drawer call with a call that ends in that same drawer, or that calls it and returns.
+
+target:
+  set: radendur
+  roms: {even: endu.u21, odd: endu.u19}
+clone:
+  set: radendurv2
+  roms: {even: endu-v2.u21, odd: endu-v2.u19}
+
+# Where the routines go, and how far they may reach: an area the game never reads (the record
+# radendur_v2_hook_area_is_unused in registers.yaml).
+hook_base: 0x0f5800
+hook_limit: 0x0f5a00
+
+layers:
+  - name: fixes
+    doc: The prototype's four faults.
+    words:
+      # FAULT 1: the BT478 uploader at 0x7b6 (called from the vblank handler) returns with A0
+      # moved, and the object drawer at 0xe03c8 uses A0 as a live cursor with interrupts on. Both
+      # words are movem masks: the uploader now saves and restores A0 too.
+      - {addr: 0x0007b8, old: [0x8020], new: [0x80a0], why: "uploader save mask +A0"}
+      - {addr: 0x0015f4, old: [0x0401], new: [0x0501], why: "uploader restore mask +A0"}
+      # FAULT 2: the vertical prop sweep and its four copies read the x window from A4, which they
+      # never assign. Loaded from the view origin (0x201736) with the 12-cell width instead, in
+      # the same instruction budget.
+      - &xwin
+        addr: 0x0e1ada
+        old: [0x380c, 0x0644, 0x000b, 0x3639, 0x0020, 0x1736]
+        new: [0x3639, 0x0020, 0x1736, 0x3803, 0x0644, 0x000b]
+        why: "prop sweep x window from the view origin"
+      - {<<: *xwin, addr: 0x0e1c6a}
+      - {<<: *xwin, addr: 0x0e1dfa}
+      - {<<: *xwin, addr: 0x0e1f6e}
+      - {<<: *xwin, addr: 0x0e2102}
+    hooks:
+      # Each routine: its words, then its source. Branches are relative, so the block runs at any
+      # base; `scripts/radendur-v2.py` lays it out from hook_base and fills in each site's target.
+      - label: env_count
+        doc: >
+          FAULT 3: the per-section environment loop at 0xe15f0 seeds its dbf with the prop count,
+          reads one prop past its array and overruns the palette copier's buffer at 0xe2f2c. The
+          count it loads is handed over minus one (zero stays zero).
+        words: [0x3839, 0x0020, 0x1730, 0x6702, 0x5344, 0x4a44, 0x4e75]
+        source:
+          - "move.w  ($201730).l,d4"
+          - "beq.s   .z"
+          - "subq.w  #1,d4"
+          - ".z: tst.w d4"
+          - "rts"
+      - label: drawer_max
+        doc: >
+          FAULT 4: the object drawer walks MIN - MAX - 1 entries; a busy cell leaves MAX above MIN
+          and the count wraps. On the drawers' own subtraction, a MAX at or above MIN (unsigned)
+          counts as 0.
+        words: [0x3f00, 0x3039, 0x0020, 0x173c, 0xb079, 0x0020, 0x173a, 0x6502, 0x7000, 0x9e40,
+                0x301f, 0x4e75]
+        source:
+          - "move.w  d0,-(a7)"
+          - "move.w  ($20173c).l,d0"
+          - "cmp.w   ($20173a).l,d0"
+          - "bcs.s   .keep"
+          - "moveq   #0,d0"
+          - ".keep: sub.w d0,d7"
+          - "move.w  (a7)+,d0"
+          - "rts"
+      - label: min_addq
+        doc: >
+          FAULT 4, the writes to MIN, counterpart of drawer_max: each of the three forms the game
+          writes MIN with performs the write and ends in min_clamp.
+        words: [0x5479, 0x0020, 0x173a, 0x6012]
+        source: ["addq.w  #2,($20173a).l", "bra.s   min_clamp"]
+      - label: min_7fff
+        words: [0x33fc, 0x7fff, 0x0020, 0x173a, 0x6008]
+        source: ["move.w  #$7fff,($20173a).l", "bra.s   min_clamp"]
+      - label: min_indexed
+        falls_into: min_clamp
+        words: [0x33f0, 0x000a, 0x0020, 0x173a]
+        source: ["move.w  $a(a0,d0.w),($20173a).l"]
+      - label: min_clamp
+        doc: >
+          MIN at or above the section's entry count (0x201722, unsigned) becomes count - 1; a zero
+          count leaves it alone.
+        words: [0x3f00, 0x3039, 0x0020, 0x1722, 0x6710, 0xb079, 0x0020, 0x173a, 0x6208, 0x5340,
+                0x33c0, 0x0020, 0x173a, 0x301f, 0x4e75]
+        source:
+          - "move.w  d0,-(a7)"
+          - "move.w  ($201722).l,d0"
+          - "beq.s   .out"
+          - "cmp.w   ($20173a).l,d0"
+          - "bhi.s   .out"
+          - "subq.w  #1,d0"
+          - "move.w  d0,($20173a).l"
+          - ".out: move.w (a7)+,d0"
+          - "rts"
+    sites:
+      - {hook: env_count, sets_flags: true, at: [0x0e15f0], old: [0x3839, 0x0020, 0x1730]}
+      - hook: drawer_max
+        old: [0x9e79, 0x0020, 0x173c]
+        # the six drawers inside 0xe0090..0xe0f00; the seventh copy, at 0xe1214, is left as the game
+        # wrote it: no race reaches it (registers.yaml: radendur_v2_the_taps_become_rom_code)
+        at: [0x0e00ae, 0x0e0406, 0x0e0676, 0x0e08e6, 0x0e0bec, 0x0e0ef2]
+      - hook: min_addq
+        old: [0x5479, 0x0020, 0x173a]
+        at: [0x0e02f0, 0x0e058c, 0x0e07e6, 0x0e0bb4, 0x0e0eba, 0x0e11dc, 0x0e1504]
+      - {hook: min_7fff, at: [0x0e17d4], old: [0x33fc, 0x7fff, 0x0020, 0x173a]}
+      - hook: min_indexed
+        old: [0x33f0, 0x000a, 0x0020, 0x173a]
+        at: [0x0e19bc, 0x0e1b60, 0x0e1cf0, 0x0e1e80, 0x0e1ff4, 0x0e2188, 0x0e2388]
+  - name: scenery
+    doc: >
+      NOT THE BOARD'S BEHAVIOUR, an enhancement of the v2. The prototype's sweeps hand each drawer
+      the entry range of the zone records their cursors accepted (a record: box x0, y0, x1, y1 in
+      cells at +0..+6, its entries from index `c` at +12 up to `a` at +10, 44 bytes each), and a
+      strip of the background is drawn from that range alone; a prop of a record the sweep did not
+      accept never reaches its strip, and a record's box does not bound its props. Before each of
+      the seven drawer calls the range is widened to every record whose box overlaps the sweep's
+      12 x 10 window grown by the margins the routine's immediates hold (left and above subtracted
+      from the window's origin; right and below added to its far edge, 11 and 9 cells from the
+      origin). The margins are the largest any visible prop needed over the five playable sections,
+      not a bound (registers.yaml: radendur_v2_scenery_margins); the layer costs game speed
+      (radendur_v2_scenery_cost). The vertical scroll's strip drawer, which stamps a row the view
+      adds below it into the top row, is pointed at the right row (scenery_strip_row).
+    hooks:
+      - label: scenery_widen
+        doc: >
+          MIN becomes the largest `a` and MAX the smallest `c` of the records the grown window
+          overlaps, never narrower than the sweep's own range; MIN stays inside the entry count, as
+          min_clamp keeps it.
+        words: [0x48e7, 0xfe80, 0x3c39, 0x0020, 0x1730, 0x6700, 0x009c, 0x5346, 0x2079, 0x0020, 0x1728, 0x3439, 0x0020, 0x1736, 0x3602, 0x0442, 0x0015, 0x0643, 0x0028, 0x3839, 0x0020, 0x1738, 0x3a04, 0x0444, 0x0010, 0x0645, 0x0016, 0x303c, 0x7fff, 0x7200, 0xb650, 0x6d26, 0xb468, 0x0004, 0x6e20, 0xba68, 0x0002, 0x6d1a, 0xb868, 0x0006, 0x6e14, 0xb068, 0x000c, 0x6304, 0x3028, 0x000c, 0xb268, 0x000a, 0x6404, 0x3228, 0x000a, 0x41e8, 0x002c, 0x51ce, 0xffd0, 0x4a41, 0x6736, 0xb279, 0x0020, 0x173a, 0x6316, 0x3439, 0x0020, 0x1722, 0x670e, 0xb242, 0x6504, 0x3202, 0x5341, 0x33c1, 0x0020, 0x173a, 0x3439, 0x0020, 0x173c, 0xb479, 0x0020, 0x173a, 0x640a, 0xb042, 0x6406, 0x33c0, 0x0020, 0x173c, 0x4cdf, 0x017f, 0x4e75]
+        source:
+          - "movem.l d0-d6/a0,-(a7)"
+          - "move.w  ($201730).l,d6"
+          - "beq.w   .done"
+          - "subq.w  #1,d6"
+          - "movea.l ($201728).l,a0"
+          - "move.w  ($201736).l,d2"
+          - "move.w  d2,d3"
+          - "subi.w  #21,d2"
+          - "addi.w  #40,d3"
+          - "move.w  ($201738).l,d4"
+          - "move.w  d4,d5"
+          - "subi.w  #16,d4"
+          - "addi.w  #22,d5"
+          - "move.w  #$7fff,d0"
+          - "moveq   #0,d1"
+          - ".loop: cmp.w (a0),d3"
+          - "blt.s   .next"
+          - "cmp.w   $4(a0),d2"
+          - "bgt.s   .next"
+          - "cmp.w   $2(a0),d5"
+          - "blt.s   .next"
+          - "cmp.w   $6(a0),d4"
+          - "bgt.s   .next"
+          - "cmp.w   $c(a0),d0"
+          - "bls.s   .c"
+          - "move.w  $c(a0),d0"
+          - ".c: cmp.w $a(a0),d1"
+          - "bcc.s   .next"
+          - "move.w  $a(a0),d1"
+          - ".next: lea.l $2c(a0),a0"
+          - "dbra    d6,.loop"
+          - "tst.w   d1"
+          - "beq.s   .done"
+          - "cmp.w   ($20173a).l,d1"
+          - "bls.s   .max"
+          - "move.w  ($201722).l,d2"
+          - "beq.s   .max"
+          - "cmp.w   d2,d1"
+          - "bcs.s   .min"
+          - "move.w  d2,d1"
+          - "subq.w  #1,d1"
+          - ".min: move.w d1,($20173a).l"
+          - ".max: move.w ($20173c).l,d2"
+          - "cmp.w   ($20173a).l,d2"
+          - "bcc.s   .done"
+          - "cmp.w   d2,d0"
+          - "bcc.s   .done"
+          - "move.w  d0,($20173c).l"
+          - ".done: movem.l (a7)+,d0-d6/a0"
+          - "rts"
+      - label: scenery_e03c8
+        words: [0x6100, 0xff50, 0x4ef9, 0x000e, 0x03c8]
+        source: ["bsr.w   scenery_widen", "jmp     ($e03c8).l"]
+      - label: scenery_e08ba
+        words: [0x6100, 0xff46, 0x4ef9, 0x000e, 0x08ba]
+        source: ["bsr.w   scenery_widen", "jmp     ($e08ba).l"]
+      - label: scenery_e0bc0
+        words: [0x6100, 0xff3c, 0x4ef9, 0x000e, 0x0bc0]
+        source: ["bsr.w   scenery_widen", "jmp     ($e0bc0).l"]
+      - label: scenery_e0ec6
+        words: [0x6100, 0xff32, 0x4ef9, 0x000e, 0x0ec6]
+        source: ["bsr.w   scenery_widen", "jmp     ($e0ec6).l"]
+      - label: scenery_e11e8
+        words: [0x6100, 0xff28, 0x4ef9, 0x000e, 0x11e8]
+        source: ["bsr.w   scenery_widen", "jmp     ($e11e8).l"]
+      - label: scenery_e0082
+        words: [0x6100, 0xff1e, 0x4ef9, 0x000e, 0x0082]
+        source: ["bsr.w   scenery_widen", "jmp     ($e0082).l"]
+      - label: scenery_strip_row
+        doc: >
+          The vertical scroll's strip: the strip drawer 0xe0646 stamps its row into the grid row
+          that 0x207922 points at, the view's top, while its caller hands it the new row, the top
+          one when the view moves up and the grid's last (the origin plus 8: the grid holds 9 rows)
+          when it moves down. Moving down, the drawer leaves that row at its base tiles and stamps
+          its props into the top row (registers.yaml: radendur_v2_reverse_scroll_cut). This points
+          0x207922 at the row being drawn for the call, the same addressing the row reset 0xe059a
+          uses, and puts it back; moving up the offset is 0 and nothing changes. D0 is left as the
+          drawer leaves it.
+        words: [0x6100, 0xff14, 0x2f39, 0x0020, 0x7922, 0x2f00, 0x302f, 0x000c, 0x9079, 0x0020, 0x1738, 0xeb48, 0x48c0, 0xd1b9, 0x0020, 0x7922, 0x201f, 0x554f, 0x3f2f, 0x000a, 0x4eb9, 0x000e, 0x0646, 0x584f, 0x23df, 0x0020, 0x7922, 0x4e75]
+        source:
+          - "bsr.w   scenery_widen"
+          - "move.l  ($207922).l,-(a7)"
+          - "move.l  d0,-(a7)"
+          - "move.w  $c(a7),d0"
+          - "sub.w   ($201738).l,d0"
+          - "lsl.w   #5,d0"
+          - "ext.l   d0"
+          - "add.l   d0,($207922).l"
+          - "move.l  (a7)+,d0"
+          - "subq.w  #2,a7"
+          - "move.w  $a(a7),-(a7)"
+          - "jsr     ($e0646).l"
+          - "addq.w  #4,a7"
+          - "move.l  (a7)+,($207922).l"
+          - "rts"
+    sites:
+      - {hook: scenery_e03c8, at: [0x0e19d2], old: [0x4eb9, 0x000e, 0x03c8]}
+      - {hook: scenery_strip_row, at: [0x0e1b76], old: [0x4eb9, 0x000e, 0x0646]}
+      - {hook: scenery_e08ba, at: [0x0e1d02], old: [0x4eb9, 0x000e, 0x08ba]}
+      - {hook: scenery_e0bc0, at: [0x0e1e92], old: [0x4eb9, 0x000e, 0x0bc0]}
+      - {hook: scenery_e0ec6, at: [0x0e2006], old: [0x4eb9, 0x000e, 0x0ec6]}
+      - {hook: scenery_e11e8, at: [0x0e219a], old: [0x4eb9, 0x000e, 0x11e8]}
+      - {hook: scenery_e0082, at: [0x0e239a], old: [0x4eb9, 0x000e, 0x0082]}
+  - name: sound
+    doc: >
+      The prototype starts each sound block at line 0, under the drawing chain the frame opens
+      with, whose handlers hold the 68000 at mask 7 past a line; the level-5 word then comes late
+      and the sound CPU, which takes one word per line with no handshake, reads one twice and
+      runs garbage for good. The family's finished games start the block at line 99, after the
+      chain: their vblank handler loads the line counter with 100 where this one loads 1
+      (registers.yaml: radendur_v2_the_block_at_line_99_keeps_the_sound). Loading 100 makes the
+      first block after the masked boot start 100 lines after the vblank request the boot left
+      pending, which the next vblank cuts; Power Ball closes the counter's enable right after its
+      own first unmask for the same reason, and the v2 does as it does.
+    words:
+      - {addr: 0x00053a, old: [0x0001], new: [0x0064], why: "vblank arms the counter with 100, as the siblings do"}
+    hooks:
+      - label: boot_close
+        doc: >
+          Right after the boot lowers the mask (0xf2106), where the pending vblank request has
+          just been served and opened the block: clear bit 13 of the control port (set bit 12,
+          as the game's own block end writes it), so the line counter stops until the next real
+          vblank, then the instruction it replaces.
+        words: [0x0279, 0xcfff, 0x0020, 0x351c, 0x0079, 0x1000, 0x0020, 0x351c,
+                0x13f9, 0x0020, 0x351c, 0x007c, 0x0000, 0x33fc, 0x0001, 0x0020, 0x1020, 0x4e75]
+        source:
+          - "andi.w  #$cfff,($20351c).l"
+          - "ori.w   #$1000,($20351c).l"
+          - "move.b  ($20351c).l,($7c0000).l"
+          - "move.w  #1,($201020).l"
+          - "rts"
+    sites:
+      - {hook: boot_close, at: [0x0f210a], old: [0x33fc, 0x0001, 0x0020, 0x1020]}

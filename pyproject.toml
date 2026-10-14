@@ -1,0 +1,41 @@
+[project]
+name = "tch-blitter"
+version = "0.1.0"
+description = "Tools of the TCH blitter board family's restoration in MAME"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0",
+    "pillow>=10.0",
+    "pyyaml>=6.0.3",
+]
+
+[dependency-groups]
+dev = [
+    "capstone>=5.0.9",
+    "mypy>=2.3.0",
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "types-pyyaml>=6.0.12.20260724",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# N and SIM catch files opened and never closed
+select = ["E", "F", "W", "I", "UP", "B", "N", "SIM"]
+
+
+[tool.mypy]
+# Not `strict`: what it adds here is mostly missing annotations. No `python_version`: pinning it
+# makes mypy parse numpy's stubs as that version and fail on their syntax.
+warn_unreachable = true
+warn_return_any = true
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# The scripts are imported as loose modules, not as an installed package.
+pythonpath = ["scripts"]
+addopts = "-q"

@@ -1,0 +1,420 @@
+games:
+- set: rltennis
+  name: Reality Tennis
+  mame_driver: tch/rltennis.cpp
+  page:
+    board: "[the first blitter board](../boards/reality-tennis.md), with a single 68000 at 8 MHz"
+    year_note: " (`⚠` recreativas.org dates it 1994)"
+  manufacturer:
+    value: TCH
+    level: verified
+    evidence: macro GAME of rltennis.cpp
+  year:
+    value: '1993'
+    level: verified
+    evidence: 'macro GAME of rltennis.cpp: GAME( 1993, rltennis, ...)'
+    discrepancy: 'recreativas.org dates it 1994. Both sides checked on 2026-08-04. MAME''s is the one
+      published, being a primary source (the emulator itself), but the discrepancy is declared rather
+      than hidden: nothing available settles it, and the ROM carries no year.'
+    sources:
+    - https://www.recreativas.org/reality-tennis-540-tch
+  mame_status:
+    value: works, with imperfect graphics and timing
+    level: verified
+    evidence: MACHINE_IMPERFECT_GRAPHICS | MACHINE_IMPERFECT_TIMING | MACHINE_SUPPORTS_SAVE
+  driver_status:
+    value: works, with imperfect graphics and timing
+    level: verified
+    evidence: MACHINE_IMPERFECT_GRAPHICS | MACHINE_IMPERFECT_TIMING | MACHINE_SUPPORTS_SAVE
+  authors:
+  - role: sole authorship
+    who: David Sandoval, Antonio A. Carrillo
+    level: verified
+    evidence: 'hidden signature in rltennis_maincpu 0x001000, repeated four times and written identically
+      in both ROMs: "ESTE JUEGO HA SIDO INTEGRAMENTE REALIZADO POR DAVID SANDOVAL Y ANTONIO A. CARRILLO."  Reproduce
+      it with `uv run scripts/signatures.py --image rltennis_maincpu`'
+  variants:
+  - set: rltennis
+    mame_name: Reality Tennis (set 1)
+    program_rom:
+    - tennis_1.u12
+    - tennis_2.u19
+    plds:
+    - realitytennis_gal22v10.u20
+    board: the original revision, with two Actel A1020B FPGAs
+    level: verified
+    evidence: ROM_START(rltennis) and the PCB layout in the header of tch/rltennis.cpp
+  - set: rltennisa
+    mame_name: Reality Tennis (set 2)
+    program_rom:
+    - tennis_1_a.bin
+    - tennis_2_a.bin
+    plds:
+    - gal16v8.ic23
+    - gal22v10.ic2
+    board: PCB marked TCH-MAVIR.001, with two TI TPC1020AF instead of the Actel ones, labelled JOAQUIN (A)
+      and JUANA (B)
+    level: verified
+    evidence: ROM_START(rltennisa) and the comment preceding it in tch/rltennis.cpp
+  differences_between_variants:
+    summary: 'Set 2 is the SAME program with a patch: 308 bytes different out of 1048576, that is
+      0.029%, over seven stretches. The graphics and the samples have identical CRCs.'
+    level: verified
+    evidence: byte for byte diff of disasm/img/rltennis_maincpu.bin against rltennisa_maincpu.bin
+    observed:
+      rltennis_track: 'six stretches of RGB triplets between 0x12658 and 0x127f5 swap the court''s
+        greens for olive and straw tones: 0x457035 becomes 0x6f6e52 and 0x807d4d. On screen, 75.40%
+        of the pixels of frame 1120 differ between the two sets'
+      rltennisa_counter: 'a 509-byte stretch at 0x00fa03 with every value shifted by +4. On frame
+        300 the only difference between the two sets is an 8x9 px box at x 296..303, y 217..225,
+        0.08% of the screen, which is the credit counter''s digit: set 1 shows CREDITS 0 and set 2
+        only CREDITS'
+- set: wheelfir
+  name: Wheels & Fire
+  mame_driver: tch/wheelfir.cpp
+  page:
+    board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout B"
+    driver_here: "the same `tch/wheelfir.cpp`, with the video model rewritten"
+    year_note: ", from an outside source; MAME dates it as `199?` and the ROM carries no year"
+  manufacturer:
+    value: TCH
+    level: verified
+    evidence: macro GAME of wheelfir.cpp
+  year:
+    value: '1997'
+    level: external
+    evidence: 'MAME writes 199? in the GAME macro and the ROM carries no year; the year comes from
+      an account from the period that is not published'
+    sources:
+    - an unpublished account from the period
+  mame_status:
+    value: NOT_WORKING
+    level: verified
+    evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
+  driver_status:
+    value: works, with imperfect graphics; plays a race to its time out
+    level: verified
+    evidence: MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE
+  authors:
+  - role: executive producer
+    role_rom: EXECUTIVE PRODUCER
+    who: Francisco Chacon
+    level: verified
+    evidence: credits in wheelfir_maincpu 0x0e3894
+  - role: production adviser
+    role_rom: PRODUCTIVE ADVISER
+    who: Jose Sanchez
+    level: verified
+    evidence: credits in wheelfir_maincpu 0x0e38b8
+  - role: hardware design
+    role_rom: HARDWARE DESIGN
+    who: David Sandoval
+    level: verified
+    evidence: credits in wheelfir_maincpu 0x0e38d8
+  - role: programming
+    role_rom: PROGRAMMING
+    who: Antonio Carrillo
+    level: verified
+    evidence: credits in wheelfir_maincpu 0x0e38f7
+  - role: auxiliary programming
+    role_rom: AUXILIAR PROGRAMMING
+    who: Fernando Jimenez
+    level: verified
+    evidence: credits in wheelfir_maincpu 0x0e3914
+  - role: graphics
+    role_rom: GRAPHICS
+    who: Javier Martinez, Francisco Bocanegra, Joaquin Perez
+    level: verified
+    evidence: credits in wheelfir_maincpu 0x0e393a. Joaquin Perez also gives his name to one of the
+      Reality Tennis board's two FPGAs, labelled "JOAQUIN" and "JUANA" (the header of rltennis.cpp)
+- set: pwball
+  name: Power Ball
+  mame_driver: tch/wheelfir.cpp
+  page:
+    board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout B"
+    driver_here: "the same `tch/wheelfir.cpp`, with the video model rewritten"
+    year_note: " (a prototype)"
+    status_note: ", with the comment \"mostly complete\""
+  manufacturer:
+    value: TCH
+    level: verified
+    evidence: macro GAME of wheelfir.cpp
+  year:
+    value: null
+    level: unknown
+    evidence: MAME writes 199? in the GAME macro
+  mame_status:
+    value: NOT_WORKING (prototype), commented "mostly complete"
+    level: verified
+    evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
+  driver_status:
+    value: works, with imperfect graphics; plays a match to its game over
+    level: verified
+    evidence: MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE
+  authors: []
+- set: kongball
+  name: Kong Ball
+  mame_driver: tch/wheelfir.cpp
+  page:
+    board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout B"
+    driver_here: "the same `tch/wheelfir.cpp`, with the video model rewritten"
+    year_note: ", printed in the ROM itself (a prototype)"
+  manufacturer:
+    value: TCH / Digital Dreams Multimedia
+    level: verified
+    evidence: 'macro GAME, and the ROM itself at 0x048fa8: "A GAME BY: DIGITAL DREAMS"'
+  year:
+    value: '1997'
+    level: verified
+    evidence: 'macro GAME of wheelfir.cpp, and confirmed by the ROM in kongball_maincpu 0x048fc2: "*1997
+      ALL RIGHTS RESERVED"'
+  mame_status:
+    value: NOT_WORKING (prototype), no sound
+    level: verified
+    evidence: MACHINE_NOT_WORKING | MACHINE_NO_SOUND | MACHINE_IMPERFECT_GRAPHICS
+  driver_status:
+    value: works, with no sound and imperfect graphics; plays to its game over
+    level: verified
+    evidence: MACHINE_NO_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE
+  authors:
+  - role: programming
+    role_rom: PROGRAMMING
+    who: Jesus R. Alvarez
+    level: verified
+    evidence: credits in kongball_maincpu 0x03f4a7
+  - role: graphics
+    role_rom: GRAPHICS
+    who: Julio Lopez, Oscar Cuesta
+    level: verified
+    evidence: credits in kongball_maincpu 0x03f4a7
+  - role: contributors
+    who: Fernando Perez, Luis Fernando Fernandez
+    level: verified
+    evidence: credits in kongball_maincpu 0x03f4a7
+- set: radendur
+  name: Radical Enduro
+  # In the pinned MAME this set lives inside tch/wheelfir.cpp. This repository's own driver,
+  # tch/radendur.cpp, is a separate thing: this field says what is in MAME, not what is here.
+  mame_driver: tch/wheelfir.cpp
+  page:
+    board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A"
+    driver_here: "**its own driver**, `tch/radendur.cpp`"
+    sets_note: " (the dump, which hangs on its own faults); `radendurv2`, a clone whose maincpu ROM has them fixed, its sound block placed where the finished siblings place it and, as an enhancement that is not the board's behaviour, its full scenery drawn, built from the dump by `make v2`"
+    status_note: ": it gets no further than the boot screen"
+  manufacturer:
+    value: TCH / Sator Videogames
+    level: verified
+    evidence: macro GAME of radendur.cpp
+    nuance: 'What is VERIFIED is that MAME writes it this way, not that the attribution is backed. Looked
+      into on 2026-08-04: the whole chain (MAME''s macro, recreativas.org and whatever copies them) goes
+      back to ONE single observation, the logo drawn on the boot screen, with no independent corroboration.
+      The MAME PR that introduced the chain cites no source. There is no date, no place, not a single
+      person and no other title: the developer entry lists exactly this game. And there is NO ASCII string
+      "SATOR" anywhere in the set''s 18 ROMs, checked with `uv run scripts/signatures.py`. The attribution
+      is published because it is MAME''s, with this warning beside it, which is more honest than repeating
+      it flat.'
+    not_exhausted:
+    - The OEPM trademark search (a POST form, not reachable automatically). A "SATOR" trademark in class
+      9 or 28 between 1993 and 1998 would give a holder, an address and dates, which is exactly what is
+      missing. A manual query, still pending.
+    - BORME. The full-text search at boe.es only covers 2009 onwards and the free mirror returns 403.
+    warning: MATCHING THE NAME IS NOT IDENTIFYING. There are at least four Spanish companies called "Sator"
+      with no relation between them (the name comes from the Latin SATOR AREPO square). None of them enters
+      as a fact without evidence tying it to this board.
+  year:
+    value: null
+    level: unknown
+    evidence: MAME writes 199? in the GAME macro. Its two code ROMs hold not one readable text, so there
+      is no internal copyright to take it from either
+  mame_status:
+    value: NOT_WORKING (early prototype)
+    level: verified
+    evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
+  driver_status:
+    value: NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurv2 clone,
+      its maincpu ROM fixed (plus full scenery, not the board's) and built from the dump, finishes a
+      race with its music at its real 16 MHz
+    level: verified
+    evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE
+  authors: []
+preservation:
+- role: wrote MAME's original drivers for both TCH blitter boards, Reality Tennis's and Wheels & Fire's
+  who: Tomasz Slanina
+  games:
+  - rltennis
+  - wheelfir
+  - pwball
+  - kongball
+  - radendur
+  level: verified
+  evidence: 'headers of both files: "copyright-holders:Tomasz Slanina" and "driver by Tomasz Slanina"'
+- role: co-wrote MAME's first Wheels & Fire driver
+  who: David Haywood
+  games:
+  - wheelfir
+  level: external
+  sources:
+  - https://github.com/mamedev/mame/blob/7b77f1218624ea26dbb2efd85a19f795f5d4e02e/src/mame/drivers/wheelfir.c
+  evidence: 'the header of wheelfir.c at the first commit of MAME''s history (0.121, 2007): "driver by David
+    Haywood, Tomasz Slanina"; the whatsnew of 0.101u4 (2005) dates it'
+- role: supplied the technical information behind the Reality Tennis driver
+  who: Antonio 'Peluko' Carrillo
+  games:
+  - rltennis
+  level: verified
+  evidence: 'header of rltennis.cpp: "based on informations provided by Antonio ''Peluko'' Carrillo". It
+    is the same Antonio Carrillo who signs as programmer on the Reality Tennis and Wheels & Fire ROMs:
+    the original programmer helped emulate his own board'
+- role: brought the three prototypes, Power Ball, Kong Ball and Radical Enduro, into MAME
+  who: David Haywood
+  games:
+  - pwball
+  - kongball
+  - radendur
+  level: external
+  sources:
+  - https://github.com/mamedev/mame/commit/ff08802442
+  - https://github.com/mamedev/mame/pull/12339
+  evidence: 'commit ff08802442 (2024-05-14, released in MAME 0.266) adds kongball, pwball and radendur'
+- role: improved the graphics emulation of Wheels & Fire and Power Ball
+  who: David Haywood
+  games:
+  - wheelfir
+  - pwball
+  level: external
+  sources:
+  - https://github.com/mamedev/mame/commit/5cfb1cc076
+  evidence: 'commit 5cfb1cc076 (2024-06-02): "Improve graphics emulation of wheelfir and pwball", credited
+    to David Haywood'
+- role: set Reality Tennis's CPU clock
+  who: Angelo Salese
+  games:
+  - rltennis
+  level: external
+  sources:
+  - https://github.com/mamedev/mame/commit/f750ab4aa0
+  evidence: 'commit f750ab4aa0 (2024-06-04): "assume MC68000P8 clock is 8 MHz"'
+- role: donated the board and dumped the ROMs
+  who: Francisco Rabazas / OldComputers ES
+  games:
+  - pwball
+  - kongball
+  - radendur
+  level: external
+  sources:
+  - https://www.recreativas.org/noticias/2024/05/18/preservados-tres-juegos-de-tch-power-ball-kong-ball-y-radical-enduro-por-oldcomputers-es-664
+  evidence: published on 2024-05-04 on oldcomputers.es and on 2024-05-18 on recreativas.org
+- role: dumped the PLDs of Kong Ball and Radical Enduro
+  who: OldComputers ES
+  games:
+  - kongball
+  - radendur
+  level: external
+  sources:
+  - https://github.com/mamedev/mame/commit/89cd320db4
+  evidence: 'commit 89cd320db4 (2024-06-06): "Add a few PLDs dumps to Kong Ball and Radical Enduro
+    [OldComputers ES]"'
+- role: added OldComputers ES's PLD dumps of Kong Ball and Radical Enduro to MAME
+  who: ClawGrip
+  games:
+  - kongball
+  - radendur
+  level: external
+  sources:
+  - https://github.com/mamedev/mame/commit/89cd320db4
+  evidence: 'the author of commit 89cd320db4 (2024-06-06), as ClawGrip'
+- role: credited in the MAME commit that added Reality Tennis, which does not state the role
+  who: Smitdogg, The Dumping Union
+  games:
+  - rltennis
+  level: external
+  sources:
+  - https://github.com/mamedev/mame/commit/54f3296521
+  evidence: 'commit 54f3296521 (2011-05-28), "New games added or promoted from NOT_WORKING status":
+    "Reality Tennis [Tomasz Slanina, Antonio ''Peluko'' Carrillo, Smitdogg, The Dumping Union]"'
+- role: photographed the Wheels & Fire board
+  who: Victor Fernandez (City Game)
+  games:
+  - wheelfir
+  level: external
+  sources:
+  - https://www.recreativas.org/wheels-and-fire-549-tch
+  evidence: the photo credit of both board photos and the collaborators line of the entry
+- role: collaborated on the Wheels & Fire entry
+  who: Tomas Garcia-Meras
+  games:
+  - wheelfir
+  level: external
+  sources:
+  - https://www.recreativas.org/wheels-and-fire-549-tch
+  evidence: the collaborators line of the entry, which credits no photo to them
+- role: photographed the board
+  who: OldComputers ES
+  games:
+  - pwball
+  - kongball
+  - radendur
+  level: external
+  sources:
+  - https://www.recreativas.org/power-ball-12336-tch
+  - https://www.recreativas.org/kong-ball-12337-tch
+  - https://www.recreativas.org/radical-enduro-12338-tch
+  evidence: the photo credit of every board photo on the three entries
+- role: scanned the Reality Tennis manual
+  who: Jordigahan, Ruben Casaña (Retro Arcadia Valencia)
+  games:
+  - rltennis
+  level: external
+  sources:
+  - https://www.recreativas.org/reality-tennis-540-tch
+  - https://www.recreativas.org/archivo/reality-tennis-tch-manual.pdf
+  evidence: the collaborators line of the entry and the credit of its manual
+- role: located the set 2 board
+  who: Maria Morpalier
+  games:
+  - rltennis
+  level: external
+  sources:
+  - https://www.recreativas.org/reality-tennis-set-1-6230-tch
+  evidence: the set 2 board entry on recreativas.org, 2020-10-01
+- role: dumped and photographed the set 2 board
+  who: Jordigahan (Retrojapan.net)
+  games:
+  - rltennis
+  level: external
+  sources:
+  - https://www.recreativas.org/reality-tennis-set-1-6230-tch
+  evidence: the set 2 board entry on recreativas.org, the same day
+- role: took the readings of the set 2 board
+  who: Tomas Garcia-Meras
+  games:
+  - rltennis
+  level: external
+  sources:
+  - https://www.recreativas.org/reality-tennis-set-1-6230-tch
+  evidence: the set 2 board entry on recreativas.org; emulated in MAME 0.226, 2020-10-28
+rejected:
+- datum: TCH SA founded in Murcia in 1993
+  reason: The company register gives its incorporation as 1990-05-09 (CIF A30148233, Beniajan, Murcia).
+    The two blogs saying 1993 cite no source.
+  date: '2026-08-04'
+- datum: Wheels & Fire is from 1993
+  reason: 'A single source (museodelrecreativo.es) against every other one: MAME writes 199?, the year
+    field at recreativas.org is empty and arcade-history does not pin it down either.'
+  date: '2026-08-04'
+- datum: the 24-12-1996 timestamp of the romset files dates the ROMs
+  reason: That is the date of the file inside the zip, not of the ROM. wheelfir, kongball and other sets
+    share it, so it is from when they were packed.
+  date: '2026-08-04'
+- datum: Sator Videogames = SATOR VIDEOGAMES S.L. (incorporated in 1999)
+  reason: 'Probably a namesake, not an identification. Three reasons, and one of them was WEAKENED on
+    2026-08-04; it is said rather than kept quiet. (1) A single, secondary source. (2) Incorporated after
+    the board''s time, and with no mention of TCH. (3) "A different sector, PC compilations", which no
+    longer weighs as much: there is MEASURED precedent in this very family, because MAME credits Kong
+    Ball to TCH alongside Digital Dreams Multimedia, a Spanish PC studio that DID make a prototype for
+    this company. With (1) and (2) standing the rejection holds, but the sector argument no longer carries
+    it on its own.'
+  date: '2026-08-04'
+- datum: the Wheels & Fire credits are drawn as graphics
+  reason: 'False, and a measurement refuted it: the fourteen fields are plain ASCII from 0x0e3894.'
+  date: '2026-08-04'

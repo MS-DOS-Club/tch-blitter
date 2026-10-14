@@ -1,0 +1,39 @@
+{
+    "configurations": [
+        {
+            "name": "MAME (tch-blitter)",
+            "cppStandard": "c++20",
+            "cStandard": "c17",
+            "intelliSenseMode": "macos-clang-arm64",
+            "includePath": [
+                "${workspaceFolder}/upstream/src/emu",
+                "${workspaceFolder}/upstream/src/devices",
+                "${workspaceFolder}/upstream/src/lib",
+                "${workspaceFolder}/upstream/src/lib/util",
+                "${workspaceFolder}/upstream/src/lib/netlist",
+                "${workspaceFolder}/upstream/src/mame/shared",
+                "${workspaceFolder}/upstream/src/osd",
+                "${workspaceFolder}/upstream/3rdparty",
+                "${workspaceFolder}/upstream/3rdparty/asio/include",
+                "${workspaceFolder}/upstream/3rdparty/flac/include",
+                "${workspaceFolder}/upstream/3rdparty/glm",
+                "${workspaceFolder}/upstream/3rdparty/libjpeg",
+                "${workspaceFolder}/upstream/3rdparty/rapidjson/include",
+                "${workspaceFolder}/upstream/3rdparty/zlib",
+                "${workspaceFolder}/upstream/build/generated/mame/layout"
+            ],
+            "defines": [
+                "LSB_FIRST",
+                "NDEBUG",
+                "CRLF=2",
+                "PUGIXML_HEADER_ONLY",
+                "ASMJIT_STATIC",
+                "FLAC__NO_DLL",
+                "HAVE_IMMINTRIN_H=0",
+                "HAVE_SSE=0",
+                "SDL_DISABLE_IMMINTRIN_H=1"
+            ]
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,1742 @@
+images:
+  common:
+  - addr: 0
+    name: vec_ssp
+    description: Initial supervisor stack pointer
+  - addr: 4
+    name: vec_reset
+    description: Initial PC (reset). radendur main = 0xf2034
+  - addr: 8
+    name: vec_buserr
+    description: Bus error
+  - addr: 12
+    name: vec_addrerr
+    description: Address error
+  - addr: 16
+    name: vec_illegal
+    description: Illegal instruction
+  - addr: 20
+    name: vec_divzero
+    description: Divide by zero
+  - addr: 24
+    name: vec_chk
+    description: CHK instruction
+  - addr: 28
+    name: vec_trapv
+    description: TRAPV
+  - addr: 32
+    name: vec_privviol
+    description: Privilege violation
+  - addr: 36
+    name: vec_trace
+    description: Trace
+  - addr: 96
+    name: vec_spurious
+    description: Spurious interrupt
+  - addr: 100
+    name: vec_irq1
+    description: Autovector IRQ level 1 = BLITTER (the key handler)
+  - addr: 108
+    name: vec_irq3
+    description: Autovector IRQ level 3 = VBLANK
+  - addr: 116
+    name: vec_irq5
+    description: Autovector IRQ level 5. In Wheels & Fire it is the RASTER chain; in Radical Enduro it
+      is the SOUND STREAMER clock, measured on 2026-08-03 (49-50 requests per frame, with no break over
+      721 frames)
+  - addr: 128
+    name: vec_trap0
+    description: 'TRAP #0 (0x080..0x0bf = TRAP #0..#15)'
+  radendur_maincpu,wheelfir_maincpu,pwball_maincpu,kongball_maincpu:
+  - addr: 0
+    name: main_rom
+    description: ROM (0x000000-0x0fffff)
+  - addr: 2097152
+    name: main_ram
+    description: RAM (0x200000-0x20ffff, mirror 0x010000)
+  - addr: 7340032
+    name: blit_data
+    description: Blitter data regs (0x700000-0x70001f) -- wheelfir_blit_w
+  - addr: 7471105
+    name: ramdac_index
+    description: RAMDAC index_w
+  - addr: 7471107
+    name: ramdac_pal
+    description: RAMDAC pal_w
+  - addr: 7471109
+    name: ramdac_mask
+    description: RAMDAC mask_w
+  - addr: 7602176
+    name: soundlatch
+    description: Latch main -> subcpu (generic_latch_16)
+  - addr: 7733248
+    name: coin_cnt
+    description: Coin counter
+  - addr: 7864320
+    name: adc
+    description: ADC0808 (wheel and pedals), 0x780000-0x78000f
+  - addr: 7995392
+    name: line_counter
+    description: Line counter write, counted while bit 13 of 0x7c0000 enables it
+  - addr: 8126464
+    name: control_and_link
+    description: rw control and link port (EEPROM, the line counter's enable, the link to a second cabinet)
+  - addr: 8257536
+    name: player_inputs
+    description: Port P1
+  - addr: 8257538
+    name: player_inputs_p2
+    description: Port P2
+  radendur_maincpu:
+  - addr: 1024
+    name: irq_vblank
+    description: 'Vblank handler (level 3 vector). Besides its own work, at 0x4a0 it does `andi.w #$f8ff,($10,A7)`
+      + `ori.w #$2000,($10,A7)` on the SR SAVED ON THE STACK: it leaves the rte with the MASK AT 0, which
+      lets the blitter IRQ1 in, and at 0x4b2 it installs 0x1f2a as the level 1 handler (the main loop does
+      the same at 0xf216e..0xf2176). When 0x2091ee is set it calls state_advance (0x484); the SR rewrite
+      and the install then run only if 0x20795c is 0. It counts frames at 0x203200/0x2031fc'
+    level: verified
+    evidence: 'READ: vector 0x6c holds 0x400; 0x4a0/0x4a6 rewrite the stacked SR, 0x4b2 stores 0x1f2a at
+      0x20f91a, 0x484 jsr state_advance; executed in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 1286
+    name: page_bit_compose_a
+    description: 'lsr#3/andi 0x20/or -> move.b d1,0x700011: the visible page bit'
+    level: verified
+    evidence: 'READ: 0x500..0x508 shift bit 8 of 0x207976 into bit 0x20 and write it to 0x700011; executed
+      in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 1312
+    name: arm_line_counter
+    description: 'Arms the 0x7a0000 line counter (together with 0x538). MEASURED with `RE_RASTERLOG` (switch
+      WITHDRAWN): it writes 1 near the vblank, and the level 5 vector jumps to the trampoline 0x20f908 ->
+      0x203164'
+    level: verified
+    evidence: 'READ: 0x520 and 0x538 write 1 to 0x7a0000, 0x516 stores 0x203164 as the level 5 trampoline''s
+      operand (vector 0x74 -> 0x20f908); executed in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 1820
+    name: page_bit_compose_b
+    description: 'Composes the page bit exactly as page_bit_compose_a, inside a level 5 line handler of
+      its own (0x5d0 installs 0x640 as the level 5 operand; the analysis never reaches the bytes there)
+      that adds a cursor at 0x2091ec to the y scroll, re-arms the line counter with 0x10 and returns by
+      its own rte at 0x780; not part of the vblank, which ends at 0x59a. A chain the game never enters:
+      neither 0x5d0 nor 0x71c runs'
+    level: verified
+    evidence: 'READ: 0x71c or.w d3,d1 / 0x71e move.b d1,0x700011, 0x762 move.w #0x10,0x7a0000, 0x780 rte,
+      0x5d0 move.l #0x640,0x20f90a; MEASURED 2026-10-13: never executed in 3000 frames of the dump''s attract
+      (control 0x4a0, 2977 hits) nor in a radendurv2 race trace'
+  - addr: 7978
+    name: irq_blitter
+    description: 'IRQ L1 handler (blitter), target of the RAM trampoline 0x20f918, which the main loop installs
+      by writing its operand at 0x20f91a. MEASURED 2026-08-03: turning the driver''s courtesy IRQ1 off completely,
+      the game does NOT reach the menu at any clock, so the drawing chain does not start itself and that
+      interrupt is indispensable'
+    level: verified
+    evidence: 'READ: 0x1f32 loads the entry pointer at 0x209430 and calls blit_program, rte at 0x1f40; vector
+      0x64 -> trampoline 0x20f918 armed at 0x266e; executed in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 8002
+    name: irq1_last_blit
+    description: 'Level 1 handler installed by 0x2516 when the list runs out: it fires the blit prepared
+      at 0x209461 and calls 0x22bc, which enqueues the next one or declares the queue empty'
+    level: verified
+    evidence: 'READ: installed at 0x251a when walk_list finds a zero entry; dumps the block at 0x209461
+      into the blitter, fires 0xffff at 0x1f80 and calls enqueue_next; executed in a radendurv2 race trace
+      of 2026-10-13 (main cpu, 5026 frames from a cold boot through scripts/drive.lua)'
+  - addr: 8084
+    name: irq1_chain
+    description: 'Level 1 handler of the chain: it writes the blitter registers from the parameter block
+      at 0x209439, fires the blit (0xffff to 0x70001e, at 0x1fd2) and calls 0x23f2 to prepare the next entry.
+      MEASURED: on the balloon screen EVERY blit comes out of this 0x1fd2, one per interrupt'
+    level: verified
+    evidence: 'READ: writes the block at 0x209439, fires 0xffff at 0x1fd2 and calls walk_list; installed
+      by blit_program at 0x208c; executed in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 8166
+    name: irq1_terminal
+    description: 'TERMINAL level 1 handler, and the other half of the mechanism: it does `andi.w #$f8ff,(A7)`
+      + `ori.w #$2100,(A7)` on the stacked SR, so it leaves the rte with the MASK AT 1, which BLOCKS IRQ1.
+      With that the chain stops by itself until the next vblank, without anyone having to deassert anything'
+    level: verified
+    evidence: 'READ: rewrites the stacked SR to mask 1 (0x1fea/0x1fee), clears 0x209438 and the busy byte
+      0x209460, rte; executed in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 8196
+    name: blit_program
+    description: 'Dumps ONE 24-byte entry of the drawing list to 0x700000-0x70001e (ptr at 0x209430) and
+      fires with 0x70001e=0xffff. It is the CHAIN''s emitter: one IRQ1 = one blit. MEASURED 2026-08-03:
+      at 16 MHz one blit comes out per SCANLINE (the 57 of frame 1200 fall on lines 224..284, one per line);
+      at 8x it is 7-8 per line'
+    level: verified
+    evidence: 'READ: writes one 24-byte entry (pointer 0x209430, advanced by 0x18 at 0x205a) to 0x700000..
+      and fires at 0x2052, with variants for the mode words; its entry and the mode paths executed in the
+      radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 8892
+    name: enqueue_next
+    description: Prepares the next blit in the queue (0x203514 = cursor, 0x203518 = end). With the two pointers
+      equal the queue is empty and it jumps to 0x23dc
+    level: verified
+    evidence: 'READ: compares the cursor 0x203514 with the end 0x203518 (equal -> queue_empty), sets the
+      busy byte 0x209460 and builds a block at 0x209461; the attract trace takes only its empty-queue exit,
+      the build ran in a radendurv2 race trace of 2026-10-13 merged into disasm/executed/radendur_maincpu.txt'
+  - addr: 9180
+    name: queue_empty
+    description: 'Queue empty: it lowers the busy flag (0x209460) and installs 0x1fe6 as the level 1 handler,
+      which is the one that closes the chain'
+    level: verified
+    evidence: 'READ: clears the busy byte 0x209460 and installs 0x1fe6 as the level 1 operand; executed
+      in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 9202
+    name: walk_list
+    description: Walks the drawing list and prepares the next entry at 0x209439. With the entry at zero
+      (end of list) it jumps to 0x2516
+    level: verified
+    evidence: 'READ: reads the entry at *0x20f760 into the block at 0x209439; a zero first word goes to
+      0x2516 (installs 0x1f42); executed in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 9522
+    name: list_finished
+    description: 'End of the drawing list: it lowers the channel flag (0x2091a4 + 16*channel) the main loop
+      waits on, and enqueues the palette job at 0x207988 that the vblank consumes'
+    level: verified
+    evidence: 'READ: clears the channel flag at 0x2091a4+16*channel the main loop polls (0xf21a2), posts
+      the palette job at 0x207988, toggles bit 8 of 0x20f770 at 0x2584; executed in the radendur attract
+      trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 9636
+    name: exception_handler
+    description: 'Address-error handler, the only ROM vector that points here (0x0c; the bus-error and the
+      unused vectors go to the rte at 0x25a2): saves the frame at 0x20f8f4, fills the RAMDAC with grey,
+      infinite loop at 0x25d4'
+    level: verified
+    evidence: 'READ: vector 0x0c holds 0x25a4, 0x08 and 0x60..0x7c hold 0x25a2 (rte), 0x64/0x74 the RAM
+      trampolines, 0x6c the vblank. MEASURED live 2026-10-13 on radendurv2: with A1 odd, clr.w (a1) at 0xf2210
+      stops at a breakpoint on 0x25a4 and never at 0x25a2, after 300 healthy frames that touched neither
+      (control 0x4a0)'
+  - addr: 9692
+    name: boot_init
+    description: 'Boot initialisation called from reset (0xf2040): clears RAM from 0x201000, calls the sound
+      initialiser 0xf24d0, zeroes the RAMDAC, arms the level 5 and level 1 trampolines (0x20f908 -> 0x782,
+      0x20f918 -> 0x1f2a) and issues four clear blits to 0x700000'
+    level: verified
+    evidence: 'READ: 0x25e8 clear loop, 0x25fa jsr 0xf24d0, 0x265c/0x266e jmp trampolines, blits at 0x2688..0x2808,
+      called from 0xf2040; executed in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 10326
+    name: mode_clear_blits
+    description: The same four clear blits to 0x700000 as boot_init, each followed by a delay loop; called
+      again from the main loop (0xf186a, under FUN_000dfaf4)
+    level: verified
+    evidence: 'READ: the four clear blits of boot_init with the same constants, each followed by a delay
+      loop; called from 0xf186a; executed in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 879378
+    name: palette_range_table
+    type: data
+    description: 'The palette ranges palette_range_copy walks: 95 four-byte entries, byte 2 the first
+      colour and byte 3 the count (0 means 256), each entry''s data offset held in the first word of the
+      NEXT one (0x8611 - 0x8314 = 3 x 255 closes entry 94). None of the 95 passes colour 256, so no valid
+      index overflows the 768-byte buffer; read as entries, the bytes from index 95 on are RGB data, and
+      several of those would'
+    level: verified
+    evidence: the 95 entries decoded from disasm/img/radendur_maincpu.bin, start + count <= 256 in every
+      one (2026-09-24)
+  - addr: 929278
+    name: displaylist_walker
+    description: Walks a grid of cell pointers (step 0x20 in x and y), clears bit 0 of each node's first
+      byte and appends (tile id, x, y) word triples to the object list at *0x203510, storing the advanced
+      cursor back; A6 is its link frame (four stack arguments)
+    level: verified
+    evidence: 'READ: 0xe2e06/0xe2e0c load 0x20350c and 0x203510, 0xe2e7e bclr #0,(a3), 0xe2ea6 move.w d0,(a0)+,
+      0xe2ec8 stores a0 to 0x203510; executed in a radendurv2 race trace of 2026-10-13 (main cpu, 5026 frames
+      from a cold boot through scripts/drive.lua)'
+  - addr: 929494
+    name: palette_range_copy
+    description: 'Copies palette range N of palette_range_table into the buffer at 0x203208: 3 bytes per
+      colour from 0x203208 + 3 x start, skipped when N is the one it copied last (re_pal_range_last).
+      It overflows into the display-list cursors at 0x203508 only for an index outside the table, and
+      the one source of such an index is the environment loop at 0xe15f0 reading one prop past its array.
+      With that loop corrected no index leaves the table, so a relocation of that buffer is a second guard
+      on the same prototype fault and is not part of the fix (retired 2026-09-24)'
+    level: verified
+    evidence: 'live, relocation undone and the environment loop corrected, five playable sections (0,
+      1, 2, 4, 8): no stop on an index >= 0x5f in about 7700 calls per section, a census of re_pal_range_last
+      holding 0..94 only, no exception in 6000 frames each. With the loop NOT corrected as well, the race
+      entry hangs (188 copies instead of ~7700) and 0x203500..0x20350f holds the 16 ROM bytes at 0xdad17,
+      the only place in the image they occur'
+  - addr: 941316
+    name: section_dispatch_table
+    type: data
+    description: 'A table of 45 pointers (0xe5d04..0xe5db7) that ends EXACTLY where the code of init_section_and_dispatch
+      begins (0xe5db8), so an index of 45 or more reads instructions and takes them for pointers. MEASURED
+      per section: section 0 asks for 18 and 0 (valid); section 6 asks for 4608, section 9 for 1014, section
+      10 for -31206, section 12 for 17183 and section 14 for 210, and those FIVE are exactly the ones
+      that blow up before drawing the race. The PC ends up in the unmapped gap (measured: 0x11f598) walking
+      straight ahead until a bus fault enters through 0x25a2, which in this game is an rte: it returns
+      to the instruction that faulted and refaults for ever'
+  - addr: 941496
+    name: init_section_and_dispatch
+    description: 'Prepares the section: clears two 1024-word arrays (0x201e64 and 0x202664) and then JUMPS
+      THROUGH THE TABLE without checking the index. It reads `(*(0x201006))->field_0xc4`, multiplies it
+      by 4 and jsrs to section_dispatch_table[index]'
+    level: verified
+    evidence: 'READ: clears the two 1024-word arrays at 0x201e64/0x202664, then jsr (a0) through the table
+      indexed by *(0x201006)+0xc4 with no bounds check (0xe5e0c..0xe5e22); executed in a radendurv2 race
+      trace of 2026-10-13 (main cpu, 5026 frames from a cold boot through scripts/drive.lua)'
+  - addr: 965508
+    name: object_update
+    description: 'Entity logic: a state machine over the struct at *0x201006 (fields 0x62/0x8c/0xa4 off
+      a0) that calls fixed helpers through a register loaded with lea (jsr (a2)/(a3)) and restarts itself
+      with jsr object_update when its state changes. The largest function (6KB)'
+    level: verified
+    evidence: 'READ: 0xebc86/0xebbd2/0xebb9e test the fields; 0xebd18 lea 0xdfa6c,a2 / jsr (a2), 0xebe1e
+      lea 0xe23b4,a2 / jsr (a2); 0xebf0a jsr object_update; executed in a radendurv2 race trace of 2026-10-13
+      (main cpu, 5026 frames from a cold boot through scripts/drive.lua)'
+  - addr: 991284
+    name: reset
+    description: 'Entry/boot: init + main loop (state machine)'
+    level: verified
+    evidence: 'READ: vector 0x04 holds 0xf2034; 0xf2040 jsr boot_init, SR 0x2100 at 0xf2106, then the
+      wait_loop at 0xf2132; executed in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 991538
+    name: wait_loop
+    description: 'The main loop, which is a BUSY WAIT on the channel flag. MEASURED with a PC histogram
+      during the race: the CPU spends 64.4% of the frame here at 16 MHz and 95.6% at 8x. It is not drawing,
+      it is waiting'
+    level: verified
+    evidence: 'READ: both branches of the loop (0xf2118 and 0xf21a4) go to 0xf2132, `move.w sr,-(a7)`;
+      0xf2130 is the low word of the operand of `clr.w $203202.l` at 0xf212c, which decodes as `move.w
+      d2,d1` only when decoding starts there. MEASURED live on 2026-10-13 with MAME''s tracer over the
+      attract, the hot vblank address on the same cpu present in the trace as the control: 0xf2132 executes
+      and 0xf2130 never does, in the dump''s attract and in a radendurv2 race'
+  - addr: 991760
+    name: crash_site
+    description: clr.w (a1) with a1=*(0x203510); an odd pointer raises an address error, whose handler 0x25a4
+      paints the grey screen
+    level: verified
+    evidence: 'READ: 0xf220a movea.l 0x203510,a1 / 0xf2210 clr.w (a1). MEASURED live 2026-10-13: an odd
+      a1 there enters 0x25a4; executed in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 991876
+    name: state_advance
+    description: 'Advances the state: stores d0 at 0x207958 and, when the channel flag at 0x2091a4+16*(d0&3)
+      is set, loads 0x209430, 0x2094e8 and 0x20f760 from row d0&3 of the ROM table at 0xf1fd4 and clears
+      0x20795c, else sets it to 1. Called from the main loop AND from the vblank (race)'
+    level: verified
+    evidence: 'READ: 0xf2288 move.w d0,0x207958; 0xf22ae..0xf22ba load 0x209430/0x2094e8/0x20f760; callers
+      0x484, 0xf215e, 0xf2256; executed in the radendur attract trace (disasm/executed/radendur_maincpu.txt)'
+  - addr: 992214
+    name: sound_start_block
+    description: 'A level 5 entry that starts a sound block: sends the 0xffff marker to the subcpu, puts
+      49 in the sample counter (0x202e86), ARMS THE LINE COUNTER WITH 100 (0x7a0000) and sets bit 13 of
+      0x20351c, which writes to the control port, then rte. Nothing in the ROM points to it, and the game
+      never enters it: the vblank''s own block start (0x520) arms the counter with 1'
+    level: verified
+    evidence: 'READ: 0xf23d6 move.w #-1,0x740000, 0xf23de 0x31 to 0x202e86, 0xf23e6 0x64 to 0x7a0000, rte
+      at 0xf2424; no reference to 0xf23d6 in the image; MEASURED 2026-10-13: never executed in 3000 frames
+      of the dump''s attract (control 0x4a0, 2977 hits) nor in a radendurv2 race trace'
+  - addr: 992318
+    name: re_snd_stream_src
+    description: radendur main. Source of the raster handler that emits the burst, copied to RAM 0x203164
+      (by 0xf2426). It emits 0xA0A0 on iteration 49 and one word of the block on each of the remaining
+      48, SELF-PATCHING its pointers and erasing what it has sent
+    level: verified
+    evidence: 0xf243e-0xf24ce; the absolute operands of 0xf2476 and 0xf2480 are rewritten at 0x20319c
+      and 0x2031a6, which is the copy displaced by 0x110d26
+    runs_from: 2109796
+  - addr: 992326
+    name: sound_streamer_rom
+    description: 'The sample streamer, in ROM; it is copied to RAM (0x203164) so it can SELF-MODIFY. It
+      sends one sample per line to the subcpu latch and advances its pointer by incrementing the OPERAND
+      of its own instructions (0x20319c and 0x2031a6), 49 firings per block. It touches no register, which
+      saves the whole movem in an interrupt that fires once per line. And that is what makes it fragile:
+      overrunning the pointer corrupts instructions, not data'
+    level: verified
+    evidence: 'READ: copy loop 0xf2426..0xf243a (0xf243e..0xf24d0 to 0x203164); 0xf2474 move.w 0x20300c,0x740000,
+      operands patched at 0xf2476/0xf2480; its RAM copy 0x203164.. executed in a radendurv2 race trace of
+      2026-10-13 '
+    runs_from: 2109804
+  - addr: 2109062
+    name: re_snd_sample_count
+    description: 'radendur main (RAM). The sample counter of the sound block: set to 49 when a block opens
+      (0x530 from the vblank handler, 0xf23de from sound_start_block), decremented once per line by the
+      streamer (0x2031b6, the RAM copy of 0xf246c/0xf2490) and compared against 49 to detect the first
+      entry of a block (0xf2446). Below zero the streamer has overrun its buffer'
+    level: verified
+    evidence: the four writers and the one comparison above, in disasm/listings/radendur_maincpu.lst
+  - addr: 2110748
+    name: re_snd_ctrl_shadow
+    description: 'radendur main (RAM). Shadow of the control port 0x7c0000: the byte copied to the port
+      after every change. Bit 13 is set when a sound block opens (0x548) and bit 12 when it closes
+      (0xf24a0), both cleared together by the andi.w #0xcfff that precedes each, so the line counter,
+      which bit 13 enables, runs only while a block streams; bits 8-10 drive the EEPROM'
+    level: verified
+    evidence: 0x540-0x550 and 0xf23ee-0xf23fe (open), 0xf2498-0xf24a8 (close), 0x2600-0x2624 (init 0xd8)
+  - addr: 2110982
+    name: re_pal_range_last
+    description: radendur main (RAM). The palette range palette_range_copy applied last; the copier returns
+      at once when asked for it again. 0xe2c4a writes 0xffff here to force the next copy
+    level: verified
+    evidence: writers 0xe2f00 (the copier) and 0xe2c4a (the 0xffff reset), from a write census over a
+      race; values 0..94 plus that marker
+  - addr: 2109452
+    name: re_snd_block
+    description: 'radendur main (RAM). radendur''s 96 command bytes: six 16-byte registers at 0x20300c,
+      1c, 2c, 3c, 4c, 5c. Exactly the same format as wheelfir''s'
+    level: verified
+    evidence: 0xf2850-0xf286e write the volume table (field +8) into 0x203014, 24, 34 and 44; 0xf2474
+      emits from 0x20300c
+  - addr: 2109796
+    name: irq5_streamer_ram
+    description: 'The level 5 handler, copied to RAM by the game. It is a sample streamer that SELF-MODIFIES
+      and re-arms the counter line by line. Its pointers (0x20319c, 0x2031a6) advance +2 per firing and
+      the sample counter 0x202e86 underflows below zero: after about 172 words the pointer walks into
+      the handler''s own code and clr.w''s it. MEASURED with `RE_SINRASTER` (switch WITHDRAWN) on (the
+      earlier `RE_RASTER` (switch WITHDRAWN) never existed) and no guard: an address error before the
+      menu'
+  - addr: 2128252
+    name: re_pal_start
+    description: 'Read alongside re_pal_arg (0x203206) by the palette probe, which labelled it "start".
+      It is NOT confirmed to be the starting index of the palette upload: that is all that is known about
+      it. It is recorded because the probe that watched it was withdrawn on 2026-08-04 as superseded,
+      and that address appeared NOWHERE else in the tree'
+  - addr: 2160920
+    name: irq1_trampoline
+    description: 'The IRQ1 trampoline in RAM: a `jmp abs.l` whose OPERAND (0x20f91a) the game rewrites
+      to change handler on the fly. Vector 0x64 points here'
+  wheelfir_maincpu:
+  - addr: 1024
+    name: wf_zoom_desc_x
+    description: '400 horizontal scale descriptors, 16 bytes each: +0..+4 five bytes the sprite builder
+      ORs into the register (0xe4940..0xe4948), +6 the shift, +8 and +0xc pointers to the two tables. It
+      is the source of the zoom_index[400] the driver carries by hand, and it agrees on all 400'
+    type: data
+  - addr: 7440
+    name: wf_zoom_desc_y
+    description: The same 400 descriptors for the vertical axis
+    type: data
+  - addr: 71730
+    name: wf_curtain_desc
+    type: data
+    description: 'ROM descriptor of the erasing curtain: 256x16 of page 2 at (1,0), which read from ROM
+      is index 0 across its 4096 pixels'
+  - addr: 135262
+    name: wf_pal_highscores
+    description: 'Palette of the High Scores engine screen, in the 68000 ROM: 256 colours of THREE RGB
+      bytes. It is the fade''s destination, and the whole chain is PROVEN byte for byte: the 768 bytes
+      here are identical to the palette live on screen on frame 2788, and the sequence appears exactly
+      once in the whole ROM. So nothing of ours touches that screen''s colour, and the badly-composed-palette
+      hypothesis is refuted'
+    state: confirmed
+    evidence: 'MEASURED: its 768 bytes are identical to the palette live on screen on frame 2788, and
+      the sequence appears exactly once in the whole ROM'
+    type: data
+  - addr: 141406
+    name: wf_track_table
+    description: wheelfir main. Per-track record, 0x8c bytes per entry, indexed by 0x20bc6e. +0x18 = song
+      pointer, +0x1c = sample base. The rest of the entry is not identified
+    level: verified
+    evidence: 0xea6c0-0xea6dc; the first 12 entries give songs whose header validates the format
+    type: data
+  - addr: 499368
+    name: wf_song_bank
+    description: 'wheelfir main. First song of the bank. Nine consecutive songs with no gap: 0x79ea8,
+      0x7dc60, 0x80a18, 0x80fd0, 0x86588, 0x8b340, 0x8fcf8, 0x902b0, 0x97068, ending at 0x9b220'
+    level: verified
+    evidence: the computed end of each one (header + 0x1b8 + (maxpattern+1)*1024) falls exactly on the
+      start of the next
+    type: data
+  - addr: 635866
+    name: wf_page_toggle
+    description: 'Once per frame: picks the 0x100 offset and the 0x20 page bit'
+    level: verified
+    evidence: 'READ: 0x9b3da tests bit 0 of wf_page_flag, odd frames load 0x100/0x20 and swap the lists,
+      stored at 0x9b41e/0x9b424; executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 635970
+    name: wf_main_loop_trigger
+    description: The main loop's trigger write (0xffff to 0x70001e), after the wait on 0x201cb8 that the
+      vblank handler sets at 0xdc488 and after the mask is opened at 0x9b43e
+    level: verified
+    evidence: 'READ: 0x9b43e move #0x2000,SR / 0x9b442 move.w #-1,0x70001e. MEASURED live 2026-10-13: a
+      write census of 0x70001e over 3000 frames of attract and race names 0x9b442 as one of its writers'
+  - addr: 636066
+    name: wf_build_scroll_table
+    description: A 256-iteration loop composing the per-line byte; 0x9b4c8 puts the page bit in
+    level: verified
+    evidence: 'READ: 256-iteration loop 0x9b4a2..0x9b4de building the +0x200 control byte from x/y bit 8,
+      wf_page_bit and 0x10; executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 642200
+    name: wf_car_graphic
+    description: 'In the car screen loop, emits a GRAPHIC with the literal #$17 in D2 (bit 2 set)'
+    level: verified
+    evidence: 'READ: 0x9cc98 move.w #0x17,d2 before jsr wf_arm_register, in the loop over wf_car_table;
+      executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 642242
+    name: wf_car_curtain
+    description: 'The SAME loop, ten instructions later, emits its ERASING CURTAIN with the literal #$1b
+      (bit 3 instead of 2), at y = scroll counter + 0x154. The two instructions together are the proof
+      that the field is deliberate'
+    level: verified
+    evidence: 'READ: `move.w #$1b,d2` at 0x9ccc2 and again at 0x9ccec, each followed by the call to 0xe5584;
+      0x9ccb0 is the middle of `lea $11832.l,a0` at 0x9ccae. MEASURED live on 2026-10-13 with MAME''s
+      tracer over the attract, the hot vblank address on the same cpu present in the trace as the control:
+      0x9ccc2 and 0x9ccec execute, 0x9ccb0 never does'
+  - addr: 642468
+    name: wf_car_table
+    type: data
+    description: 'Table of the eight slices of the presentation car: 8 bytes per entry (counter threshold,
+      x, pointer to the descriptor). The thresholds are the previous slice''s x, and the x values drop
+      by 79 and wrap mod 512, so the strip is 632 px over a 512 plane'
+  - addr: 642778
+    name: wf_pal_blast
+    description: 'THE palette uploader that actually runs: 219 of the 222 uploads to the RAMDAC, MEASURED
+      with a breakpoint. An UNROLLED loop with a computed jump: it enters at 256-count, so it uploads ANY
+      stretch (index in wf_pal_idx, count in wf_pal_count) from wf_pal_buffer. That is the palette composition
+      by stretches'
+    level: verified
+    evidence: 'READ: unrolled 256-colour loop entered at 256-wf_pal_count by the computed jump at 0x9cf02;
+      executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 646808
+    name: wf_pal_accumulate
+    description: 'Composes the palette by ACCUMULATION: it walks wf_pal_delta and ADDS each increment
+      to the buffer''s colour, wf_pal_count colours, and takes one step off wf_pal_steps. It is the fade,
+      and it is the reason each colour takes SIX bytes: they are words, so they can accumulate without
+      clipping, and the upload keeps the low byte. Located with a write watchpoint on the buffer, not
+      by reading the disassembly'
+    level: verified
+    evidence: 'MEASURED live on 2026-10-13 with a write census on wf_pal_buffer over the attract: its
+      writers are 0x9deac/0x9deb0/0x9deb4 (the three `add.w d1,(a1)+` of this routine), the subtracting
+      twin at 0x9ded2, the copy at 0x9df0c, and wf_pal_to_black and wf_pal_to_white; nothing inside wf_pal_blast''s
+      unrolled loop (0x9cf04..0x9dd04) writes it. The routines are the targets of the jump table at 0x9dd22,
+      which 0x9dd06 indexes by the step at 0x201054'
+  - addr: 646992
+    name: wf_pal_to_black
+    description: Zeroes wf_pal_count colours of the buffer (fade to black)
+    level: verified
+    evidence: 'READ: three `clr.w (a0)+` per colour from 0x9df5c, one of the targets of the jump table
+      at 0x9dd22; MEASURED live on 2026-10-13 among the writers of wf_pal_buffer'
+  - addr: 647030
+    name: wf_pal_to_white
+    description: Fills wf_pal_count colours with 0xff00 (fade to white)
+    level: verified
+    evidence: 'READ: three `move.w #$ff00,(a0)+` per colour from 0x9df82, one of the targets of the jump
+      table at 0x9dd22; MEASURED live on 2026-10-13 among the writers of wf_pal_buffer'
+  - addr: 672866
+    name: wf_generate_road_table
+    description: Generates the per-line scroll table of the ROAD, 13 segments, from the lowest line to the
+      highest
+    level: verified
+    evidence: 'READ: 0xa4462..0xa44e6, 13 segments, each value written to entries n and n+1; executed in
+      the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+    state: confirmed
+  - addr: 674092
+    name: wf_port_7c0001
+    description: 'Writes 0xAC and then 0xFF to the low byte of control_and_link (0x7c0001), each followed
+      by 27 calls to the link poll 0xa4962, which reads bit 5 of 0x7c0000. It is 54 bytes and runs once
+      per frame right before the blit burst. Guarded by 0x20bc98: if that is not zero, it does nothing.
+      The reading of the two values as half scanline widths is refuted under control_and_link in registers.yaml'
+    level: verified
+    evidence: 'READ: 0xa492c `tst.w $20bc98.l` / `bne`, `move.b #$ac,$7c0001.l` at 0xa4936, `move.b #$ff,$7c0001.l`
+      at 0xa494a, each with a `dbra` over `bsr 0xa4962`; sixteen call sites. The address 0xa452c the table
+      carried before is 0x400 lower, inside a RAM clear loop. MEASURED live on 2026-10-13: 0xa492c executes
+      in the attract'
+  - addr: 676306
+    name: wf_link_share_difficulty
+    description: wheelfir main. Shares the DIFFICULTY LEVEL between two linked cabinets, then rebuilds the
+      EEPROM settings block and resets. The second cabinet (wf_link_player_number nonzero) receives a byte
+      over the link and stores it into wf_difficulty; the first sends its own
+    level: verified
+    evidence: 'READ (the two-cabinet link cannot run on one machine): 0xa51d2..0xa52c2; receive 0xa520a
+      (bsr 0xa4cd8) and the store at 0xa5210, send 0xa5294 (bsr 0xa4e74), 0xdd646 and reset on both branches;
+      called at 0xa480e and 0xa487e; no hit live with NUMBER OF PLAYERS 1'
+  - addr: 679176
+    name: wf_highscores_loop
+    description: Loop of the HIGH SCORES screen, with its state machine (dispatch by state at (-2,A5), states
+      0..7+ from 0xa5f24; it starts at 3). READ from the 68000. It loads 0x2105e as the destination palette,
+      asks for 0xf fade steps, and uploads the whole stretch (idx=0, count=256). It is a SECOND COPY of
+      the double buffer and per-line scroll block already known at 0x9b3da
+    level: verified
+    evidence: 'MEASURED with a watchpoint on wf_page_flag: it is the writer that takes over exactly on entering
+      the screen (frame 2771), and its code loads 0x2105e as the destination palette and asks for 0xf fade
+      steps'
+    state: confirmed
+  - addr: 894336
+    name: wf_snd_load_song
+    description: 'wheelfir main. Loads a song: seeds the voice register pointers and the two opcodes per
+      channel, resolves the 31+31 sample tables by adding the base to them, clears the state and sets
+      speed 6'
+    level: verified
+    evidence: 0xda580-0xda732; a 31-iteration loop at 0xda6e4-0xda72c
+  - addr: 894772
+    name: wf_snd_tick
+    description: wheelfir main. Sequencer tick, called ONCE per vblank. Accumulator += 500 with overflow
+      at 543; when the tick counter reaches the speed it advances a row, and if not it runs the per-tick
+      effects
+    level: verified
+    evidence: 0xda734-0xda7b6; called from 0xdc498, inside the handler whose IRQ3 vector is 0xdc340
+  - addr: 894904
+    name: wf_snd_effect_tick
+    description: 'wheelfir main. ProTracker per-tick effects: 0 arpeggio, 1 portamento up (limit 113),
+      2 portamento down (limit 856), A volume slide (clipped 0..64). It only runs if the parameter is
+      != 0'
+    level: verified
+    evidence: 0xda7b8-0xda7d6 (dispatch); 0xda7e2 `cmpi.w 0x71`, 0xda830 `cmpi.w 0x358`, 0xda890 `cmpi.w
+      0x40`
+  - addr: 895308
+    name: wf_snd_apply_volume
+    description: wheelfir main. Translates (channel volume, master volume) into a base for the sub's volume
+      table and writes it into voice register +0x08. Volume 0 -> 0x842 (silence)
+    level: verified
+    evidence: 0xda94c-0xda98e; `lsl.l 0x8` + `addi.l 0x842` at 0xda972
+  - addr: 895590
+    name: wf_snd_read_row
+    description: 'wheelfir main. Reads a pattern row: pattern = order[position], address = song + 0x1b8
+      + pattern*1024 + offset, and calls the cell reader for the four channels. It wraps the offset at
+      0x400 (64 rows) and advances the position'
+    level: verified
+    evidence: 0xdaa66-0xdab42; `asl.l 0x8` + `asl.l 0x2` = *1024 at 0xdaa7c
+  - addr: 895812
+    name: wf_snd_read_cell
+    description: 'wheelfir main. Decodes a 4-byte cell: instrument, note, effect, parameter. The instrument
+      loads volume/start/loop; the note translates to a period and to Hz and arms the voice register,
+      choosing the form with or without postincrement; the effect dispatches B/C/D/F per row'
+    level: verified
+    evidence: 0xdab44-0xdac2a
+  - addr: 896118
+    name: wf_period_hz_table
+    description: wheelfir main. Period -> playback frequency in Hz table, read from the base 0xdab94 indexed
+      by the period. Only periods 113..856 are read, so the table's bytes are 0xdac76..0xdb245 and it
+      ends right where the volume matrix begins; the base itself is the operand of the `lea` at 0xdab92
+      that loads it, and what lies between is code and wf_note_period_table
+    level: verified
+    evidence: 0xda7f0, 0xda83e, 0xda91a, 0xdab92 load the base 0xdab94; period 113 -> 31677, period 856
+      -> 4186
+    type: data
+  - addr: 896046
+    name: wf_note_period_table
+    description: 'wheelfir main. Note -> period table, 36 words for notes 1..36, read from the base 0xdac2c
+      indexed by the note, so index 0 is the `rts` that closes the routine before it. It IS ProTracker''s
+      period table with finetune 0: 856, 808, 762, ... 120, 113'
+    level: verified
+    evidence: 0xdab84, 0xda90e load the base 0xdac2c; the same table is in radendur (base 0xf2df8, also
+      an `rts`), in pwball and in kongball, and NOT in rltennis
+    type: data
+  - addr: 897608
+    name: wf_volume_matrix_table
+    description: 'wheelfir main. A 64x64 byte matrix: index (channel_vol-1) + 64*(master_vol-1), value
+      = the sub''s volume table number (0..64). It occupies exactly 0xdb248..0xdc247'
+    level: verified
+    evidence: 0xda94c-0xda96a; byte 0xdc247 is the last of the matrix and code begins at 0xdc248 (`move.l
+      a0,-(a7)`)
+    type: data
+  - addr: 938612
+    name: wf_irq_sprite_list
+    description: 'The level-1 (blitter) interrupt handler: walks the sprite list and fires the next blit
+      from it. Nearly every blit comes out of here; the rest come from the fill and clear routines'
+    level: verified
+    evidence: 'READ: vector 0x64 holds 0xe5274. MEASURED live on 2026-10-13 with a write census on the
+      blitter trigger 0x70001e over the attract: the firing writers are wf_fire_case0 and the other cases
+      of wf_sprite_dispatch, all inside this handler, plus wf_clear_screen_3, wf_build_scroll_table, wf_highscores_loop,
+      wf_video_reset and wf_clear_screen_end. 0xdc274, where the table carried it before, is inside a
+      coin-purse routine (0xdc26e) and never executes'
+  - addr: 902288
+    name: wf_snd_commit
+    description: 'wheelfir main. `move.w 0xffff, 0x740000.l` in the vblank: the "apply the block" order.
+      It is one of only TWO reserved words in the protocol'
+    level: verified
+    evidence: 0xdc490, inside the IRQ3 handler (vector 0xdc340)
+  - addr: 902300
+    name: wf_snd_enqueue_block
+    description: wheelfir main. Stamps 0xA0A0 plus the block's 96 bytes into the raster's per-line table
+      (0x590(a6) = the line 200 slot of the array starting at 0x400(a6)) and CLEARS the source buffer
+      so that whatever was not rewritten travels as zero
+    level: verified
+    evidence: '0xdc49c-0xdc508: 24 pairs of `move.l (a1),(a2)+` / `clr.l (a1)+`'
+  - addr: 902410
+    name: wf_scroll_frame
+    description: 'Frame start: writes scroll x and sets scroll y to ZERO'
+    level: verified
+    evidence: 'READ: 0xdc510 writes scroll x, 0xdc52e scroll y = 0; executed in the wheelfir race trace
+      of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 902468
+    name: wf_scroll_vblank
+    description: 'Writes word 8''s low byte from D0, which it also stores to 0x201cbe, inside the vblank
+      handler (IRQ3, 0xdc340..0xdc59e), once per frame. MEASURED with a per-site write log over an attract
+      cycle: 2982 writes at vpos 247..262, the page bit set in 1430'
+    level: verified
+    evidence: 'READ: 0xdc53e move.b d0,0x201cbe / 0xdc544 move.b d0,0x700011. MEASURED live 2026-10-13:
+      a write census of word 8 over 3000 frames names 0xdc544 (2985 writes); 0xdc52e writes word 11'
+  - addr: 902646
+    name: wf_raster_starts_road
+    description: 'First raster IRQ of the frame: installs the road handler, arms the counter with horizon+1
+      and advances the table cursor by as many entries'
+    level: verified
+    evidence: 'READ: installed at 0x201c8c by 0xdc56c when 0x20bc46 is set; 0xdc648..0xdc662 arm the road
+      handler; executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 902682
+    name: wf_page_of_frame
+    description: 'Sets the frame''s page by writing the blitter''s word 8. It is the ONLY one of that word''s
+      four writers that falls on vpos 0..0, once per frame, and it alternates 951/907 over an attract cycle.
+      MEASURED with `WFV2_SITIOS` (switch WITHDRAWN)=1, which records the writes by PC, whether they carried
+      bit 0x20 and which beam line they fell on: that is what finally separates the four physically, because
+      the access mask does not tell them apart (all four write the low byte)'
+    level: verified
+    evidence: 'READ: 0xdc61a move.b 0x201cbe,0x700011. MEASURED live 2026-10-13: 2514 writes of word 8 in
+      3000 frames; executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+    state: confirmed
+  - addr: 902692
+    name: wf_write_scroll_and_raster
+    description: Writes scroll y (word 11, from 0x201cc0) and re-arms the raster counter with 1, installing
+      0xdc7b0 as the next handler
+    level: verified
+    evidence: 'READ: 0xdc624 move.b 0x201cc0,0x700017, 0xdc62e move.w #1,0x7a0000, 0xdc636 move.l #0xdc7b0,0x201c8c.
+      MEASURED live 2026-10-13: a write census of word 11 names 0xdc624 (2514 writes in 3000 frames)'
+  - addr: 902998
+    name: wf_stream_scroll_line
+    description: 'Injects each line''s control byte (page bit, x and y bit 8) from the scroll table (+0x200)
+      into word 8, once per line over the visible part; the next instructions write the line''s x and y
+      bytes. MEASURED with a per-site write log over an attract cycle: 484870 writes at vpos 1..255, the
+      page bit set in 227290'
+    level: verified
+    evidence: 'READ: 0xdc756 move.b 0x200(a6),0x700011. MEASURED live 2026-10-13: a write census of word
+      8 over 3000 frames names 0xdc756 (355650 writes); 0xdc764 writes word 11'
+  - addr: 903006
+    name: wf_raster_walk
+    description: 'Raster handler: walks the table, writes x and then y'
+    level: verified
+    evidence: 'READ: 0xdc75e writes x then 0xdc764 y from the byte pair at a6; executed in the wheelfir
+      race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 903050
+    name: wf_snd_stream_word
+    description: 'wheelfir main. Stage of the raster chain that emits ONE word of the block to the latch
+      per scanline and advances the pointer. There are three variants with the same instruction: 0xdc74e,
+      0xdc78a and 0xdc7c6, each at the end of a run of `nop`s the chain jumps into. This one is never entered:
+      no code writes a target inside its run (0xdc774..0xdc788) into the jump at 0x201c8a'
+    level: verified
+    evidence: '0xdc78a `move.w 0x400(a6), 0x740000.l` + `addq.l 0x2, a6`; the jump targets the game writes
+      are 0xdc5f6, 0xdc66a, 0xdc738 and 0xdc7b0. MEASURED live on 2026-10-13: a played session never reaches
+      0xdc78a while the control on wf_fire_case0 counts millions of hits'
+  - addr: 903110
+    name: wf_raster_band
+    description: 'Handler of the band ABOVE the horizon: pins the scroll at 257, which is the scenery''s
+      first row in the plane, that is a stop against its top edge'
+    level: verified
+    evidence: 'READ: 0xdc7d0 control 0x80 and 0xdc7d8 y=1 (line 257); the band exists while wf_camera_y
+      is below 0x101 (0xdc3c0); executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 903120
+    name: wf_road_scroll
+    description: 'Writes word 8 as the constant 0x80 (y bit 8 set, page bit ZERO) on each line of the band
+      above the road, then y=1 at 0xdc7d8. MEASURED with a per-site write log over an attract cycle: 10489
+      writes at vpos 1..53, the page bit zero in all of them. It is the one that made the page look as if
+      it varied per line, and why the boundary moved with the HORIZON: on those lines the page really is
+      zero'
+    level: verified
+    evidence: 'READ: 0xdc7d0 move.b #0x80,0x700011. MEASURED live 2026-10-13: a write census of word 8 over
+      3000 frames names 0xdc7d0 (14148 writes); 0xdc7d8 writes word 11'
+  - addr: 935934
+    name: wf_scale_coord
+    description: 'The REAL scale, not a percentage: (2x + first table[x] - second table[...]) >> shift,
+      with a 16-byte descriptor per scale. Validated against a known answer: 100 gives the identity and
+      200 gives exactly double'
+    level: verified
+    evidence: 'READ: 0xe47fe..0xe484c, x descriptor at 0x400+16n, y at 0x1d10+16n, shift from +6; executed
+      in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 936014
+    name: wf_clip_dispatch
+    description: 'Entry of the software clipper: scales the descriptor''s width and height through wf_scale_coord,
+      rejects a zero size, and branches to one of eight variants by the complement of D2''s low three
+      bits (bit 0 set: x walks forward; bit 1 set: y walks forward; bit 2 clear: the axes are exchanged).
+      Every variant rejects what lies wholly outside the rectangle wf_clip_x0..wf_clip_y1 and pins to
+      its edge an end that crosses it; when the pinned end is the walk''s start, it flips that axis''s
+      direction bit and takes the source from its other end, so the walk ends on the edge'
+    level: verified
+    evidence: 'decoded from disasm/img/wheelfir_maincpu.bin (2026-10-03): bsr.b 0xe47fe at 0xe4858, d6
+      = ~d2 & 7 at 0xe4866..0xe486a, the branch chain 0xe486e..0xe4898; reached by 30 jsr 0xe484e.l in
+      the image (control: jsr 0xe5584.l finds the known call at 0x9cc9e) and by bsr forms, a raw scan
+      of which finds 106 candidates not each decoded'
+  - addr: 936092
+    name: wf_sprite_build_swapped
+    description: Second entry of wf_sprite_build, the exit of the four clip variants that exchange the axes;
+      rejects a zero span and joins the builder with the two coordinates the other way round
+    level: verified
+    evidence: 'READ: 0xe489c..0xe48be, bra.w 0xe48e4. MEASURED live 2026-10-13: wf_clip_swap forced from
+      0xe4866 runs on to 0xe489c'
+  - addr: 936130
+    name: wf_sprite_build
+    description: Builds the 24-byte register; derives the bit 8s of x/y into 0x40/0x80
+    level: verified
+    evidence: 'READ: 0xe48c2..0xe497e writes the 24-byte register, bit 8 of x and y folded into 0x40/0x80
+      at 0xe4908..0xe4918; executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 936330
+    name: wf_clip
+    description: Clip variant for D2 low bits 7 (axes as declared, x forward, y forward), one of the eight
+      the clipper entry picks; leaves to the sprite builder
+    level: verified
+    evidence: decoded from disasm/img/wheelfir_maincpu.bin at this address, the body read whole (2026-10-03)
+  - addr: 936524
+    name: wf_clip_xb
+    description: Clip variant for D2 low bits 6 (axes as declared, x backward, y forward), one of the
+      eight the clipper entry picks; leaves to the sprite builder
+    level: verified
+    evidence: decoded from disasm/img/wheelfir_maincpu.bin at this address, the body read whole (2026-10-03)
+  - addr: 936726
+    name: wf_clip_yb
+    description: Clip variant for D2 low bits 5 (axes as declared, x forward, y backward), one of the eight
+      the clipper entry picks; leaves to the sprite builder
+    level: verified
+    evidence: 'READ: the clipper entry 0xe4866..0xe4898 branches on (~D2)&7. MEASURED live 2026-10-13 on
+      wheelfir: from a stop at 0xe4866, D2''s low three bits forced to each value land on the variant this
+      description names'
+  - addr: 936928
+    name: wf_clip_xb_yb
+    description: Clip variant for D2 low bits 4 (axes as declared, x backward, y backward), one of the eight
+      the clipper entry picks; leaves to the sprite builder
+    level: verified
+    evidence: 'READ: the clipper entry 0xe4866..0xe4898 branches on (~D2)&7. MEASURED live 2026-10-13 on
+      wheelfir: from a stop at 0xe4866, D2''s low three bits forced to each value land on the variant this
+      description names'
+  - addr: 937130
+    name: wf_clip_swap
+    description: Clip variant for D2 low bits 3 (axes exchanged, x forward, y forward), one of the eight
+      the clipper entry picks; leaves to the sprite builder's second entry
+    level: verified
+    evidence: 'READ: the clipper entry 0xe4866..0xe4898 branches on (~D2)&7. MEASURED live 2026-10-13 on
+      wheelfir: from a stop at 0xe4866, D2''s low three bits forced to each value land on the variant this
+      description names'
+  - addr: 937334
+    name: wf_clip_swap_xb
+    description: Clip variant for D2 low bits 2 (axes exchanged, x backward, y forward), one of the eight
+      the clipper entry picks; leaves to the sprite builder's second entry
+    level: verified
+    evidence: 'READ: the clipper entry 0xe4866..0xe4898 branches on (~D2)&7. MEASURED live 2026-10-13 on
+      wheelfir: from a stop at 0xe4866, D2''s low three bits forced to each value land on the variant this
+      description names'
+  - addr: 937538
+    name: wf_clip_swap_yb
+    description: Clip variant for D2 low bits 1 (axes exchanged, x forward, y backward), one of the eight
+      the clipper entry picks; leaves to the sprite builder's second entry
+    level: verified
+    evidence: 'READ: the clipper entry 0xe4866..0xe4898 branches on (~D2)&7. MEASURED live 2026-10-13 on
+      wheelfir: from a stop at 0xe4866, D2''s low three bits forced to each value land on the variant this
+      description names'
+  - addr: 937742
+    name: wf_clip_swap_xb_yb
+    description: Clip variant for D2 low bits 0 (axes exchanged, x backward, y backward), one of the eight
+      the clipper entry picks; leaves to the sprite builder's second entry
+    level: verified
+    evidence: 'READ: the clipper entry 0xe4866..0xe4898 branches on (~D2)&7. MEASURED live 2026-10-13 on
+      wheelfir: from a stop at 0xe4866, D2''s low three bits forced to each value land on the variant this
+      description names'
+  - addr: 937948
+    name: wf_fill_direct
+    description: Opens a window with a 0xffff trigger and streams bytes through the direct write port 0x70000d
+      (0xff runs, then 0x21 zeros). Nothing in the ROM jumps to it, and it never runs
+    level: verified
+    evidence: 'READ: 0xe5054 trigger, 0xe5060 move.b #-1,0x70000d nine per loop, 0xe5130 zeros. MEASURED
+      live 2026-10-13: a breakpoint at 0xe4fdc never stops over 3000 frames of attract and race nor in 900
+      frames of the TEST menu'
+  - addr: 938634
+    name: wf_sprite_case0
+    description: 'The dispatcher''s fifth case: tst.w 0x16(a1) and, if the register''s mode is ZERO, it
+      goes to 0xe5292..0xe52f0, which writes parameters, arms and fires WITHOUT touching any mode register.
+      It is the NORMAL case: 117740 of 117742 blits in 90 s emulated'
+    level: verified
+    evidence: 'READ: 0xe528a tests 0x16(a1); zero falls through the parameters (arm at 0xe52d0) into the
+      trigger at 0xe52f0; executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 938664
+    name: wf_sprite_reg7
+    description: 'move.w 0xa(a1),0x70000e: copies the sprite register''s flags field into the blitter''s
+      word 7. Bits 2 and 3 come down through here, the field that separates drawing from erasing'
+    level: verified
+    evidence: 'READ: 0xe52a8 move.w 0xa(a1),0x70000e; executed in the wheelfir race trace of 2026-10-13
+      (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 938736
+    name: wf_fire_case0
+    description: 'The FIRING of the dispatcher''s case 0 (0x70001e=0xffff). Almost everything the game draws
+      comes out through it, sprites and backgrounds alike: 117740 of 117742 blits in 90 s emulated, because
+      case 0 is the normal one and touches no mode register. It is the CONTROL address of the traces, with
+      52527 firings measured in 50 s'
+    level: verified
+    evidence: 'READ: 0xe52f0 move.w #-1,0x70001e then lea 0x18(a1),a1; reached from 0xe527c. MEASURED live
+      2026-10-13: 57933 firings in 3000 frames'
+  - addr: 938752
+    name: wf_sprite_dispatch
+    description: Dispatches on the mode at 0x16(a1) to the four variants
+    level: verified
+    evidence: 'READ: 0xe5300 reads the mode at 0x16(a1) and branches on 1..4 to wf_sprite_mode1..4; executed
+      in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 938780
+    name: wf_sprite_null
+    description: 'A 2x2 blit at (0,0) with no mode: it looks like a blitter reset'
+    level: verified
+    evidence: 'READ: a 2x2 blit at (0,0), armed at 0xe535c without firing; sets 0x201cb6 at 0xe5390; the
+      mode-5 handler; executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 938908
+    name: wf_sprite_mode1
+    description: Writes 0x70001b=0xff and 0x70001c=0xffff (opaque)
+    level: verified
+    evidence: 'READ: 0xe53fa opaque selector 0x70001b, 0xe5402 word 14, then the trigger at 0xe540a; executed
+      in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 939018
+    name: wf_background_fill
+    description: 'Emits the word-14 FILLS of the BACKGROUND plane: the seed is a destination 2 px wide reading
+      a source one pixel across, and what it clears is the STRIP it declares in height, from edge to edge
+      of the plane. MEASURED over 60 s emulated: 256 declaring rows 0..255 and 213 declaring 230..255. Together
+      with wf_sprite_fill it is the mechanism the game clears its planes with'
+    level: verified
+    evidence: 'READ: 0xe540a fires after mode 1''s opaque selector and word 14 (0xe53fa..0xe5402). MEASURED
+      live 2026-10-13: 199 firings in 3000 frames'
+  - addr: 939034
+    name: wf_sprite_mode2
+    description: Writes 0x700019=0xff and 0x70001c=0xffff (transparent)
+    level: verified
+    evidence: 'READ: 0xe5478 transparent selector 0x700019, 0xe5480 word 14; executed in the wheelfir race
+      trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 939144
+    name: wf_sprite_fill
+    description: 'Emits the word-14 fills of the SPRITE PLANE: one per frame declaring half a page and alternating
+      (1408 with rows 0..255 and 1228 with 256..511 over 60 s). It is the game''s own DOUBLE BUFFER'
+    level: verified
+    evidence: 'READ: 0xe5488 fires after mode 2''s transparent selector and word 14; executed in the wheelfir
+      race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 939160
+    name: wf_sprite_mode3
+    description: Writes 0x70001b=0xff (opaque, without the third)
+    level: verified
+    evidence: 'READ: opaque/transparent selector without word 14, fire at the end. MEASURED live 2026-10-13:
+      from a stop at 0xe5304, the mode forced to 3 lands on 0xe5498; the game''s own lists never use it
+      in attract or race'
+  - addr: 939278
+    name: wf_sprite_mode4
+    description: Writes 0x700019=0xff (transparent, without the third)
+    level: verified
+    evidence: 'READ: opaque/transparent selector without word 14, fire at the end. MEASURED live 2026-10-13:
+      from a stop at 0xe5304, the mode forced to 4 lands on 0xe550e; the game''s own lists never use it
+      in attract or race'
+  - addr: 939396
+    name: wf_arm_register
+    description: Sprite register builder. It takes the descriptor in A0 (width +0, height +2), the destination
+      start in D0/D1, the flags in D2 (bit 0 picks the path at 0xe5652) and the scale indices in D3, passes
+      the descriptor SIZE through wf_scale_coord and writes the 24 bytes
+    level: verified
+    evidence: 'READ: 0xe5590/0xe5592 load the size from (a0), 0xe5596 bsr wf_scale_coord, 0xe55b0/0xe55b2
+      add d0/d1; executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 939498
+    name: wf_arm_flags
+    description: 'move.w D2,0xa(a1): the instruction that leaves the flags field in the register, with the
+      bit 8s of x and y already mixed in'
+    level: verified
+    evidence: 'READ: 0xe55ea stores d2 after 0xe55da..0xe55e8 OR bit 8 of x and y into 0x40/0x80; executed
+      in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 953660
+    name: wf_video_reset
+    description: Resets the blitter and the clipping window. IT CLEARS NO PLANE
+    level: verified
+    evidence: 'READ instruction by instruction (0xe8d3c..0xe8f48) and CONTRASTED against the blit log, which
+      matches one to one. It is FOUR blitter programs and not one of them covers a plane: (1) 33x1 opaque
+      to the BACKGROUND at (0..32, 0..0) from page 0, source (0x73,1), fired at 0xe8d8c; (2) opening the
+      direct write channel over the SPRITE plane with a 33x1 window (page 0xfc0000) and 49 zero bytes through
+      0x70000d, at 0xe8dec; (3) 2x512 OPAQUE to the background at x=0..1, y=0..511, source (0x69,0), preceded
+      by 0x70001c=0xffff, at 0xe8e64; (4) the same 2x512 TRANSPARENT to the sprite plane, at 0xe8ecc. Then
+      it sets the clipping window to (0,0)-(0x154,0xff) and reloads a table. MEASURED on the machine: those
+      four blits come out on frames 8, 10, 12 and 15, with the program counters 0xe8d8c, 0xe8dec, 0xe8e64
+      and 0xe8ecc, so the "frames 8, 12, 17" recorded as FOUR distinct CLEARING ROUTINES are the four firings
+      of ONE single call to this, and none of them clears anything. It is also the source in code of the
+      x=0..1 column and of the word-14 mark'
+    state: confirmed
+  - addr: 954186
+    name: wf_pal_upload
+    description: 'Uploads a STRETCH of palette to the BT478: starting index in d0, number of colours in
+      d1, source in a0. Seven call sites; in the attract it runs once, on frame 8. The one that runs on
+      every screen is wf_pal_blast'
+    level: verified
+    evidence: 'READ: 0xe8f4c move.w d0,0x720000 and three move.b (a0)+ per colour; callers 0xa46b2, 0xdcad8,
+      0xdda22, 0xe0998, 0xe1e4a, 0xe3012, 0xeab78; executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 954216
+    name: wf_pal_fill
+    description: Fills a stretch of palette with a constant value (d2)
+    level: verified
+    evidence: 'READ: 0xe8f6a move.w d0,0x720000 and d2 three times per colour; executed in the wheelfir
+      race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 954246
+    name: wf_print_text
+    description: 'String printer of the service menu (a2 = string, d0/d1 = position): its call sites 0xde622..0xdf658
+      print the TEST menu''s strings; the High Scores text goes through 0xe8fe8'
+    level: verified
+    evidence: 'READ: callers in 0xde622..0xdf658. MEASURED live 2026-10-13: booting with the TEST switch
+      held, a breakpoint at 0xe8f86 stops 29 frames after the reset with a2 = 0xe2bb (''PUSH START BUTTON
+      FO...'')'
+  - addr: 954466
+    name: wf_clear_screen_b
+    description: Queues three word-14 fills through 0xe5140 (two halves of the transparent plane and a whole
+      opaque plane) and fires the list at 0xe90b8; between attract cycles (f=937)
+    level: verified
+    evidence: 'READ: 0xe9062 bsr 0xe5140 (d0=2), twice more with the y offset and d0=1, fire at 0xe90b8;
+      no write to 0x70000d. MEASURED live 2026-10-13: 0xe90b8 writes 0x70001e in a 3000-frame census'
+  - addr: 954694
+    name: wf_clear_screen_end
+    description: Last clear before the played demo (f=958)
+    level: verified
+    evidence: 'READ: the routine starts at 0xe9146 (`movem.l`), called from 0xdd0f0, 0xe0b60 and 0xe95e4;
+      0xe914e is the middle of `lea $2285e.l,a4`. MEASURED live on 2026-10-13: 0xe9146 executes, 0xe914e
+      never does, and its trigger write at 0xe9162 fires once per pass'
+  - addr: 955214
+    name: wf_clear_screen_3
+    description: 'Third screen-clearing routine: emits a fill declaring all 512 rows of the sprite plane'
+    level: verified
+    evidence: 'READ: 0xe934e fires the fill programmed at 0xe92f6..0xe9346 (transparent selector, word 14);
+      executed in the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
+  - addr: 2101221
+    name: wf_bar_master_count
+    description: Third copy of the bar's countdown, outside the two page structures, with the same values
+      as the page 0 one. It is the only one of the three that does not live inside a structure, so it
+      is probably the master the other two are copied from; that last part is NOT verified
+  - addr: 2101334
+    name: wf_fade_length
+    description: 'Length of the next palette fade, in steps: every screen start writes a constant (1, 3,
+      8, 0xf, 0x14, 0x19, 0x28); the fade code stores it minus one in wf_pal_steps, and a length of 1 skips
+      the fade'
+    level: verified
+    evidence: 'READ: constant writes at 0x9b302, 0x9b57a, 0xa5d48 and others; read at 0x9dd72, 0x9dd86,
+      0x9de02, 0x9de16, never counted down'
+  - addr: 2101336
+    name: wf_pal_idx
+    description: Starting index of the stretch about to be uploaded to the RAMDAC
+  - addr: 2101338
+    name: wf_pal_count
+    description: How many colours the stretch uploads; the uploader enters its unrolled loop at 256-count
+  - addr: 2101340
+    name: wf_pal_steps
+    description: Steps the fade has left; wf_pal_accumulate counts them down
+  - addr: 2101342
+    name: wf_pal_pending
+    description: Request flag; the uploader clears it once served
+  - addr: 2101348
+    name: wf_pal_delta
+    description: Second buffer, holding the per-colour INCREMENT that wf_pal_accumulate adds at every
+      step. Same format of six bytes per colour
+  - addr: 2102884
+    name: wf_pal_buffer
+    description: Palette buffer in RAM, 256 colours at SIX bytes each (R,G,B as words, only the low byte
+      is read). It is where the palette is COMPOSED before being uploaded
+  - addr: 2104008
+    name: wf_line_scroll_table
+    description: 'Per-scanline table: at +0x200 the byte carrying page, scroll bit 8, 0x10'
+    type: data
+  - addr: 2104508
+    name: wf_horizon
+    description: 'Lines SKIPPED before the road begins, that is, the horizon line. 0xdc652 arms the scanline
+      counter with this value +1 and advances the table pointer by 2*d0 bytes. MEASURED in the race: 1
+      at the start, 166 on frame 1198, and it swings with the terrain'
+  - addr: 2104514
+    name: wf_upper_band
+    description: 'Lines of the band ABOVE the road (stage 0xdc7b0). READ at 0xdc3ba: it is 257 - camera_y
+      when the camera drops below 257, and the horizon then rises by as many lines. Sweeping all 1744
+      frames of the demo, the band runs on 380 of them. On frame 1595 it is its first 40 lines, and 0xdc7d8 writes all of them the same scroll, 257,
+      which is EXACTLY the scenery''s first row: a stop put in by hand against the edge of the road strip'
+  - addr: 2104520
+    name: wf_scroll_source_table
+    description: Per-line source table, 256 entries of two words (x, y). It is packed into bytes in wf_line_scroll_table.
+      At the start of a race it is seeded with y = line + 4 (0xdc9c4)
+    type: data
+  - addr: 2104972
+    name: wf_vector_raster
+    description: 'RAM vector through which the raster chain''s handlers are installed. That is why a breakpoint
+      on a handler''s address can give ZERO: the real entry point moves'
+  - addr: 2124202
+    name: wf_horizon_raster_chain
+    description: The horizon line the raster chain uses; it comes from the minimum of the 13 segments'
+      high lines, pipelined over two frames (0x2069a2 -> 0x2069a4 -> here)
+  - addr: 2124211
+    name: wf_bar_count_page0
+    description: 'Countdown governing the High Scores TIME BAR, in byte +5 of the page structure at 0x2069ae.
+      MEASURED by dumping the whole RAM over six frames and keeping the monotonic bytes: it falls 94,
+      74, 54, 34, 14, 0 in samples 10 frames apart, that is EXACTLY -2 per frame, which is the same clock
+      at which the bar grows (+2 px per frame). On reaching zero the screen changes. With this the timer
+      mechanism is closed end to end: the blit that draws it, its source in ROM (page
+      0 x=105, flat colour), its geometry (2 px wide anchored to the bottom of the active half) and now
+      the variable that moves it'
+    state: confirmed
+    evidence: 'MEASURED by dumping the whole RAM over six frames: it falls exactly -2 per frame down to
+      zero, the same clock at which the bar grows'
+  - addr: 2133811
+    name: wf_bar_count_page1
+    description: The same countdown in byte +5 of the other page structure (0x208f2e). It runs 2 out of
+      step with the previous one (92, 72, 52, 32, 12, 0), which is exactly what two pages alternating
+      frame by frame call for
+    state: confirmed
+    evidence: MEASURED the same way, 2 out of step with the other page's
+  - addr: 2143406
+    name: wf_sprite_list_current
+    description: Pointer to this frame's sprite list (0x208f2e / 0x2069ae, they alternate)
+  - addr: 2143410
+    name: wf_sprite_list_other
+    description: Pointer to the other frame's list; it swaps with the previous one
+  - addr: 2143414
+    name: wf_page_flag
+    description: 'Frame counter; its bit 0 alternates the double buffer (btst at 0x9b3da, and at 0xa5e3c
+      in the High Scores copy). It is PER SCREEN: each loop increments it as a BYTE, and the change of
+      writer falls exactly on the screen change (0xe399a up to frame 2770, 0xa5e22 from 2771). It was
+      located by looking for the ONLY monotonic word among the 65536 bytes of RAM, which is what is left
+      when all you have is the symptom'
+  - addr: 2143416
+    name: wf_clip_x0
+    description: Screen window, x0 (it is 0)
+  - addr: 2143418
+    name: wf_clip_y0
+    description: Screen window, y0 (it is 0)
+  - addr: 2143420
+    name: wf_clip_x1
+    description: Screen window, x1 = 0x150 = 336 (0x9b2c4, 0x9bab6); wf_video_reset sets 0x154
+  - addr: 2143422
+    name: wf_clip_y1
+    description: Screen window, y1 = 0xff = 255
+  - addr: 2143424
+    name: wf_page_yoffset
+    description: '0x100 or 0: the builder adds it to every sprite''s y. (-0x1a,A5)'
+  - addr: 2143426
+    name: wf_page_bit
+    description: '0x20 or 0: it goes into EVERY line''s scroll byte at 0x9b4c8, and at 0xa5e04 in the
+      High Scores copy. EXCEPTION READ FROM THE CODE (0xa5e84): in states 7 and 0xd of that state machine
+      the bit is INVERTED (eori.b #0x20). No heuristic based on counting blits can guess an exception
+      like that; it has to be read'
+  - addr: 2143442
+    name: wf_double_buffer_on
+    description: 'If it is 0 it forces the offset and the page bit to zero: it turns the double buffer
+      off. (-0x8,A5)'
+  - addr: 2145358
+    name: wf_camera_y
+    description: 'The camera''s y, which is the scenery scroll at the start of the frame. Measured: camera_y
+      + horizon is 429 or 430 on every frame, so the horizon always falls on the same row of the plane'
+  - addr: 2145364
+    name: wf_car_scroll
+    description: Scroll counter of the presentation car screen. It falls about 7 units per frame; the
+      background x, the firing of each slice and the curtain's row all come out of it
+  - addr: 2145390
+    name: wf_race_class
+    description: wheelfir main (RAM). The race class, 0..11, the column of the race clock step table and
+      the environment. Every boot stores the next attract demo class from the table at 0x76f98; a played
+      race stores 0x20bc6c * 3 + the level map cursor
+    level: verified
+    evidence: boot store 0xea540, played store 0xe0e04, read by the step load 0xe9414..0xe943e
+  - addr: 2145412
+    name: wf_difficulty
+    description: wheelfir main (RAM). The service menu DIFFICULTY LEVEL, 0 = VERY EASY 1 .. 4 = VERY HARD
+      5, from the high nibble of EEPROM settings byte 4 (2 in the shipped EEPROM). It selects the race
+      clock step row; the attract demos clear it around their step load, so they run at VERY EASY
+    level: verified
+    evidence: load 0xdd466, menu step 0xde268..0xde278, menu strings through 0xdee76, demo clear and restore
+      0xe95d8..0xe95ec, link store 0xa5210
+  - addr: 2145432
+    name: wf_link_player_number
+    description: wheelfir main (RAM). The COMUNICATION page PLAYER NUMBER, 0 = the first cabinet. Every
+      link routine tests it; it picks whether wf_link_share_difficulty sends or receives
+    level: verified
+    evidence: toggled by the menu handler 0xdea60..0xdeab6, EEPROM byte 0x7e bit 1; tested at 0xa51da
+  - addr: 2149412
+    name: wf_snd_active
+    description: 'wheelfir main (RAM). The sequencer''s switch: if it is 0, wf_snd_tick returns having
+      done nothing. It turns itself off only when the master volume reaches 0'
+    level: verified
+    evidence: 0xda734 `tst.w`; 0xda9de and 0xdaae8 turn it off; 0x9b286, 0x9cbfc, 0xea6f2 turn it on
+  - addr: 2149420
+    name: wf_snd_master_volume
+    description: wheelfir main (RAM). Overall volume 0..64. 0x20cc2e is the per-row fade step and 0x20cc28
+      / 0x20cc2a its two limits; on reaching 0 the player switches off and silences the four voices
+    level: verified
+    evidence: 0xda990-0xda9e2; `move.w 0x26, 0x20cc2c` at 0xea6ea
+  - addr: 2149436
+    name: wf_snd_speed
+    description: 'wheelfir main (RAM). Ticks per row; it starts at 6 (ProTracker''s default). Effect F
+      writes its low byte (0x20cc3d) masked to 4 bits: there is a speed but there is NO tempo/BPM'
+    level: verified
+    evidence: 0xda6c4, 0xdab00; 0xda76c compares it; 0xdac14-0xdac26 is effect F
+  - addr: 2149440
+    name: wf_snd_song
+    description: 'wheelfir main (RAM). Pointer to the song in progress. The header is: a word with the
+      number of positions, 31 longs of sample start, 31 longs of loop, 31 words of volume, the order list
+      at +0x138 (128 bytes) and 1024-byte patterns at +0x1b8'
+    level: verified
+    evidence: 0xda6d2, 0xdaa66; the model chains ten songs with no gap from 0x79ea8 to 0x9b220
+  - addr: 2149444
+    name: wf_snd_sample_base
+    description: 'wheelfir main (RAM). Base added to the song''s sample offsets to give absolute pointers
+      in the SUB''s space. It is also the anchor of the two resolved tables: starts at +4 (0x20cc48) and
+      loops at +0x80 (0x20ccc4)'
+    level: verified
+    evidence: 0xda6fa, 0xda718, 0xdab5c-0xdab6a; measured values 0x4942, 0x20d62, 0x486cc, 0x5d34c, 0x6740e,
+      0x79884, 0x84202, 0xf2c4, 0xf2ea
+  - addr: 2149696
+    name: wf_snd_channel1
+    description: wheelfir main (RAM). Sequencer channel 1 state, 26 bytes (the four at 0x20cd40, 5a, 74,
+      8e). +0 instrument, +1 note, +2 effect, +3 parameter, +4 start, +8 loop, +0xC note, +0xE volume,
+      +0x10 period, +0x12 voice register, +0x16 indirect opcode, +0x18 postincrement opcode
+    level: verified
+    evidence: 0xda58a-0xda5a2 seeds it; 0xdab44 fills it; 0x1a of separation between blocks
+  - addr: 2149800
+    name: wf_snd_block
+    description: 'wheelfir main (RAM). The 96 command bytes: six 16-byte registers at 0x20cda8, b8, c8,
+      d8, e8, f8. The first four are the sequencer''s channels and the last two the effects the game fires'
+    level: verified
+    evidence: 0xdc49c enqueues it; 0x9bf3e and 0xda9e4 fill it; 0xe6c46 and 0xe6c80 fire effects at 0x20cdf8
+  pwball_maincpu:
+  - addr: 63950
+    name: pwball_pal_blast
+    description: 'THE palette uploader that actually runs: 219 of the 222 uploads to the RAMDAC, MEASURED
+      with a breakpoint. An UNROLLED loop with a computed jump: it enters at 256-count, so it uploads
+      ANY stretch (index in wf_pal_idx, count in wf_pal_count) from wf_pal_buffer. That is the palette
+      composition by stretches'
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x09ceda (wf_pal_blast), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 67988
+    name: pwball_pal_accumulate
+    description: 'Composes the palette by ACCUMULATION: it walks wf_pal_delta and ADDS each increment
+      to the buffer''s colour, wf_pal_count colours, and takes one step off wf_pal_steps. It is the fade,
+      and it is the reason each colour takes SIX bytes: they are words, so they can accumulate without
+      clipping, and the upload keeps the low byte. Located with a write watchpoint on the buffer, not
+      by reading the disassembly'
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x09de98 (wf_pal_accumulate), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 68172
+    name: pwball_pal_to_black
+    description: Zeroes wf_pal_count colours of the buffer (fade to black)
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x09df50 (wf_pal_to_black), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 68210
+    name: pwball_pal_to_white
+    description: Fills wf_pal_count colours with 0xff00 (fade to white)
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x09df76 (wf_pal_to_white), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 95130
+    name: pwball_snd_load_song
+    description: 'wheelfir main. Loads a song: seeds the voice register pointers and the two opcodes per
+      channel, resolves the 31+31 sample tables by adding the base to them, clears the state and sets
+      speed 6'
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0da580 (wf_snd_load_song), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 95552
+    name: pwball_snd_tick
+    description: wheelfir main. Sequencer tick, called ONCE per vblank. Accumulator += 500 with overflow
+      at 543; when the tick counter reaches the speed it advances a row, and if not it runs the per-tick
+      effects
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0da734 (wf_snd_tick), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 95684
+    name: pwball_snd_effect_tick
+    description: 'wheelfir main. ProTracker per-tick effects: 0 arpeggio, 1 portamento up (limit 113),
+      2 portamento down (limit 856), A volume slide (clipped 0..64). It only runs if the parameter is
+      != 0'
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0da7b8 (wf_snd_effect_tick), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 96088
+    name: pwball_snd_apply_volume
+    description: wheelfir main. Translates (channel volume, master volume) into a base for the sub's volume
+      table and writes it into voice register +0x08. Volume 0 -> 0x842 (silence)
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0da94c (wf_snd_apply_volume), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 96238
+    name: pwball_snd_read_row
+    description: 'wheelfir main. Reads a pattern row: pattern = order[position], address = song + 0x1b8
+      + pattern*1024 + offset, and calls the cell reader for the four channels. It wraps the offset at
+      0x400 (64 rows) and advances the position'
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0daa66 (wf_snd_read_row), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 96694
+    name: pwball_note_period_table
+    description: 'wheelfir main. Note -> period table, 36 words for notes 1..36, read from the base 0xdac2c
+      indexed by the note, so index 0 is the `rts` that closes the routine before it. It IS ProTracker''s
+      period table with finetune 0: 856, 808, 762, ... 120, 113'
+    level: identical
+    evidence: 256 bytes identical to wheelfir_maincpu 0x0dac2e (wf_note_period_table)
+    type: data
+  - addr: 98256
+    name: pwball_volume_matrix_table
+    description: 'wheelfir main. A 64x64 byte matrix: index (channel_vol-1) + 64*(master_vol-1), value
+      = the sub''s volume table number (0..64). It occupies exactly 0xdb248..0xdc247'
+    level: identical
+    evidence: 256 bytes identical to wheelfir_maincpu 0x0db248 (wf_volume_matrix_table)
+    type: data
+  kongball_maincpu:
+  - addr: 1024
+    name: kongball_zoom_desc_x
+    description: '400 horizontal scale descriptors, 16 bytes each: +0..+4 five bytes the sprite builder
+      ORs into the register, +6 the shift, +8 and +0xc pointers to the two tables. It is the source of the
+      zoom_index[400] the driver carries by hand, and it agrees on all 400'
+    level: identical
+    evidence: 256 bytes identical to wheelfir_maincpu 0x000400 (wf_zoom_desc_x)
+    type: data
+  - addr: 7440
+    name: kongball_zoom_desc_y
+    description: The same 400 descriptors for the vertical axis
+    level: identical
+    evidence: 256 bytes identical to wheelfir_maincpu 0x001d10 (wf_zoom_desc_y)
+    type: data
+  - addr: 166334
+    name: kongball_pal_blast
+    description: 'THE palette uploader that actually runs: 219 of the 222 uploads to the RAMDAC, MEASURED
+      with a breakpoint. An UNROLLED loop with a computed jump: it enters at 256-count, so it uploads
+      ANY stretch (index in wf_pal_idx, count in wf_pal_count) from wf_pal_buffer. That is the palette
+      composition by stretches'
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x09ceda (wf_pal_blast), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 170374
+    name: kongball_pal_accumulate
+    description: 'Composes the palette by ACCUMULATION: it walks wf_pal_delta and ADDS each increment
+      to the buffer''s colour, wf_pal_count colours, and takes one step off wf_pal_steps. It is the fade,
+      and it is the reason each colour takes SIX bytes: they are words, so they can accumulate without
+      clipping, and the upload keeps the low byte. Located with a write watchpoint on the buffer, not
+      by reading the disassembly'
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x09de98 (wf_pal_accumulate), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 170562
+    name: kongball_pal_to_black
+    description: Zeroes wf_pal_count colours of the buffer (fade to black)
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x09df50 (wf_pal_to_black), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 170600
+    name: kongball_pal_to_white
+    description: Fills wf_pal_count colours with 0xff00 (fade to white)
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x09df76 (wf_pal_to_white), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 198656
+    name: kongball_clip
+    description: Clip variant for D2 low bits 7 (axes as declared, x forward, y forward), one of the eight
+      the clipper entry picks; leaves to the sprite builder
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0e498a (wf_clip), confirmed by comparing 12
+      disassembled instructions on each side
+  - addr: 199278
+    name: kongball_clip_xb_yb
+    description: Clip variant for D2 low bits 4 (axes as declared, x backward, y backward), one of the
+      eight the clipper entry picks; leaves to the sprite builder
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0e4be0 (wf_clip_xb_yb), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 199488
+    name: kongball_clip_swap
+    description: Clip variant for D2 low bits 3 (axes exchanged, x forward, y forward), one of the eight
+      the clipper entry picks; leaves to the sprite builder's second entry
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0e4caa (wf_clip_swap), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 200124
+    name: kongball_clip_swap_xb_yb
+    description: Clip variant for D2 low bits 0 (axes exchanged, x backward, y backward), one of the eight
+      the clipper entry picks; leaves to the sprite builder's second entry
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0e4f0e (wf_clip_swap_xb_yb), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 201356
+    name: kongball_arm_register
+    description: Sprite register builder. It takes the destination in D0/D1, the descriptor size in D4/D5
+      and the flags field in D2, passes the position through wf_scale_coord and writes the 24 bytes
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0e5584 (wf_arm_register), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 201458
+    name: kongball_arm_flags
+    description: 'move.w D2,0xa(a1): the instruction that leaves the flags field in the register, with
+      the bit 8s of x and y already mixed in'
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0e55ea (wf_arm_flags), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 308000
+    name: kongball_snd_load_song
+    description: 'wheelfir main. Loads a song: seeds the voice register pointers and the two opcodes per
+      channel, resolves the 31+31 sample tables by adding the base to them, clears the state and sets
+      speed 6'
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0da580 (wf_snd_load_song), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 308422
+    name: kongball_snd_tick
+    description: wheelfir main. Sequencer tick, called ONCE per vblank. Accumulator += 500 with overflow
+      at 543; when the tick counter reaches the speed it advances a row, and if not it runs the per-tick
+      effects
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0da734 (wf_snd_tick), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 308554
+    name: kongball_snd_effect_tick
+    description: 'wheelfir main. ProTracker per-tick effects: 0 arpeggio, 1 portamento up (limit 113),
+      2 portamento down (limit 856), A volume slide (clipped 0..64). It only runs if the parameter is
+      != 0'
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0da7b8 (wf_snd_effect_tick), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 308958
+    name: kongball_snd_apply_volume
+    description: wheelfir main. Translates (channel volume, master volume) into a base for the sub's volume
+      table and writes it into voice register +0x08. Volume 0 -> 0x842 (silence)
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0da94c (wf_snd_apply_volume), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 309108
+    name: kongball_snd_read_row
+    description: 'wheelfir main. Reads a pattern row: pattern = order[position], address = song + 0x1b8
+      + pattern*1024 + offset, and calls the cell reader for the four channels. It wraps the offset at
+      0x400 (64 rows) and advances the position'
+    level: correspondence
+    evidence: flow correspondence with wheelfir_maincpu 0x0daa66 (wf_snd_read_row), confirmed by comparing
+      12 disassembled instructions on each side
+  - addr: 309564
+    name: kongball_note_period_table
+    description: 'wheelfir main. Note -> period table, 36 words for notes 1..36, read from the base 0xdac2c
+      indexed by the note, so index 0 is the `rts` that closes the routine before it. It IS ProTracker''s
+      period table with finetune 0: 856, 808, 762, ... 120, 113'
+    level: identical
+    evidence: 256 bytes identical to wheelfir_maincpu 0x0dac2e (wf_note_period_table)
+    type: data
+  - addr: 311126
+    name: kongball_volume_matrix_table
+    description: 'wheelfir main. A 64x64 byte matrix: index (channel_vol-1) + 64*(master_vol-1), value
+      = the sub''s volume table number (0..64). It occupies exactly 0xdb248..0xdc247'
+    level: identical
+    evidence: 256 bytes identical to wheelfir_maincpu 0x0db248 (wf_volume_matrix_table)
+    type: data
+  radendur_subcpu,wheelfir_subcpu,pwball_subcpu:
+  - addr: 0
+    name: sub_rom
+    description: ROM code + sound samples (0x000000-0x0fffff)
+  - addr: 1024
+    name: snd_reset
+    description: 'Sound CPU reset. It masks IRQs, copies 0x554..0x839 (742 bytes) to RAM 0x201060, clears
+      the command buffer 0x201000..0x20105f, initialises the 6 voices (pointer and loop to 0x83a, table
+      0x4842, step 0x3d09) and falls into a `bra` to itself: all the work happens in IRQ1.'
+    level: verified
+    evidence: '0x400..0x542. The 24 patches were re-derived from the raw bytes by looking for 0x33fc/0x23fc
+      between 0x43a and 0x542; the copy loop is at 0x410 with `cmpa.l #0x83a,a0`; MEASURED 2026-10-13: executed
+      in a cold-boot sound-cpu trace of radendur'
+  - addr: 1348
+    name: snd_soft_reset_stub
+    description: Stacks PC=0x400 and SR=0x2700 and does an `rte`, that is, a soft jump to the reset. NO
+      vector points at it.
+    level: verified
+    evidence: '0x544..0x54e. A sweep of the 256 vectors (0x000..0x3fc): only 0x201000, 0x400, 0x550 and
+      0x201060 appear; MEASURED 2026-10-13: not executed in a cold-boot sound-cpu trace nor in 1500 frames
+      of attract; established by reading'
+  - addr: 1362
+    name: snd_rte_stub
+    description: A bare `rte` that 252 of the 256 exception vectors point at. The TRACE one (0x024) points
+      at its twin at 0x550.
+    level: verified
+    evidence: 'Count over the binary: {0x552: 252, 0x201000: 1, 0x400: 1, 0x550: 1, 0x201060: 1}.'
+  - addr: 1364
+    name: snd_isr_mixer
+    description: 'The whole mixer, and it is the IRQ1 handler. It is copied to RAM 0x201060 because it SELF-MODIFIES:
+      24 slots (read opcode, table base, step and loop pointer, for each of the 6 voices) plus the target
+      of the final `jmp`. 742 bytes, byte for byte identical in wheelfir, pwball and radendur.'
+    level: verified
+    evidence: 'Vector 0x064 = 0x201060; copy loop at 0x410. The three subcpu dumps are identical from 0x0
+      to 0x4946 (re-verified); MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurv2
+      attract'
+    runs_from: 2101344
+  - addr: 1466
+    name: snd_mix_out_l
+    description: 'Dumps the sum of voices 1+3+5 to the left DAC. `move.w d7, 0x700000.l`, a 16-bit word
+      of which the DAC uses the low 10 bits. No saturation and no clipping: the sum of three bytes cannot
+      pass 765, and that is why the DAC is 10 bits.'
+    level: verified
+    evidence: 'Bytes at 0x5ba: 33 c7 00 70 00 00. Between the `add.w` at 0x596 and 0x5b8 and this write
+      there is no other instruction; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of
+      the radendurv2 attract'
+    runs_from: 2101446
+  - addr: 1574
+    name: snd_mix_out_r
+    description: 'Dumps the sum of voices 2+4+6 to the right DAC. `move.w d7, 0x740000.l`. The stereo split
+      is FIXED by register: there is no pan field anywhere.'
+    level: verified
+    evidence: 'Bytes at 0x626: 33 c7 00 74 00 00, preceded by `clr.w d7` at 0x5c0; MEASURED 2026-10-13:
+      its RAM copy executes in a sound-cpu trace of the radendurv2 attract'
+    runs_from: 2101554
+  - addr: 1580
+    name: snd_isr_tail_jmp
+    description: '`jmp (X).l` with X patchable in RAM at 0x20113a: it is the command machine''s state pointer.
+      Each tail chains itself by writing the next one there before its `rte`.'
+    level: verified
+    evidence: 'Bytes 4e f9 ff ff ff ff at 0x62c; the reset initialises it with `move.l #0x20113e, 0x20113a`
+      at 0x532; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurv2 attract'
+    runs_from: 2101560
+  - addr: 1586
+    name: snd_cmd_idle
+    description: 'Idle state of the command machine: every IRQ compares the latch (0x780000) against 0xffff
+      and, when it arrives, chains to snd_cmd_apply_v12. It is the APPLY token the main CPU sends.'
+    level: verified
+    evidence: 'Bytes 0c 79 ff ff 00 78 00 00 at 0x632. On the main CPU, 0xdc490 `move.w #0xffff, 0x740000.l`;
+      MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurv2 attract'
+    runs_from: 2101566
+  - addr: 1608
+    name: snd_cmd_apply_v12
+    description: 'Applies the command registers of voices 1 and 2 from 0x201000. Each register is 16 bytes:
+      +0 sample pointer (0 = leave alone, skips 8), +4 loop pointer, +8 volume table base (0 = leave alone),
+      +12 opcode word (0 = leave alone, skips 4), +14 phase step. Writing +12 also does a `clr.w dN`, that
+      is, it restarts the phase.'
+    level: verified
+    evidence: '0x648..0x6ba. Bytes 41 f9 00 20 10 00 (lea 0x201000,a0); guards 4a 90/66 06/41 e8 00 08 and
+      4a 50/66 06/41 e8 00 04; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurv2
+      attract'
+    runs_from: 2101588
+  - addr: 1724
+    name: snd_cmd_apply_v34
+    description: The same for voices 3 and 4, reading from 0x201020.
+    level: verified
+    evidence: '0x6bc, `lea 0x201020, a0` (bytes 41 f9 00 20 10 20); MEASURED 2026-10-13: its RAM copy executes
+      in a sound-cpu trace of the radendurv2 attract'
+    runs_from: 2101704
+  - addr: 1840
+    name: snd_cmd_apply_v56
+    description: The same for voices 5 and 6, reading from 0x201040. It chains to snd_cmd_wait_block.
+    level: verified
+    evidence: '0x730, `lea 0x201040, a0` (bytes 41 f9 00 20 10 40); tail at 0x798 `move.l #0x2012b0, 0x20113a`;
+      MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurv2 attract'
+    runs_from: 2101820
+  - addr: 1956
+    name: snd_cmd_wait_block
+    description: Waits for the 0xa0a0 token in the latch (a new block begins). On arrival it zeroes the
+      HIGH word of d0, which is the reception index, and chains to the receiver.
+    level: verified
+    evidence: 'Bytes 0c 79 a0 a0 00 78 00 00 at 0x7a4, then 48 40 42 40 48 40 (swap/clr.w/swap). On the
+      main CPU, 0xdc4a6 `move.w #0xa0a0, (a2)+` heads the block it is about to emit; MEASURED 2026-10-13:
+      its RAM copy executes in a sound-cpu trace of the radendurv2 attract'
+    runs_from: 2101936
+  - addr: 1984
+    name: snd_cmd_recv_word
+    description: 'Receives ONE word from the latch per interrupt and leaves it at 0x201000 + index; the
+      index lives in d0''s high word and advances by 2 up to 0x60 (48 words = 96 bytes = 6 registers of
+      16). On completing it returns to snd_cmd_idle. The protocol is blind: the sound CPU answers nothing.'
+    level: verified
+    evidence: 'Bytes 31 b9 00 78 00 00 00 00 (move.w latch,(0,a0,d0.w)), 54 40, 0c 40 00 60 at 0x7c0..0x7d6.
+      On the wheelfir main CPU, 0xdc74e/0xdc78a/0xdc7c6 emit one word and re-arm the line counter with `move.w
+      #1, 0x7a0000`, that is, one word per scanline; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu
+      trace of the radendurv2 attract'
+    runs_from: 2101964
+  - addr: 2022
+    name: snd_voice_end_v1
+    description: 'End of sample for voice 1: it puts 0x80 (centre, silence) into d7 without going through
+      the table, reloads a1 with the patchable loop pointer (RAM 0x2012f8) and continues at 0x576. It does
+      not restart the phase.'
+    level: verified
+    evidence: 'Bytes 1e 3c 00 80 / 22 7c ff ff ff ff / 60 00 fd .. at 0x7e6; the `beq.w` that arrives here
+      is at 0x558; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu trace of the radendurv2 attract'
+    runs_from: 2102002
+  - addr: 2036
+    name: snd_voice_end_v3
+    description: 'End of sample for voice 3: 0x80 into d0, reload a3 (RAM slot 0x201306) and back to the
+      `add.w d0,d7` at 0x596.'
+    level: verified
+    evidence: '0x7f4..0x802, `beq.w` from 0x578; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu
+      trace of the radendurv2 attract'
+    runs_from: 2102016
+  - addr: 2050
+    name: snd_voice_end_v5
+    description: 'End of sample for voice 5: 0x80 into d0, reload a5 (RAM slot 0x201314) and back to the
+      `add.w d0,d7` at 0x5b8.'
+    level: verified
+    evidence: '0x802..0x810, `beq.w` from 0x59a; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu
+      trace of the radendurv2 attract'
+    runs_from: 2102030
+  - addr: 2064
+    name: snd_voice_end_v2
+    description: 'End of sample for voice 2: 0x80 into d7, reload a2 (RAM slot 0x201322) and continue at
+      0x5e2.'
+    level: verified
+    evidence: '0x810..0x81e, `beq.w` from 0x5c4; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu
+      trace of the radendurv2 attract'
+    runs_from: 2102044
+  - addr: 2078
+    name: snd_voice_end_v4
+    description: 'End of sample for voice 4: 0x80 into d0, reload a4 (RAM slot 0x201330) and back to the
+      `add.w d0,d7` at 0x602.'
+    level: verified
+    evidence: '0x81e..0x82c, `beq.w` from 0x5e4; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu
+      trace of the radendurv2 attract'
+    runs_from: 2102058
+  - addr: 2092
+    name: snd_voice_end_v6
+    description: 'End of sample for voice 6: 0x80 into d0, reload a6 (RAM slot 0x20133e) and back to the
+      `add.w d0,d7` at 0x624.'
+    level: verified
+    evidence: '0x82c..0x83a, `beq.w` from 0x606; MEASURED 2026-10-13: its RAM copy executes in a sound-cpu
+      trace of the radendurv2 attract'
+    runs_from: 2102072
+  - addr: 2106
+    name: snd_silence_loop
+    description: 'Silence loop: four 0x80 samples and a 0x00 terminator. With the loop pointer aimed here
+      as well, a voice pointing at this stays off for ever without needing an enable flag. It is the initial
+      state of all six voices.'
+    level: verified
+    evidence: d[0x83a..0x841] = 80 80 80 80 00 00 00 00. The reset writes 0x83a into the six pointers
+      (0x42a, 0x456, 0x482, 0x4ae, 0x4da, 0x506) and into the six loop slots (0x430, 0x45c, 0x488, 0x4b4,
+      0x4e0, 0x50c).
+    type: data
+  - addr: 2114
+    name: snd_vol_tables
+    description: An array of 65 volume tables of 256 bytes, 0x842..0x4941 (0x4100 bytes). The base of
+      level v is 0x842 + v*0x100 with v = 0..64, and the transform is table_v[i] = 0x80 + trunc((i-128)*v/64)
+      with truncation towards zero. v=0 is silence (all 0x80) and v=64 is the identity. Linear volume
+      in 65 steps of 1/64.
+    level: verified
+    evidence: 'Validated byte for byte: the 65 tables x 256 entries match that formula, 65/65. The floor
+      and ceil variants get only 1 and 2 of 65 right.'
+    type: data
+  - addr: 18498
+    name: snd_vol_full
+    description: Maximum volume table (v=64), which is the identity d[0x4842+i] = i. It is the one the
+      reset puts into all six voices.
+    level: verified
+    evidence: The slope-1 stretch measured over the binary is exactly 0x4842..0x4941, values 0x00..0xff.
+      The reset writes it at 0x44c, 0x478, 0x4a4, 0x4d0, 0x4fc and 0x528.
+    type: data
+  - addr: 18758
+    name: snd_samples
+    description: 'Start of the sample data, unsigned 8-bit PCM centred on 0x80 with 0x00 reserved as the
+      terminator. It is exactly where the three games stop being identical: the sound program is common
+      and only the samples change.'
+    level: verified
+    evidence: 'Byte for byte comparison of wheelfir_subcpu.bin against pwball_subcpu.bin and radendur_subcpu.bin:
+      identical up to 0x4946 in both cases. First bytes at 0x4946: 74 75 75 75 76 77 76 7b 8f af df ff.'
+    type: data
+  - addr: 2097152
+    name: sub_ram
+    description: RAM (0x200000-0x20ffff)
+    evidence: 'READ from the sound 68000 map in both drivers, and they are identical: wheelfir_sub() in
+      wheelfir.cpp and the sub map in radendur.cpp'
+  - addr: 2101248
+    name: snd_cmd_buffer
+    description: Command buffer in RAM, 96 bytes = 6 registers of 16 (voice 1 at 0x201000, voice 2 at
+      0x201010, ... voice 6 at 0x201050). The receiver fills it one word per interrupt and the three application
+      tails consume it. The reset clears it entirely.
+    level: verified
+    evidence: 0x41a..0x428 clears it up to 0x201060; 0x7c0 writes into it with an index up to 0x60; 0x648,
+      0x6bc and 0x730 read from 0x201000, 0x201020 and 0x201040.
+  - addr: 2101344
+    name: snd_isr_mixer_ram
+    description: 'The mixer''s RAM copy, 0x201060..0x201345. It is the one that executes and the only
+      one that gets patched. Conversion: RAM = 0x201060 + (ROM - 0x554).'
+    level: verified
+    evidence: 0x40a `lea 0x201060,a1` and the IRQ1 vector at 0x064 = 0x201060.
+  - addr: 2101346
+    name: snd_v1_opcode
+    description: 'Sub-CPU (RAM). Voice 1''s read opcode, patched live: 0x1e11 = `move.b (a1),d7` (with
+      a phase accumulator) or 0x1e19 = `move.b (a1)+,d7` (one sample per IRQ, the octave above). The six
+      are at 0x201062, 0x2010ce, 0x201082, 0x2010ee, 0x2010a4 and 0x201110'
+    level: verified
+    evidence: reset 0x43c; application 0x674; the wheelfir main CPU chooses between the two forms at 0xdabb2-0xdabca
+  - addr: 2101354
+    name: snd_v1_table
+    description: 'Sub-CPU (RAM). Operand of voice 1''s `movea.l #imm,a0`: the base of its volume table.
+      The six: 0x20106a, 0x2010d6, 0x20108a, 0x2010f6, 0x2010ac, 0x201118'
+    level: verified
+    evidence: reset 0x44c `move.l 0x4842, 0x20106a.l`; application 0x664
+    type: data
+  - addr: 2101364
+    name: snd_v1_step
+    description: 'Sub-CPU (RAM). Operand of voice 1''s `addi.w`: the phase increment in Hz. The MODULUS
+      (0x3d09 = 15625, the rate of IRQ1) sits at 0x201078 and is NEVER patched'
+    level: verified
+    evidence: reset 0x444; application 0x67a; `cmpi.w 0x3d09` in ROM at 0x56a with the immediate at 0x56c
+  - addr: 2101562
+    name: snd_tail_slot
+    description: 'Operand of the mixer''s final `jmp`: the command machine''s state pointer. Possible
+      values, all in RAM: 0x20113e (idle), 0x201154 (voices 1-2), 0x2011c8 (voices 3-4), 0x20123c (voices
+      5-6), 0x2012b0 (awaiting block), 0x2012cc (receiving word).'
+    level: verified
+    evidence: Reset at 0x532; chained at 0x63c, 0x6b0, 0x724, 0x798, 0x7b4 and 0x7d8. Each one translates
+      to ROM with ROM = 0x554 + (RAM - 0x201060).
+  - addr: 2102008
+    name: snd_v1_reload
+    description: 'Sub-CPU (RAM). Voice 1''s loop pointer: operand of the `movea.l` in the end-of-sample
+      epilogue. The six: 0x2012f8, 0x201322, 0x201306, 0x201330, 0x201314, 0x20133e (a1..a6)'
+    level: verified
+    evidence: reset 0x430; application 0x65a; consumed at 0x7ea
+  - addr: 7340032
+    name: ldac
+    description: left DAC (data_w)
+    evidence: 'READ from the sound 68000 map in both drivers, and they are identical: wheelfir_sub() in
+      wheelfir.cpp and the sub map in radendur.cpp'
+  - addr: 7602176
+    name: rdac
+    description: right DAC (data_w)
+    evidence: 'READ from the sound 68000 map in both drivers, and they are identical: wheelfir_sub() in
+      wheelfir.cpp and the sub map in radendur.cpp'
+  - addr: 7864320
+    name: soundlatch_r
+    description: latch from the main CPU to the sub CPU (reads the main CPU's command)
+    evidence: 'READ from the sound 68000 map in both drivers, and they are identical: wheelfir_sub() in
+      wheelfir.cpp and the sub map in radendur.cpp'
+  rltennis_maincpu,rltennisa_maincpu:
+  - addr: 0
+    name: rlt_rom
+    description: ROM (0x000000-0x0fffff)
+    evidence: 'HARDWARE MAP, read from the address_map of tch/rltennis.cpp (rltennis_main). It holds for
+      BOTH sets because it is the SAME BOARD, not because the dumps agree: they differ in 308 bytes of
+      1048576 (six palette stretches and the credits table).'
+  - addr: 1048576
+    name: rlt_eeprom
+    description: EEPROM 28xx (0x100000-0x103fff)
+    evidence: 'HARDWARE MAP, read from the address_map of tch/rltennis.cpp (rltennis_main). It holds for
+      BOTH sets because it is the SAME BOARD, not because the dumps agree: they differ in 308 bytes of
+      1048576 (six palette stretches and the credits table).'
+  - addr: 2097152
+    name: rlt_ram
+    description: RAM (0x200000-0x20ffff)
+    evidence: 'HARDWARE MAP, read from the address_map of tch/rltennis.cpp (rltennis_main). It holds for
+      BOTH sets because it is the SAME BOARD, not because the dumps agree: they differ in 308 bytes of
+      1048576 (six palette stretches and the credits table).'
+  - addr: 7340032
+    name: rlt_blitter
+    description: Blitter (0x700000-0x70000f) -- blitter_w
+    evidence: 'HARDWARE MAP, read from the address_map of tch/rltennis.cpp (rltennis_main). It holds for
+      BOTH sets because it is the SAME BOARD, not because the dumps agree: they differ in 308 bytes of
+      1048576 (six palette stretches and the credits table).'
+  - addr: 7471105
+    name: rlt_ramdac_idx
+    description: RAMDAC index_w
+    evidence: 'HARDWARE MAP, read from the address_map of tch/rltennis.cpp (rltennis_main). It holds for
+      BOTH sets because it is the SAME BOARD, not because the dumps agree: they differ in 308 bytes of
+      1048576 (six palette stretches and the credits table).'
+  - addr: 7471107
+    name: rlt_ramdac_pal
+    description: RAMDAC pal_rw
+    evidence: 'HARDWARE MAP, read from the address_map of tch/rltennis.cpp (rltennis_main). It holds for
+      BOTH sets because it is the SAME BOARD, not because the dumps agree: they differ in 308 bytes of
+      1048576 (six palette stretches and the credits table).'
+  - addr: 7602176
+    name: rlt_snd1
+    description: Sample block of DAC 2 (the driver's snd1_w, which stores it in m_data760000)
+    evidence: 'HARDWARE MAP, read from the address_map of tch/rltennis.cpp (rltennis_main). It holds for
+      BOTH sets because it is the SAME BOARD, not because the dumps agree: they differ in 308 bytes of
+      1048576 (six palette stretches and the credits table).'
+  - addr: 7733248
+    name: rlt_snd2
+    description: Sample block of DAC 1 (the driver's snd2_w, which stores it in m_data740000)
+    evidence: 'HARDWARE MAP, read from the address_map of tch/rltennis.cpp (rltennis_main). It holds for
+      BOTH sets because it is the SAME BOARD, not because the dumps agree: they differ in 308 bytes of
+      1048576 (six palette stretches and the credits table).'
+  - addr: 7864320
+    name: rlt_sndctrl
+    description: Sound control, unknown, usually 0x0044
+    evidence: 'HARDWARE MAP, read from the address_map of tch/rltennis.cpp (rltennis_main). It holds for
+      BOTH sets because it is the SAME BOARD, not because the dumps agree: they differ in 308 bytes of
+      1048576 (six palette stretches and the credits table).'
+  - addr: 7995392
+    name: rlt_unknown
+    description: Read-only at boot (unknown)
+    evidence: 'HARDWARE MAP, read from the address_map of tch/rltennis.cpp (rltennis_main). It holds for
+      BOTH sets because it is the SAME BOARD, not because the dumps agree: they differ in 308 bytes of
+      1048576 (six palette stretches and the credits table).'
+  - addr: 8257536
+    name: rlt_io
+    description: io_r (player 1 inputs)
+    evidence: 'HARDWARE MAP, read from the address_map of tch/rltennis.cpp (rltennis_main). It holds for
+      BOTH sets because it is the SAME BOARD, not because the dumps agree: they differ in 308 bytes of
+      1048576 (six palette stretches and the credits table).'
+  - addr: 8257538
+    name: rlt_p2
+    description: Port P2
+    evidence: 'HARDWARE MAP, read from the address_map of tch/rltennis.cpp (rltennis_main). It holds for
+      BOTH sets because it is the SAME BOARD, not because the dumps agree: they differ in 308 bytes of
+      1048576 (six palette stretches and the credits table).'

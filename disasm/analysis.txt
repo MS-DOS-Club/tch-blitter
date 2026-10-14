@@ -1,0 +1,3969 @@
+################################################################
+# kongball_maincpu.bin   functions: 228
+################################################################
+  00028840  FUN_00028840              162 bytes
+  000288e2  FUN_000288e2              24 bytes
+  00028994  FUN_00028994              84 bytes
+  000297ea  FUN_000297ea              30 bytes
+  0002ff96  FUN_0002ff96              56 bytes
+  0002ffce  FUN_0002ffce              94 bytes
+  0003002c  FUN_0003002c              256 bytes
+  0003012c  FUN_0003012c              298 bytes
+  00030256  FUN_00030256              292 bytes
+  0003037a  FUN_0003037a              306 bytes
+  000304ac  FUN_000304ac              300 bytes
+  000305d8  FUN_000305d8              18 bytes
+  000305ea  FUN_000305ea              160 bytes
+  0003068a  FUN_0003068a              84 bytes
+  000306de  FUN_000306de              1970 bytes
+  00030e90  FUN_00030e90              320 bytes
+  00030fd0  FUN_00030fd0              26 bytes
+  00030fea  FUN_00030fea              674 bytes
+  0003128c  kongball_arm_register     414 bytes
+  0003142a  FUN_0003142a              2 bytes
+  0003142c  FUN_0003142c              56 bytes
+  00031464  FUN_00031464              598 bytes
+  0003b53a  FUN_0003b53a              120 bytes
+  0003b5b2  FUN_0003b5b2              132 bytes
+  0003b636  FUN_0003b636              132 bytes
+  0003b6ba  FUN_0003b6ba              52 bytes
+  0003b6ee  FUN_0003b6ee              84 bytes
+  0003d704  FUN_0003d704              64 bytes
+  0003d744  FUN_0003d744              58 bytes
+  0003d77e  FUN_0003d77e              56 bytes
+  0003d7b6  FUN_0003d7b6              20 bytes
+  0003d7ca  FUN_0003d7ca              20 bytes
+  0003d83c  FUN_0003d83c              98 bytes
+  0003d8ec  FUN_0003d8ec              36 bytes
+  0003d910  FUN_0003d910              32 bytes
+  0003d94c  FUN_0003d94c              60 bytes
+  0003d988  FUN_0003d988              14 bytes
+  0003d9bc  FUN_0003d9bc              164 bytes
+  0003da56  FUN_0003da56              20 bytes
+  0003dc32  FUN_0003dc32              62 bytes
+  0003dc70  FUN_0003dc70              54 bytes
+  0003dca6  FUN_0003dca6              188 bytes
+  0003dd62  FUN_0003dd62              106 bytes
+  0003ddcc  FUN_0003ddcc              92 bytes
+  0003de28  FUN_0003de28              64 bytes
+  0003de68  FUN_0003de68              70 bytes
+  0003deae  FUN_0003deae              72 bytes
+  0003def6  FUN_0003def6              72 bytes
+  0003df3e  FUN_0003df3e              512 bytes
+  0003e13e  FUN_0003e13e              34 bytes
+  0003e662  FUN_0003e662              168 bytes
+  0003e70a  FUN_0003e70a              128 bytes
+  0003e78a  FUN_0003e78a              270 bytes
+  0003e898  FUN_0003e898              310 bytes
+  0003e9ce  FUN_0003e9ce              34 bytes
+  0003e9f0  FUN_0003e9f0              684 bytes
+  0003eeb2  FUN_0003eeb2              460 bytes
+  0003f07e  FUN_0003f07e              114 bytes
+  0003f0f0  FUN_0003f0f0              34 bytes
+  0003f19a  FUN_0003f19a              20 bytes
+  0003f20a  FUN_0003f20a              286 bytes
+  0003fe78  FUN_0003fe78              350 bytes
+  0003ffd6  FUN_0003ffd6              30 bytes
+  0003fff4  FUN_0003fff4              202 bytes
+  000400be  FUN_000400be              458 bytes
+  00040288  FUN_00040288              78 bytes
+  000402d6  FUN_000402d6              56 bytes
+  0004030e  FUN_0004030e              96 bytes
+  0004036e  FUN_0004036e              58 bytes
+  000403a8  FUN_000403a8              86 bytes
+  000403fe  FUN_000403fe              88 bytes
+  00040456  FUN_00040456              16 bytes
+  00040466  FUN_00040466              56 bytes
+  0004049e  FUN_0004049e              138 bytes
+  00040528  FUN_00040528              124 bytes
+  000405a4  FUN_000405a4              140 bytes
+  00040630  FUN_00040630              46 bytes
+  0004065e  FUN_0004065e              56 bytes
+  00040696  FUN_00040696              58 bytes
+  000406d0  FUN_000406d0              314 bytes
+  0004080a  FUN_0004080a              176 bytes
+  000408ba  FUN_000408ba              44 bytes
+  00040902  FUN_00040902              32 bytes
+  0004093a  FUN_0004093a              84 bytes
+  0004098e  FUN_0004098e              78 bytes
+  00040ae0  FUN_00040ae0              130 bytes
+  00040b8e  FUN_00040b8e              118 bytes
+  00040c32  FUN_00040c32              116 bytes
+  00040ca6  FUN_00040ca6              24 bytes
+  00040cbe  FUN_00040cbe              144 bytes
+  00040d4e  FUN_00040d4e              164 bytes
+  00040df2  FUN_00040df2              38 bytes
+  00040eba  FUN_00040eba              684 bytes
+  00041166  FUN_00041166              84 bytes
+  000411ba  FUN_000411ba              230 bytes
+  000412a0  FUN_000412a0              62 bytes
+  000412de  FUN_000412de              618 bytes
+  00041548  FUN_00041548              46 bytes
+  00041576  FUN_00041576              380 bytes
+  000416f2  FUN_000416f2              130 bytes
+  00041798  FUN_00041798              704 bytes
+  00041a58  FUN_00041a58              70 bytes
+  00041a9e  FUN_00041a9e              130 bytes
+  00041b20  thunk_FUN_00041bdc        4 bytes
+  00041bdc  FUN_00041bdc              152 bytes
+  00041c74  FUN_00041c74              656 bytes
+  00041f04  thunk_FUN_00041f84        4 bytes
+  00041f84  FUN_00041f84              1010 bytes
+  00042376  FUN_00042376              66 bytes
+  000423b8  FUN_000423b8              16 bytes
+  000423c8  FUN_000423c8              162 bytes
+  0004246a  FUN_0004246a              182 bytes
+  00042520  FUN_00042520              86 bytes
+  00042576  FUN_00042576              314 bytes
+  000426b0  FUN_000426b0              40 bytes
+  000426d8  FUN_000426d8              312 bytes
+  00042810  FUN_00042810              138 bytes
+  0004289a  FUN_0004289a              98 bytes
+  000428fc  FUN_000428fc              252 bytes
+  000429f8  FUN_000429f8              54 bytes
+  00042ade  FUN_00042ade              116 bytes
+  00042b52  FUN_00042b52              54 bytes
+  00042b88  FUN_00042b88              54 bytes
+  00042bbe  FUN_00042bbe              34 bytes
+  00042be0  FUN_00042be0              276 bytes
+  00042cf4  FUN_00042cf4              26 bytes
+  00042d0e  FUN_00042d0e              18 bytes
+  00042d20  FUN_00042d20              94 bytes
+  00042d7e  FUN_00042d7e              182 bytes
+  00042e46  FUN_00042e46              84 bytes
+  00042e9a  FUN_00042e9a              342 bytes
+  00043062  FUN_00043062              34 bytes
+  00043084  FUN_00043084              46 bytes
+  000433ba  FUN_000433ba              56 bytes
+  000433f2  FUN_000433f2              64 bytes
+  00043432  FUN_00043432              58 bytes
+  0004346c  FUN_0004346c              90 bytes
+  000434c6  FUN_000434c6              102 bytes
+  0004352c  FUN_0004352c              122 bytes
+  000435a6  FUN_000435a6              144 bytes
+  00043636  FUN_00043636              116 bytes
+  000436aa  FUN_000436aa              90 bytes
+  00043704  FUN_00043704              242 bytes
+  000437f6  FUN_000437f6              100 bytes
+  0004385a  FUN_0004385a              88 bytes
+  000438b2  FUN_000438b2              98 bytes
+  00043914  FUN_00043914              110 bytes
+  00043982  FUN_00043982              246 bytes
+  00043a78  FUN_00043a78              256 bytes
+  00043b78  FUN_00043b78              104 bytes
+  00043be0  FUN_00043be0              138 bytes
+  00043c6a  FUN_00043c6a              62 bytes
+  00043ca8  FUN_00043ca8              362 bytes
+  00043e12  FUN_00043e12              96 bytes
+  00043f34  FUN_00043f34              78 bytes
+  000442e2  FUN_000442e2              860 bytes
+  0004463e  FUN_0004463e              130 bytes
+  000446c0  FUN_000446c0              104 bytes
+  00044728  FUN_00044728              110 bytes
+  00044796  FUN_00044796              36 bytes
+  000447ba  FUN_000447ba              240 bytes
+  000448aa  FUN_000448aa              68 bytes
+  000448ee  FUN_000448ee              352 bytes
+  00044a4e  FUN_00044a4e              58 bytes
+  00044a88  FUN_00044a88              42 bytes
+  00044ab2  FUN_00044ab2              110 bytes
+  00044b20  FUN_00044b20              84 bytes
+  00044b74  FUN_00044b74              268 bytes
+  00044c80  FUN_00044c80              218 bytes
+  00044d5a  FUN_00044d5a              822 bytes
+  00045092  FUN_00045092              54 bytes
+  000450c8  FUN_000450c8              132 bytes
+  0004514c  FUN_0004514c              360 bytes
+  000452b4  FUN_000452b4              166 bytes
+  0004535a  FUN_0004535a              38 bytes
+  00045380  FUN_00045380              178 bytes
+  00045452  FUN_00045452              446 bytes
+  00045610  FUN_00045610              178 bytes
+  00045edc  FUN_00045edc              22 bytes
+  00046002  FUN_00046002              484 bytes
+  000461e6  FUN_000461e6              34 bytes
+  0004643c  FUN_0004643c              72 bytes
+  00046484  FUN_00046484              92 bytes
+  000464e0  FUN_000464e0              264 bytes
+  000465e8  FUN_000465e8              128 bytes
+  00046668  FUN_00046668              174 bytes
+  00046716  FUN_00046716              44 bytes
+  00046742  FUN_00046742              170 bytes
+  00046b98  FUN_00046b98              144 bytes
+  00046dae  FUN_00046dae              188 bytes
+  00046e6a  FUN_00046e6a              46 bytes
+  00046e98  FUN_00046e98              348 bytes
+  0004724c  FUN_0004724c              114 bytes
+  00047608  FUN_00047608              26 bytes
+  000491a4  FUN_000491a4              3502 bytes
+  00049556  FUN_00049556              20 bytes
+  00049f66  FUN_00049f66              10 bytes
+  00049f70  FUN_00049f70              92 bytes
+  00049fcc  FUN_00049fcc              100 bytes
+  0004a030  FUN_0004a030              274 bytes
+  0004a142  FUN_0004a142              226 bytes
+  0004a4f0  reset                     364 bytes
+  0004a65c  FUN_0004a65c              264 bytes
+  0004a764  FUN_0004a764              126 bytes
+  0004a858  FUN_0004a858              156 bytes
+  0004a8f4  FUN_0004a8f4              116 bytes
+  0004a968  FUN_0004a968              290 bytes
+  0004aa8a  FUN_0004aa8a              290 bytes
+  0004abac  FUN_0004abac              18 bytes
+  0004abbe  FUN_0004abbe              78 bytes
+  0004ac0c  FUN_0004ac0c              28 bytes
+  0004ac28  FUN_0004ac28              60 bytes
+  0004ac64  FUN_0004ac64              122 bytes
+  0004acde  FUN_0004acde              180 bytes
+  0004ad92  FUN_0004ad92              578 bytes
+  0004b280  FUN_0004b280              28 bytes
+  0004b29c  FUN_0004b29c              28 bytes
+  0004b2b8  FUN_0004b2b8              74 bytes
+  0004b302  FUN_0004b302              30 bytes
+  0004b320  kongball_snd_load_song    422 bytes
+  0004b4c6  kongball_snd_tick         132 bytes
+  0004b54a  kongball_snd_effect_tick  404 bytes
+  0004b6de  kongball_snd_apply_volume  68 bytes
+  0004b722  FUN_0004b722              304 bytes
+  0004b852  FUN_0004b852              234 bytes
+  0004cf56  FUN_0004cf56              152 bytes
+  0004cfee  FUN_0004cfee              288 bytes
+  0004d10e  FUN_0004d10e              126 bytes
+
+-- symbols seeded from symbols.txt --
+  00000000  vec_ssp
+  00000000  main_rom
+  00000004  vec_reset
+  00000008  vec_buserr
+  0000000c  vec_addrerr
+  00000010  vec_illegal
+  00000014  vec_divzero
+  00000018  vec_chk
+  0000001c  vec_trapv
+  00000020  vec_privviol
+  00000024  vec_trace
+  00000060  vec_spurious
+  00000064  vec_irq1
+  0000006c  vec_irq3
+  00000074  vec_irq5
+  00000080  vec_trap0
+  00000400  kongball_zoom_desc_x
+  00001d10  kongball_zoom_desc_y
+  000289be  kongball_pal_blast
+  00029986  kongball_pal_accumulate
+  00029a42  kongball_pal_to_black
+  00029a68  kongball_pal_to_white
+  00030800  kongball_clip
+  00030a6e  kongball_clip_xb_yb
+  00030b40  kongball_clip_swap
+  00030dbc  kongball_clip_swap_xb_yb
+  0003128c  kongball_arm_register
+  000312f2  kongball_arm_flags
+  0004a4f0  reset
+  0004b320  kongball_snd_load_song
+  0004b4c6  kongball_snd_tick
+  0004b54a  kongball_snd_effect_tick
+  0004b6de  kongball_snd_apply_volume
+  0004b774  kongball_snd_read_row
+  0004b93c  kongball_note_period_table
+  0004bf56  kongball_volume_matrix_table
+  00200000  main_ram
+  00700000  blit_data
+  00720001  ramdac_index
+  00720003  ramdac_pal
+  00720005  ramdac_mask
+  00740000  soundlatch
+  00760000  coin_cnt
+  00780000  adc
+  007a0000  line_counter
+  007c0000  control_and_link
+  007e0000  player_inputs
+  007e0002  player_inputs_p2
+
+-- code that touches the blitter (0x700000-0x70001f) --
+  000314dc -> 00700000   [FUN_00031464 @ 00031464]
+  00031544 -> 00700000   [FUN_00031464 @ 00031464]
+  000315ac -> 00700000   [FUN_00031464 @ 00031464]
+  00031614 -> 00700000   [FUN_00031464 @ 00031464]
+  00030ff2 -> 00700000   [FUN_00030fea @ 00030fea]
+  00031090 -> 00700000   [FUN_00030fea @ 00030fea]
+  0003110a -> 00700000   [FUN_00030fea @ 00030fea]
+  00031184 -> 00700000   [FUN_00030fea @ 00030fea]
+  00031208 -> 00700000   [FUN_00030fea @ 00030fea]
+  0003150c -> 00700002   [FUN_00031464 @ 00031464]
+  00031574 -> 00700002   [FUN_00031464 @ 00031464]
+  000315dc -> 00700002   [FUN_00031464 @ 00031464]
+  00031644 -> 00700002   [FUN_00031464 @ 00031464]
+  00031038 -> 00700002   [FUN_00030fea @ 00030fea]
+  000310d6 -> 00700002   [FUN_00030fea @ 00030fea]
+  00031150 -> 00700002   [FUN_00030fea @ 00030fea]
+  000311cc -> 00700002   [FUN_00030fea @ 00030fea]
+  00031250 -> 00700002   [FUN_00030fea @ 00030fea]
+  000314e4 -> 00700004   [FUN_00031464 @ 00031464]
+  0003154c -> 00700004   [FUN_00031464 @ 00031464]
+  000315b4 -> 00700004   [FUN_00031464 @ 00031464]
+  0003161c -> 00700004   [FUN_00031464 @ 00031464]
+  00030ff8 -> 00700004   [FUN_00030fea @ 00030fea]
+  00031096 -> 00700004   [FUN_00030fea @ 00030fea]
+  00031110 -> 00700004   [FUN_00030fea @ 00030fea]
+  0003118c -> 00700004   [FUN_00030fea @ 00030fea]
+  00031210 -> 00700004   [FUN_00030fea @ 00030fea]
+  00031514 -> 00700006   [FUN_00031464 @ 00031464]
+  0003157c -> 00700006   [FUN_00031464 @ 00031464]
+  000315e4 -> 00700006   [FUN_00031464 @ 00031464]
+  0003164c -> 00700006   [FUN_00031464 @ 00031464]
+  00031040 -> 00700006   [FUN_00030fea @ 00030fea]
+  000310de -> 00700006   [FUN_00030fea @ 00030fea]
+  00031158 -> 00700006   [FUN_00030fea @ 00030fea]
+  000311d4 -> 00700006   [FUN_00030fea @ 00030fea]
+  00031258 -> 00700006   [FUN_00030fea @ 00030fea]
+  000314a2 -> 00700008   [FUN_00031464 @ 00031464]
+  000288a2 -> 00700009   [FUN_00028840 @ 00028840]
+  000314aa -> 0070000a   [FUN_00031464 @ 00031464]
+  000288a8 -> 0070000b   [FUN_00028840 @ 00028840]
+  000314ec -> 0070000c   [FUN_00031464 @ 00031464]
+  00031554 -> 0070000c   [FUN_00031464 @ 00031464]
+  000315bc -> 0070000c   [FUN_00031464 @ 00031464]
+  00031624 -> 0070000c   [FUN_00031464 @ 00031464]
+  00031000 -> 0070000c   [FUN_00030fea @ 00030fea]
+  0003109e -> 0070000c   [FUN_00030fea @ 00030fea]
+  00031118 -> 0070000c   [FUN_00030fea @ 00030fea]
+  00031194 -> 0070000c   [FUN_00030fea @ 00030fea]
+  00031218 -> 0070000c   [FUN_00030fea @ 00030fea]
+  00031538 -> 0070000d   [FUN_00031464 @ 00031464]
+  000315a0 -> 0070000d   [FUN_00031464 @ 00031464]
+  000311f8 -> 0070000d   [FUN_00030fea @ 00030fea]
+  0003127c -> 0070000d   [FUN_00030fea @ 00030fea]
+  000314f4 -> 0070000e   [FUN_00031464 @ 00031464]
+  0003155c -> 0070000e   [FUN_00031464 @ 00031464]
+  000315c4 -> 0070000e   [FUN_00031464 @ 00031464]
+  0003162c -> 0070000e   [FUN_00031464 @ 00031464]
+  00031008 -> 0070000e   [FUN_00030fea @ 00030fea]
+  000310a6 -> 0070000e   [FUN_00030fea @ 00030fea]
+  00031120 -> 0070000e   [FUN_00030fea @ 00030fea]
+  0003119c -> 0070000e   [FUN_00030fea @ 00030fea]
+  00031220 -> 0070000e   [FUN_00030fea @ 00030fea]
+  000314fc -> 00700010   [FUN_00031464 @ 00031464]
+  00031564 -> 00700010   [FUN_00031464 @ 00031464]
+  000315cc -> 00700010   [FUN_00031464 @ 00031464]
+  00031634 -> 00700010   [FUN_00031464 @ 00031464]
+  00031010 -> 00700010   [FUN_00030fea @ 00030fea]
+  000310ae -> 00700010   [FUN_00030fea @ 00030fea]
+  00031128 -> 00700010   [FUN_00030fea @ 00030fea]
+  000311a4 -> 00700010   [FUN_00030fea @ 00030fea]
+  00031228 -> 00700010   [FUN_00030fea @ 00030fea]
+  000288ca -> 00700011   [FUN_00028840 @ 00028840]
+  0003151c -> 00700012   [FUN_00031464 @ 00031464]
+  00031584 -> 00700012   [FUN_00031464 @ 00031464]
+  000315ec -> 00700012   [FUN_00031464 @ 00031464]
+  00031654 -> 00700012   [FUN_00031464 @ 00031464]
+  00031048 -> 00700012   [FUN_00030fea @ 00030fea]
+  000310e6 -> 00700012   [FUN_00030fea @ 00030fea]
+  00031160 -> 00700012   [FUN_00030fea @ 00030fea]
+  000311dc -> 00700012   [FUN_00030fea @ 00030fea]
+  00031260 -> 00700012   [FUN_00030fea @ 00030fea]
+  00031018 -> 00700014   [FUN_00030fea @ 00030fea]
+  000310b6 -> 00700014   [FUN_00030fea @ 00030fea]
+  00031130 -> 00700014   [FUN_00030fea @ 00030fea]
+  000311ac -> 00700014   [FUN_00030fea @ 00030fea]
+  00031230 -> 00700014   [FUN_00030fea @ 00030fea]
+  00028896 -> 00700015   [FUN_00028840 @ 00028840]
+  00031020 -> 00700016   [FUN_00030fea @ 00030fea]
+  000310be -> 00700016   [FUN_00030fea @ 00030fea]
+  00031138 -> 00700016   [FUN_00030fea @ 00030fea]
+  000311b4 -> 00700016   [FUN_00030fea @ 00030fea]
+  00031238 -> 00700016   [FUN_00030fea @ 00030fea]
+  0002889c -> 00700017   [FUN_00028840 @ 00028840]
+  00031028 -> 00700018   [FUN_00030fea @ 00030fea]
+  000310c6 -> 00700018   [FUN_00030fea @ 00030fea]
+  00031140 -> 00700018   [FUN_00030fea @ 00030fea]
+  000311bc -> 00700018   [FUN_00030fea @ 00030fea]
+  00031240 -> 00700018   [FUN_00030fea @ 00030fea]
+  0003158c -> 00700019   [FUN_00031464 @ 00031464]
+  0003165c -> 00700019   [FUN_00031464 @ 00031464]
+  00031168 -> 00700019   [FUN_00030fea @ 00030fea]
+  00031268 -> 00700019   [FUN_00030fea @ 00030fea]
+  00031524 -> 0070001b   [FUN_00031464 @ 00031464]
+  000315f4 -> 0070001b   [FUN_00031464 @ 00031464]
+  000310ee -> 0070001b   [FUN_00030fea @ 00030fea]
+  000311e4 -> 0070001b   [FUN_00030fea @ 00030fea]
+  000315fc -> 0070001c   [FUN_00031464 @ 00031464]
+  00031664 -> 0070001c   [FUN_00031464 @ 00031464]
+  000310f6 -> 0070001c   [FUN_00030fea @ 00030fea]
+  00031170 -> 0070001c   [FUN_00030fea @ 00030fea]
+  000314d4 -> 0070001e   [FUN_00031464 @ 00031464]
+  00031504 -> 0070001e   [FUN_00031464 @ 00031464]
+  0003152c -> 0070001e   [FUN_00031464 @ 00031464]
+  0003156c -> 0070001e   [FUN_00031464 @ 00031464]
+  00031594 -> 0070001e   [FUN_00031464 @ 00031464]
+  000315d4 -> 0070001e   [FUN_00031464 @ 00031464]
+  00031604 -> 0070001e   [FUN_00031464 @ 00031464]
+  0003163c -> 0070001e   [FUN_00031464 @ 00031464]
+  0003166c -> 0070001e   [FUN_00031464 @ 00031464]
+  00031030 -> 0070001e   [FUN_00030fea @ 00030fea]
+  00031050 -> 0070001e   [FUN_00030fea @ 00030fea]
+  000310ce -> 0070001e   [FUN_00030fea @ 00030fea]
+  000310fe -> 0070001e   [FUN_00030fea @ 00030fea]
+  00031148 -> 0070001e   [FUN_00030fea @ 00030fea]
+  00031178 -> 0070001e   [FUN_00030fea @ 00030fea]
+  000311c4 -> 0070001e   [FUN_00030fea @ 00030fea]
+  000311ec -> 0070001e   [FUN_00030fea @ 00030fea]
+  00031248 -> 0070001e   [FUN_00030fea @ 00030fea]
+  00031270 -> 0070001e   [FUN_00030fea @ 00030fea]
+
+-- decompilation of reset --
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void reset(void)
+
+{
+  short sVar1;
+  undefined2 *puVar2;
+  
+  _control_and_link = 0;
+  FUN_00031464();
+  FUN_000288e2();
+  FUN_0004d10e();
+  FUN_0004cf56();
+  reset();
+  _DAT_00201c26 = 0xd800;
+  _control_and_link = CONCAT11(0xd8,UNK_007c0001);
+  sVar1 = 0xff;
+  puVar2 = &DAT_002023e6;
+  do {
+    *puVar2 = 0;
+    sVar1 = sVar1 + -1;
+    puVar2 = puVar2 + 1;
+  } while (sVar1 != -1);
+  _DAT_00208b00 = 0;
+  _DAT_002023e0 = 1;
+  DAT_00204000 = 5;
+  DAT_00206580 = 5;
+  DAT_00201022 = &DAT_0000bd20;
+  DAT_00201018 = 0x32;
+  DAT_0020101a = 0;
+  DAT_0020101c = 0x100;
+  DAT_00201016 = 1;
+  FUN_000297ea();
+  FUN_00042b88();
+  FUN_0004a968();
+  FUN_0004aa8a();
+  FUN_0004acde();
+  FUN_00042810();
+  FUN_00042ade();
+  FUN_00043f34();
+  FUN_0004abac();
+  FUN_0004abbe();
+  FUN_0004ac64();
+  FUN_0004385a();
+  FUN_000436aa();
+  FUN_0004724c();
+  FUN_0004036e();
+  DAT_00210042 = 0;
+  DAT_00210043 = 0;
+  DAT_00210048 = 0x50;
+  DAT_00210049 = 0x50;
+  DAT_0021004d = 0;
+  FUN_0004ad92();
+  do {
+    do {
+      DAT_00210045 = 1;
+      FUN_00041798();
+      if (DAT_0021004f != '\x01') {
+        FUN_0004b29c();
+      }
+      DAT_0021004e = 0;
+      FUN_00046002();
+    } while (DAT_0020ff50 == '\0');
+    FUN_00041798();
+    FUN_000491a4();
+    FUN_0004ac28();
+  } while( true );
+}
+
+
+
+################################################################
+# pwball_maincpu.bin   functions: 169
+################################################################
+  00000400  reset                     66 bytes
+  00000442  FUN_00000442              284 bytes
+  00000d52  FUN_00000d52              252 bytes
+  00001e2a  FUN_00001e2a              72 bytes
+  000028e8  FUN_000028e8              254 bytes
+  00002b7c  FUN_00002b7c              270 bytes
+  00002c8a  FUN_00002c8a              94 bytes
+  00002ce8  FUN_00002ce8              100 bytes
+  00002d64  FUN_00002d64              80 bytes
+  00002e68  FUN_00002e68              170 bytes
+  00002f12  FUN_00002f12              470 bytes
+  000030e8  FUN_000030e8              164 bytes
+  0000318c  FUN_0000318c              172 bytes
+  00003238  FUN_00003238              240 bytes
+  00003328  FUN_00003328              228 bytes
+  0000340c  FUN_0000340c              102 bytes
+  00003472  FUN_00003472              128 bytes
+  000034f2  FUN_000034f2              48 bytes
+  00003522  FUN_00003522              14 bytes
+  00003530  FUN_00003530              48 bytes
+  00003560  FUN_00003560              50 bytes
+  00003592  FUN_00003592              74 bytes
+  000038b8  FUN_000038b8              106 bytes
+  00003970  FUN_00003970              196 bytes
+  00003b9c  FUN_00003b9c              84 bytes
+  00003dc2  FUN_00003dc2              102 bytes
+  00003ee0  FUN_00003ee0              94 bytes
+  00004104  FUN_00004104              86 bytes
+  000042d2  FUN_000042d2              156 bytes
+  00004536  FUN_00004536              38 bytes
+  000048ce  FUN_000048ce              92 bytes
+  0000493c  FUN_0000493c              28 bytes
+  000050b6  FUN_000050b6              228 bytes
+  000051b2  FUN_000051b2              480 bytes
+  00005392  FUN_00005392              34 bytes
+  0000548e  FUN_0000548e              84 bytes
+  00005554  FUN_00005554              62 bytes
+  00005602  FUN_00005602              24 bytes
+  00005640  FUN_00005640              156 bytes
+  000056dc  FUN_000056dc              180 bytes
+  00005908  FUN_00005908              144 bytes
+  000059ec  FUN_000059ec              62 bytes
+  00005a2a  FUN_00005a2a              122 bytes
+  00005aa4  FUN_00005aa4              20 bytes
+  00005ab8  FUN_00005ab8              38 bytes
+  00005ade  FUN_00005ade              22 bytes
+  00005af4  FUN_00005af4              26 bytes
+  00005b0e  FUN_00005b0e              26 bytes
+  00005b28  FUN_00005b28              84 bytes
+  00005b7c  FUN_00005b7c              82 bytes
+  00005bce  FUN_00005bce              158 bytes
+  00005c6c  FUN_00005c6c              124 bytes
+  00005e6c  FUN_00005e6c              64 bytes
+  00005eec  FUN_00005eec              22 bytes
+  00005f12  FUN_00005f12              62 bytes
+  000067ea  FUN_000067ea              390 bytes
+  00006970  FUN_00006970              38 bytes
+  000069ae  FUN_000069ae              122 bytes
+  00006a86  FUN_00006a86              176 bytes
+  00006b36  FUN_00006b36              68 bytes
+  00006b7a  FUN_00006b7a              144 bytes
+  00006c0a  FUN_00006c0a              124 bytes
+  0000770a  FUN_0000770a              194 bytes
+  000077cc  FUN_000077cc              124 bytes
+  00007e68  FUN_00007e68              462 bytes
+  000080ca  FUN_000080ca              1034 bytes
+  000085ac  FUN_000085ac              80 bytes
+  00008894  FUN_00008894              4728 bytes
+  00008bf6  FUN_00008bf6              1176 bytes
+  00008d30  FUN_00008d30              86 bytes
+  00008d86  FUN_00008d86              198 bytes
+  00008e4c  FUN_00008e4c              116 bytes
+  0000942c  FUN_0000942c              72 bytes
+  00009474  FUN_00009474              162 bytes
+  00009516  FUN_00009516              354 bytes
+  00009678  FUN_00009678              138 bytes
+  00009702  FUN_00009702              322 bytes
+  00009844  FUN_00009844              238 bytes
+  00009932  FUN_00009932              188 bytes
+  000099ee  FUN_000099ee              256 bytes
+  00009aee  FUN_00009aee              68 bytes
+  00009b32  FUN_00009b32              812 bytes
+  00009e5e  FUN_00009e5e              2306 bytes
+  0000a65c  FUN_0000a65c              180 bytes
+  0000a710  FUN_0000a710              916 bytes
+  0000aba8  FUN_0000aba8              132 bytes
+  0000ac2c  FUN_0000ac2c              162 bytes
+  0000ace6  FUN_0000ace6              122 bytes
+  0000b29a  FUN_0000b29a              128 bytes
+  0000c352  FUN_0000c352              92 bytes
+  0000c3e2  FUN_0000c3e2              98 bytes
+  0000d1c6  FUN_0000d1c6              322 bytes
+  0000d652  FUN_0000d652              218 bytes
+  0000d72c  FUN_0000d72c              658 bytes
+  0000d9be  FUN_0000d9be              478 bytes
+  0000dbcc  FUN_0000dbcc              56 bytes
+  0000dc04  FUN_0000dc04              82 bytes
+  0000dc56  FUN_0000dc56              124 bytes
+  0000dcd2  FUN_0000dcd2              18 bytes
+  0000dce4  FUN_0000dce4              150 bytes
+  0000dd7a  FUN_0000dd7a              602 bytes
+  0000dfd4  FUN_0000dfd4              206 bytes
+  0000e0a2  FUN_0000e0a2              80 bytes
+  0000e0f2  FUN_0000e0f2              206 bytes
+  0000e1c0  FUN_0000e1c0              94 bytes
+  0000e21e  FUN_0000e21e              98 bytes
+  0000e280  FUN_0000e280              22 bytes
+  0000e296  FUN_0000e296              70 bytes
+  0000e2dc  FUN_0000e2dc              92 bytes
+  0000e338  FUN_0000e338              22 bytes
+  0000e34e  FUN_0000e34e              68 bytes
+  0000e392  FUN_0000e392              96 bytes
+  0000e3f2  FUN_0000e3f2              96 bytes
+  0000e452  FUN_0000e452              28 bytes
+  0000e46e  FUN_0000e46e              114 bytes
+  0000e4e0  FUN_0000e4e0              194 bytes
+  0000e5a2  FUN_0000e5a2              52 bytes
+  0000e5d6  FUN_0000e5d6              36 bytes
+  0000e5fa  FUN_0000e5fa              184 bytes
+  0000e6b2  FUN_0000e6b2              158 bytes
+  0000e750  FUN_0000e750              320 bytes
+  0000e890  FUN_0000e890              42 bytes
+  0000e8ba  FUN_0000e8ba              72 bytes
+  0000e902  FUN_0000e902              72 bytes
+  0000ea22  FUN_0000ea22              32 bytes
+  0000ea42  FUN_0000ea42              108 bytes
+  0000eabe  FUN_0000eabe              394 bytes
+  0000ec48  FUN_0000ec48              24 bytes
+  0000ec60  FUN_0000ec60              226 bytes
+  0000ed42  FUN_0000ed42              74 bytes
+  0000ed8c  FUN_0000ed8c              102 bytes
+  0000edf2  FUN_0000edf2              230 bytes
+  0000eed8  FUN_0000eed8              16 bytes
+  0000eee8  FUN_0000eee8              16 bytes
+  0000eef8  FUN_0000eef8              16 bytes
+  0000ef08  FUN_0000ef08              16 bytes
+  0000ef18  FUN_0000ef18              814 bytes
+  0000f246  FUN_0000f246              294 bytes
+  0000f36c  FUN_0000f36c              270 bytes
+  0000f47a  FUN_0000f47a              234 bytes
+  0000f564  FUN_0000f564              24 bytes
+  0000f60e  FUN_0000f60e              6 bytes
+  0000f614  FUN_0000f614              828 bytes
+  0000f95c  FUN_0000f95c              70 bytes
+  0000f9a2  FUN_0000f9a2              2 bytes
+  0000f9a4  FUN_0000f9a4              2 bytes
+  0000f9a6  FUN_0000f9a6              82 bytes
+  000107fa  FUN_000107fa              28 bytes
+  00016ea6  FUN_00016ea6              152 bytes
+  00016f3e  FUN_00016f3e              80 bytes
+  00016f8e  FUN_00016f8e              104 bytes
+  00016ff6  FUN_00016ff6              104 bytes
+  0001705e  FUN_0001705e              128 bytes
+  0001739a  pwball_snd_load_song      422 bytes
+  00017540  pwball_snd_tick           132 bytes
+  000175c4  pwball_snd_effect_tick    404 bytes
+  00017758  pwball_snd_apply_volume   68 bytes
+  0001779c  FUN_0001779c              304 bytes
+  000178cc  FUN_000178cc              234 bytes
+  00018fd0  FUN_00018fd0              34 bytes
+  00018ff2  FUN_00018ff2              34 bytes
+  00019014  FUN_00019014              34 bytes
+  000190b6  FUN_000190b6              254 bytes
+  000191b4  FUN_000191b4              296 bytes
+  000192dc  FUN_000192dc              290 bytes
+  000193fe  FUN_000193fe              304 bytes
+  0001952e  FUN_0001952e              298 bytes
+  00019658  FUN_00019658              18 bytes
+  0001966a  FUN_0001966a              158 bytes
+
+-- symbols seeded from symbols.txt --
+  00000000  vec_ssp
+  00000000  main_rom
+  00000004  vec_reset
+  00000008  vec_buserr
+  0000000c  vec_addrerr
+  00000010  vec_illegal
+  00000014  vec_divzero
+  00000018  vec_chk
+  0000001c  vec_trapv
+  00000020  vec_privviol
+  00000024  vec_trace
+  00000060  vec_spurious
+  00000064  vec_irq1
+  0000006c  vec_irq3
+  00000074  vec_irq5
+  00000080  vec_trap0
+  00000400  reset
+  0000f9ce  pwball_pal_blast
+  00010994  pwball_pal_accumulate
+  00010a4c  pwball_pal_to_black
+  00010a72  pwball_pal_to_white
+  0001739a  pwball_snd_load_song
+  00017540  pwball_snd_tick
+  000175c4  pwball_snd_effect_tick
+  00017758  pwball_snd_apply_volume
+  000177ee  pwball_snd_read_row
+  000179b6  pwball_note_period_table
+  00017fd0  pwball_volume_matrix_table
+  00200000  main_ram
+  00700000  blit_data
+  00720001  ramdac_index
+  00720003  ramdac_pal
+  00720005  ramdac_mask
+  00740000  soundlatch
+  00760000  coin_cnt
+  00780000  adc
+  007a0000  line_counter
+  007c0000  control_and_link
+  007e0000  player_inputs
+  007e0002  player_inputs_p2
+
+-- code that touches the blitter (0x700000-0x70001f) --
+  0000f6b8 -> 00700000   [FUN_0000f614 @ 0000f614]
+  0000f748 -> 00700000   [FUN_0000f614 @ 0000f614]
+  0000f7e0 -> 00700000   [FUN_0000f614 @ 0000f614]
+  0000f870 -> 00700000   [FUN_0000f614 @ 0000f614]
+  0000eb0a -> 00700000   [FUN_0000eabe @ 0000eabe]
+  0000eb6c -> 00700000   [FUN_0000eabe @ 0000eabe]
+  0000ebde -> 00700000   [FUN_0000eabe @ 0000eabe]
+  0000f2ba -> 00700000   [FUN_0000f246 @ 0000f246]
+  0000f70e -> 00700002   [FUN_0000f614 @ 0000f614]
+  0000f7a6 -> 00700002   [FUN_0000f614 @ 0000f614]
+  0000f836 -> 00700002   [FUN_0000f614 @ 0000f614]
+  0000f8ce -> 00700002   [FUN_0000f614 @ 0000f614]
+  0000eb42 -> 00700002   [FUN_0000eabe @ 0000eabe]
+  0000ebb4 -> 00700002   [FUN_0000eabe @ 0000eabe]
+  0000ec26 -> 00700002   [FUN_0000eabe @ 0000eabe]
+  0000f330 -> 00700002   [FUN_0000f246 @ 0000f246]
+  0000f6c2 -> 00700004   [FUN_0000f614 @ 0000f614]
+  0000f752 -> 00700004   [FUN_0000f614 @ 0000f614]
+  0000f7ea -> 00700004   [FUN_0000f614 @ 0000f614]
+  0000f87a -> 00700004   [FUN_0000f614 @ 0000f614]
+  0000eb10 -> 00700004   [FUN_0000eabe @ 0000eabe]
+  0000eb72 -> 00700004   [FUN_0000eabe @ 0000eabe]
+  0000ebe4 -> 00700004   [FUN_0000eabe @ 0000eabe]
+  0000f2c8 -> 00700004   [FUN_0000f246 @ 0000f246]
+  0000f716 -> 00700006   [FUN_0000f614 @ 0000f614]
+  0000f7ae -> 00700006   [FUN_0000f614 @ 0000f614]
+  0000f83e -> 00700006   [FUN_0000f614 @ 0000f614]
+  0000f8d6 -> 00700006   [FUN_0000f614 @ 0000f614]
+  0000eb48 -> 00700006   [FUN_0000eabe @ 0000eabe]
+  0000ebba -> 00700006   [FUN_0000eabe @ 0000eabe]
+  0000ec2c -> 00700006   [FUN_0000eabe @ 0000eabe]
+  0000f342 -> 00700006   [FUN_0000f246 @ 0000f246]
+  0000f686 -> 00700009   [FUN_0000f614 @ 0000f614]
+  0000f4b4 -> 00700009   [FUN_0000f47a @ 0000f47a]
+  0000f68e -> 0070000b   [FUN_0000f614 @ 0000f614]
+  0000f4bc -> 0070000b   [FUN_0000f47a @ 0000f47a]
+  0000f6cc -> 0070000c   [FUN_0000f614 @ 0000f614]
+  0000f75c -> 0070000c   [FUN_0000f614 @ 0000f614]
+  0000f7f4 -> 0070000c   [FUN_0000f614 @ 0000f614]
+  0000f884 -> 0070000c   [FUN_0000f614 @ 0000f614]
+  0000eb16 -> 0070000c   [FUN_0000eabe @ 0000eabe]
+  0000eb78 -> 0070000c   [FUN_0000eabe @ 0000eabe]
+  0000ebea -> 0070000c   [FUN_0000eabe @ 0000eabe]
+  0000f2e4 -> 0070000c   [FUN_0000f246 @ 0000f246]
+  0000f6d6 -> 0070000e   [FUN_0000f614 @ 0000f614]
+  0000f766 -> 0070000e   [FUN_0000f614 @ 0000f614]
+  0000f7fe -> 0070000e   [FUN_0000f614 @ 0000f614]
+  0000f88e -> 0070000e   [FUN_0000f614 @ 0000f614]
+  0000eb1c -> 0070000e   [FUN_0000eabe @ 0000eabe]
+  0000eb7e -> 0070000e   [FUN_0000eabe @ 0000eabe]
+  0000ebf0 -> 0070000e   [FUN_0000eabe @ 0000eabe]
+  0000f2fe -> 0070000e   [FUN_0000f246 @ 0000f246]
+  0000f6de -> 00700010   [FUN_0000f614 @ 0000f614]
+  0000f76e -> 00700010   [FUN_0000f614 @ 0000f614]
+  0000f806 -> 00700010   [FUN_0000f614 @ 0000f614]
+  0000f896 -> 00700010   [FUN_0000f614 @ 0000f614]
+  0000eb22 -> 00700010   [FUN_0000eabe @ 0000eabe]
+  0000eb84 -> 00700010   [FUN_0000eabe @ 0000eabe]
+  0000ebf6 -> 00700010   [FUN_0000eabe @ 0000eabe]
+  0000f304 -> 00700010   [FUN_0000f246 @ 0000f246]
+  0000f6a6 -> 00700011   [FUN_0000f614 @ 0000f614]
+  0000f4ae -> 00700011   [FUN_0000f47a @ 0000f47a]
+  0000f71e -> 00700012   [FUN_0000f614 @ 0000f614]
+  0000f7b6 -> 00700012   [FUN_0000f614 @ 0000f614]
+  0000f846 -> 00700012   [FUN_0000f614 @ 0000f614]
+  0000f8de -> 00700012   [FUN_0000f614 @ 0000f614]
+  0000eb4e -> 00700012   [FUN_0000eabe @ 0000eabe]
+  0000ebc0 -> 00700012   [FUN_0000eabe @ 0000eabe]
+  0000ec32 -> 00700012   [FUN_0000eabe @ 0000eabe]
+  0000f352 -> 00700012   [FUN_0000f246 @ 0000f246]
+  0000f6e6 -> 00700014   [FUN_0000f614 @ 0000f614]
+  0000f776 -> 00700014   [FUN_0000f614 @ 0000f614]
+  0000f80e -> 00700014   [FUN_0000f614 @ 0000f614]
+  0000f89e -> 00700014   [FUN_0000f614 @ 0000f614]
+  0000eb28 -> 00700014   [FUN_0000eabe @ 0000eabe]
+  0000eb8a -> 00700014   [FUN_0000eabe @ 0000eabe]
+  0000ebfc -> 00700014   [FUN_0000eabe @ 0000eabe]
+  0000f30c -> 00700014   [FUN_0000f246 @ 0000f246]
+  0000f696 -> 00700015   [FUN_0000f614 @ 0000f614]
+  0000f4c4 -> 00700015   [FUN_0000f47a @ 0000f47a]
+  0000f6ee -> 00700016   [FUN_0000f614 @ 0000f614]
+  0000f77e -> 00700016   [FUN_0000f614 @ 0000f614]
+  0000f816 -> 00700016   [FUN_0000f614 @ 0000f614]
+  0000f8a6 -> 00700016   [FUN_0000f614 @ 0000f614]
+  0000eb2e -> 00700016   [FUN_0000eabe @ 0000eabe]
+  0000eb90 -> 00700016   [FUN_0000eabe @ 0000eabe]
+  0000ec02 -> 00700016   [FUN_0000eabe @ 0000eabe]
+  0000f314 -> 00700016   [FUN_0000f246 @ 0000f246]
+  0000f69e -> 00700017   [FUN_0000f614 @ 0000f614]
+  0000f4ce -> 00700017   [FUN_0000f47a @ 0000f47a]
+  0000f6f6 -> 00700018   [FUN_0000f614 @ 0000f614]
+  0000f786 -> 00700018   [FUN_0000f614 @ 0000f614]
+  0000f81e -> 00700018   [FUN_0000f614 @ 0000f614]
+  0000f8ae -> 00700018   [FUN_0000f614 @ 0000f614]
+  0000eb34 -> 00700018   [FUN_0000eabe @ 0000eabe]
+  0000eb96 -> 00700018   [FUN_0000eabe @ 0000eabe]
+  0000ec08 -> 00700018   [FUN_0000eabe @ 0000eabe]
+  0000f31c -> 00700018   [FUN_0000f246 @ 0000f246]
+  0000f82e -> 00700019   [FUN_0000f614 @ 0000f614]
+  0000f8be -> 00700019   [FUN_0000f614 @ 0000f614]
+  0000eba4 -> 00700019   [FUN_0000eabe @ 0000eabe]
+  000207c0 -> 00700019   [(no function)]
+  0000f706 -> 0070001a   [FUN_0000f614 @ 0000f614]
+  0000f796 -> 0070001a   [FUN_0000f614 @ 0000f614]
+  0000ec16 -> 0070001a   [FUN_0000eabe @ 0000eabe]
+  0000f79e -> 0070001c   [FUN_0000f614 @ 0000f614]
+  0000f8c6 -> 0070001c   [FUN_0000f614 @ 0000f614]
+  0000ebac -> 0070001c   [FUN_0000eabe @ 0000eabe]
+  0000ec1e -> 0070001c   [FUN_0000eabe @ 0000eabe]
+  0000f6b0 -> 0070001e   [FUN_0000f614 @ 0000f614]
+  0000f6fe -> 0070001e   [FUN_0000f614 @ 0000f614]
+  0000f726 -> 0070001e   [FUN_0000f614 @ 0000f614]
+  0000f740 -> 0070001e   [FUN_0000f614 @ 0000f614]
+  0000f78e -> 0070001e   [FUN_0000f614 @ 0000f614]
+  0000f7be -> 0070001e   [FUN_0000f614 @ 0000f614]
+  0000f7d8 -> 0070001e   [FUN_0000f614 @ 0000f614]
+  0000f826 -> 0070001e   [FUN_0000f614 @ 0000f614]
+  0000f84e -> 0070001e   [FUN_0000f614 @ 0000f614]
+  0000f868 -> 0070001e   [FUN_0000f614 @ 0000f614]
+  0000f8b6 -> 0070001e   [FUN_0000f614 @ 0000f614]
+  0000f8e6 -> 0070001e   [FUN_0000f614 @ 0000f614]
+  0000eb02 -> 0070001e   [FUN_0000eabe @ 0000eabe]
+  0000eb3a -> 0070001e   [FUN_0000eabe @ 0000eabe]
+  0000eb54 -> 0070001e   [FUN_0000eabe @ 0000eabe]
+  0000eb64 -> 0070001e   [FUN_0000eabe @ 0000eabe]
+  0000eb9c -> 0070001e   [FUN_0000eabe @ 0000eabe]
+  0000ebc6 -> 0070001e   [FUN_0000eabe @ 0000eabe]
+  0000ebd6 -> 0070001e   [FUN_0000eabe @ 0000eabe]
+  0000ec0e -> 0070001e   [FUN_0000eabe @ 0000eabe]
+  0000ec38 -> 0070001e   [FUN_0000eabe @ 0000eabe]
+  0000f250 -> 0070001e   [FUN_0000f246 @ 0000f246]
+  0000f324 -> 0070001e   [FUN_0000f246 @ 0000f246]
+  0000f358 -> 0070001e   [FUN_0000f246 @ 0000f246]
+
+-- decompilation of reset --
+
+/* WARNING: Removing unreachable block (ram,0x0000047e) */
+/* WARNING: Removing unreachable block (ram,0x000004c2) */
+/* WARNING: Removing unreachable block (ram,0x000004ca) */
+/* WARNING: Removing unreachable block (ram,0x0000050e) */
+/* WARNING: Removing unreachable block (ram,0x0000052e) */
+/* WARNING: Removing unreachable block (ram,0x0000054a) */
+/* WARNING: Removing unreachable block (ram,0x00000552) */
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void reset(void)
+
+{
+  _control_and_link = 0;
+  FUN_0000f60e();
+  do {
+  } while( true );
+}
+
+
+
+################################################################
+# pwball_subcpu.bin   functions: 3
+################################################################
+  00000400  snd_reset                 324 bytes
+  00000550  FUN_00000550              2 bytes
+  00000552  snd_rte_stub              2 bytes
+
+-- symbols seeded from symbols.txt --
+  00000000  vec_ssp
+  00000000  sub_rom
+  00000004  vec_reset
+  00000008  vec_buserr
+  0000000c  vec_addrerr
+  00000010  vec_illegal
+  00000014  vec_divzero
+  00000018  vec_chk
+  0000001c  vec_trapv
+  00000020  vec_privviol
+  00000024  vec_trace
+  00000060  vec_spurious
+  00000064  vec_irq1
+  0000006c  vec_irq3
+  00000074  vec_irq5
+  00000080  vec_trap0
+  00000400  snd_reset
+  00000400  reset
+  00000544  snd_soft_reset_stub
+  00000552  snd_rte_stub
+  00000554  snd_isr_mixer
+  000005ba  snd_mix_out_l
+  00000626  snd_mix_out_r
+  0000062c  snd_isr_tail_jmp
+  00000632  snd_cmd_idle
+  00000648  snd_cmd_apply_v12
+  000006bc  snd_cmd_apply_v34
+  00000730  snd_cmd_apply_v56
+  000007a4  snd_cmd_wait_block
+  000007c0  snd_cmd_recv_word
+  000007e6  snd_voice_end_v1
+  000007f4  snd_voice_end_v3
+  00000802  snd_voice_end_v5
+  00000810  snd_voice_end_v2
+  0000081e  snd_voice_end_v4
+  0000082c  snd_voice_end_v6
+  0000083a  snd_silence_loop
+  00000842  snd_vol_tables
+  00004842  snd_vol_full
+  00004946  snd_samples
+  00200000  sub_ram
+  00201000  snd_cmd_buffer
+  00201060  snd_isr_mixer_ram
+  00201062  snd_v1_opcode
+  0020106a  snd_v1_table
+  00201074  snd_v1_step
+  0020113a  snd_tail_slot
+  002012f8  snd_v1_reload
+  00700000  ldac
+  00740000  rdac
+  00780000  soundlatch_r
+
+-- code that touches the blitter (0x700000-0x70001f) --
+  000005ba -> 00700000   [(no function)]
+
+-- decompilation of reset --
+
+/* snd_reset: Sound CPU reset. It masks IRQs, copies 0x554..0x839 (742 bytes) to RAM 0x201060,
+   clears the command buffer 0x201000..0x20105f, initialises the 6 voices (pointer and loop to
+   0x83a, table 0x4842, step 0x3d09) and falls into a `bra` to itself: all the work happens in IRQ1.
+    */
+
+void snd_reset(void)
+
+{
+  undefined2 *puVar1;
+  undefined4 *puVar3;
+  undefined2 *puVar5;
+  undefined2 *puVar2;
+  undefined4 *puVar4;
+  
+  puVar1 = (undefined2 *)&snd_isr_mixer;
+  puVar5 = &snd_isr_mixer_ram;
+  do {
+    puVar2 = puVar1 + 1;
+    *puVar5 = *puVar1;
+    puVar1 = puVar2;
+    puVar5 = puVar5 + 1;
+  } while (puVar2 != (undefined2 *)&snd_silence_loop);
+  puVar3 = &snd_cmd_buffer;
+  do {
+    puVar4 = (undefined4 *)((int)puVar3 + 2);
+    *(undefined2 *)puVar3 = 0;
+    puVar3 = puVar4;
+  } while (puVar4 != (undefined4 *)&snd_isr_mixer_ram);
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+
+
+
+################################################################
+# radendur_maincpu.bin   functions: 184
+################################################################
+  00000400  irq_vblank                412 bytes
+  000007b6  FUN_000007b6              60 bytes
+  000015f8  FUN_000015f8              66 bytes
+  000016ee  FUN_000016ee              54 bytes
+  00001724  FUN_00001724              92 bytes
+  00001780  FUN_00001780              254 bytes
+  0000187e  FUN_0000187e              296 bytes
+  000019a6  FUN_000019a6              290 bytes
+  00001ac8  FUN_00001ac8              304 bytes
+  00001bf8  FUN_00001bf8              298 bytes
+  00001d22  FUN_00001d22              18 bytes
+  00001d34  FUN_00001d34              158 bytes
+  00001dd2  FUN_00001dd2              344 bytes
+  00002004  blit_program              694 bytes
+  000022bc  enqueue_next              308 bytes
+  000023f2  walk_list                 432 bytes
+  000025a2  FUN_000025a2              2 bytes
+  000025a4  exception_handler         56 bytes
+  000025dc  boot_init                 634 bytes
+  00002856  mode_clear_blits          418 bytes
+  000df4e6  FUN_000df4e6              54 bytes
+  000df51c  FUN_000df51c              74 bytes
+  000df666  FUN_000df666              14 bytes
+  000df674  FUN_000df674              36 bytes
+  000df69a  FUN_000df69a              26 bytes
+  000df6b6  FUN_000df6b6              30 bytes
+  000df6d4  FUN_000df6d4              58 bytes
+  000df70e  FUN_000df70e              70 bytes
+  000df754  FUN_000df754              82 bytes
+  000df7a6  FUN_000df7a6              98 bytes
+  000df808  FUN_000df808              68 bytes
+  000dfa6c  FUN_000dfa6c              8 bytes
+  000dfa74  FUN_000dfa74              70 bytes
+  000dfaba  FUN_000dfaba              58 bytes
+  000dfaf4  FUN_000dfaf4              134 bytes
+  000dfb7a  FUN_000dfb7a              856 bytes
+  000dfed2  FUN_000dfed2              14 bytes
+  000dfee0  FUN_000dfee0              34 bytes
+  000dff02  FUN_000dff02              54 bytes
+  000dff38  FUN_000dff38              142 bytes
+  000dffc6  FUN_000dffc6              44 bytes
+  000dfff2  FUN_000dfff2              44 bytes
+  000e001e  FUN_000e001e              100 bytes
+  000e0082  FUN_000e0082              516 bytes
+  000e02fc  FUN_000e02fc              204 bytes
+  000e03c8  FUN_000e03c8              466 bytes
+  000e059a  FUN_000e059a              172 bytes
+  000e0646  FUN_000e0646              430 bytes
+  000e07f4  FUN_000e07f4              198 bytes
+  000e08ba  FUN_000e08ba              774 bytes
+  000e0bc0  FUN_000e0bc0              774 bytes
+  000e0ec6  FUN_000e0ec6              802 bytes
+  000e11e8  FUN_000e11e8              808 bytes
+  000e155a  FUN_000e155a              630 bytes
+  000e17d0  FUN_000e17d0              70 bytes
+  000e1816  FUN_000e1816              2974 bytes
+  000e23b4  FUN_000e23b4              1026 bytes
+  000e27b6  FUN_000e27b6              596 bytes
+  000e2a0a  FUN_000e2a0a              506 bytes
+  000e2c04  FUN_000e2c04              10 bytes
+  000e2c0e  FUN_000e2c0e              10 bytes
+  000e2c18  FUN_000e2c18              30 bytes
+  000e2c36  FUN_000e2c36              8 bytes
+  000e2c3e  FUN_000e2c3e              62 bytes
+  000e2c7c  FUN_000e2c7c              200 bytes
+  000e2d44  FUN_000e2d44              186 bytes
+  000e2dfe  displaylist_walker        216 bytes
+  000e2ed6  palette_range_copy        112 bytes
+  000e2f46  FUN_000e2f46              76 bytes
+  000e2f92  FUN_000e2f92              272 bytes
+  000e30a2  FUN_000e30a2              112 bytes
+  000e3112  FUN_000e3112              24 bytes
+  000e312a  FUN_000e312a              24 bytes
+  000e3142  FUN_000e3142              14 bytes
+  000e3150  FUN_000e3150              40 bytes
+  000e3178  FUN_000e3178              412 bytes
+  000e3314  FUN_000e3314              68 bytes
+  000e3358  FUN_000e3358              18 bytes
+  000e3388  FUN_000e3388              450 bytes
+  000e354a  FUN_000e354a              28 bytes
+  000e3566  FUN_000e3566              10 bytes
+  000e3570  FUN_000e3570              456 bytes
+  000e3738  FUN_000e3738              74 bytes
+  000e37e4  FUN_000e37e4              82 bytes
+  000e3836  FUN_000e3836              84 bytes
+  000e388a  FUN_000e388a              92 bytes
+  000e38e6  FUN_000e38e6              126 bytes
+  000e3964  FUN_000e3964              130 bytes
+  000e39e6  FUN_000e39e6              594 bytes
+  000e3c38  FUN_000e3c38              384 bytes
+  000e3db8  FUN_000e3db8              372 bytes
+  000e3f2c  FUN_000e3f2c              428 bytes
+  000e40d8  FUN_000e40d8              546 bytes
+  000e42fa  FUN_000e42fa              388 bytes
+  000e447e  FUN_000e447e              588 bytes
+  000e46ca  FUN_000e46ca              408 bytes
+  000e4862  FUN_000e4862              368 bytes
+  000e49d2  FUN_000e49d2              472 bytes
+  000e4baa  FUN_000e4baa              572 bytes
+  000e4de6  FUN_000e4de6              376 bytes
+  000e4f5e  FUN_000e4f5e              142 bytes
+  000e4fec  FUN_000e4fec              144 bytes
+  000e507c  FUN_000e507c              454 bytes
+  000e5242  FUN_000e5242              448 bytes
+  000e5402  FUN_000e5402              402 bytes
+  000e5594  FUN_000e5594              356 bytes
+  000e56f8  FUN_000e56f8              134 bytes
+  000e577e  FUN_000e577e              126 bytes
+  000e57fc  FUN_000e57fc              438 bytes
+  000e59b2  FUN_000e59b2              432 bytes
+  000e5b62  FUN_000e5b62              418 bytes
+  000e5db8  init_section_and_dispatch  154 bytes
+  000e5e52  FUN_000e5e52              732 bytes
+  000e612e  FUN_000e612e              14 bytes
+  000e613c  FUN_000e613c              84 bytes
+  000e6190  FUN_000e6190              84 bytes
+  000e61e4  FUN_000e61e4              84 bytes
+  000e6238  FUN_000e6238              130 bytes
+  000e62ba  FUN_000e62ba              134 bytes
+  000e6340  FUN_000e6340              586 bytes
+  000e658a  FUN_000e658a              346 bytes
+  000e66e4  FUN_000e66e4              306 bytes
+  000e6816  FUN_000e6816              322 bytes
+  000e6958  FUN_000e6958              554 bytes
+  000e6b82  FUN_000e6b82              328 bytes
+  000e6cca  FUN_000e6cca              582 bytes
+  000e6f10  FUN_000e6f10              354 bytes
+  000e7072  FUN_000e7072              308 bytes
+  000e71a6  FUN_000e71a6              318 bytes
+  000e72e4  FUN_000e72e4              558 bytes
+  000e7512  FUN_000e7512              320 bytes
+  000e7652  FUN_000e7652              158 bytes
+  000e76f0  FUN_000e76f0              158 bytes
+  000e778e  FUN_000e778e              374 bytes
+  000e7904  FUN_000e7904              360 bytes
+  000e7a6c  FUN_000e7a6c              346 bytes
+  000e7bc6  FUN_000e7bc6              346 bytes
+  000e7d20  FUN_000e7d20              124 bytes
+  000e7d9c  FUN_000e7d9c              302 bytes
+  000e7eca  FUN_000e7eca              318 bytes
+  000e8008  FUN_000e8008              334 bytes
+  000e820a  FUN_000e820a              166 bytes
+  000e8308  FUN_000e8308              930 bytes
+  000e86aa  FUN_000e86aa              146 bytes
+  000e873c  FUN_000e873c              212 bytes
+  000e8dde  FUN_000e8dde              148 bytes
+  000e919c  FUN_000e919c              232 bytes
+  000ead4c  FUN_000ead4c              454 bytes
+  000eaf12  FUN_000eaf12              1478 bytes
+  000eb4d8  FUN_000eb4d8              200 bytes
+  000eb6b6  FUN_000eb6b6              170 bytes
+  000eb760  FUN_000eb760              174 bytes
+  000eb80e  FUN_000eb80e              14 bytes
+  000eb81c  FUN_000eb81c              654 bytes
+  000ebaaa  FUN_000ebaaa              14 bytes
+  000ebab8  FUN_000ebab8              38 bytes
+  000ebade  FUN_000ebade              38 bytes
+  000ebb04  FUN_000ebb04              48 bytes
+  000ebb84  object_update             5964 bytes
+  000ed2d0  FUN_000ed2d0              1138 bytes
+  000ed774  FUN_000ed774              1564 bytes
+  000edd90  FUN_000edd90              144 bytes
+  000f0c62  FUN_000f0c62              116 bytes
+  000f0cd6  FUN_000f0cd6              206 bytes
+  000f0da4  FUN_000f0da4              210 bytes
+  000f0e76  FUN_000f0e76              1364 bytes
+  000f180e  FUN_000f180e              44 bytes
+  000f183a  FUN_000f183a              62 bytes
+  000f1878  FUN_000f1878              1238 bytes
+  000f1d4e  FUN_000f1d4e              80 bytes
+  000f1d9e  FUN_000f1d9e              14 bytes
+  000f1dac  FUN_000f1dac              552 bytes
+  000f2034  reset                     592 bytes
+  000f2284  state_advance             88 bytes
+  000f2426  FUN_000f2426              24 bytes
+  000f24d0  FUN_000f24d0              14 bytes
+  000f24de  FUN_000f24de              152 bytes
+  000f2686  FUN_000f2686              128 bytes
+  000f27de  FUN_000f27de              422 bytes
+  000f2984  FUN_000f2984              132 bytes
+  000f2a08  FUN_000f2a08              404 bytes
+  000f2b9c  FUN_000f2b9c              68 bytes
+  000f2be0  FUN_000f2be0              304 bytes
+  000f2d10  FUN_000f2d10              234 bytes
+
+-- symbols seeded from symbols.txt --
+  00000000  vec_ssp
+  00000000  main_rom
+  00000004  vec_reset
+  00000008  vec_buserr
+  0000000c  vec_addrerr
+  00000010  vec_illegal
+  00000014  vec_divzero
+  00000018  vec_chk
+  0000001c  vec_trapv
+  00000020  vec_privviol
+  00000024  vec_trace
+  00000060  vec_spurious
+  00000064  vec_irq1
+  0000006c  vec_irq3
+  00000074  vec_irq5
+  00000080  vec_trap0
+  00000400  irq_vblank
+  00000506  page_bit_compose_a
+  00000520  arm_line_counter
+  0000071c  page_bit_compose_b
+  00001f2a  irq_blitter
+  00001f42  irq1_last_blit
+  00001f94  irq1_chain
+  00001fe6  irq1_terminal
+  00002004  blit_program
+  000022bc  enqueue_next
+  000023dc  queue_empty
+  000023f2  walk_list
+  00002532  list_finished
+  000025a4  exception_handler
+  000025dc  boot_init
+  00002856  mode_clear_blits
+  000d6b12  palette_range_table
+  000e2dfe  displaylist_walker
+  000e2ed6  palette_range_copy
+  000e5d04  section_dispatch_table
+  000e5db8  init_section_and_dispatch
+  000ebb84  object_update
+  000f2034  reset
+  000f2132  wait_loop
+  000f2210  crash_site
+  000f2284  state_advance
+  000f23d6  sound_start_block
+  000f243e  re_snd_stream_src
+  000f2446  sound_streamer_rom
+  00200000  main_ram
+  00202e86  re_snd_sample_count
+  0020300c  re_snd_block
+  00203164  irq5_streamer_ram
+  0020351c  re_snd_ctrl_shadow
+  00203606  re_pal_range_last
+  0020797c  re_pal_start
+  0020f918  irq1_trampoline
+  00700000  blit_data
+  00720001  ramdac_index
+  00720003  ramdac_pal
+  00720005  ramdac_mask
+  00740000  soundlatch
+  00760000  coin_cnt
+  00780000  adc
+  007a0000  line_counter
+  007c0000  control_and_link
+  007e0000  player_inputs
+  007e0002  player_inputs_p2
+
+-- code that touches the blitter (0x700000-0x70001f) --
+  00002688 -> 00700000   [boot_init @ 000025dc]
+  000026e8 -> 00700000   [boot_init @ 000025dc]
+  00002748 -> 00700000   [boot_init @ 000025dc]
+  000027b0 -> 00700000   [boot_init @ 000025dc]
+  00002862 -> 00700000   [mode_clear_blits @ 00002856]
+  000028c2 -> 00700000   [mode_clear_blits @ 00002856]
+  00002922 -> 00700000   [mode_clear_blits @ 00002856]
+  0000298a -> 00700000   [mode_clear_blits @ 00002856]
+  0000200c -> 00700000   [blit_program @ 00002004]
+  0000209c -> 00700000   [blit_program @ 00002004]
+  00002136 -> 00700000   [blit_program @ 00002004]
+  000021c2 -> 00700000   [blit_program @ 00002004]
+  0000223e -> 00700000   [blit_program @ 00002004]
+  00001f54 -> 00700000   [(no function)]
+  00001fa6 -> 00700000   [(no function)]
+  000026b8 -> 00700002   [boot_init @ 000025dc]
+  00002718 -> 00700002   [boot_init @ 000025dc]
+  00002778 -> 00700002   [boot_init @ 000025dc]
+  000027e0 -> 00700002   [boot_init @ 000025dc]
+  00002892 -> 00700002   [mode_clear_blits @ 00002856]
+  000028f2 -> 00700002   [mode_clear_blits @ 00002856]
+  00002952 -> 00700002   [mode_clear_blits @ 00002856]
+  000029ba -> 00700002   [mode_clear_blits @ 00002856]
+  0000203a -> 00700002   [blit_program @ 00002004]
+  000020e2 -> 00700002   [blit_program @ 00002004]
+  00002184 -> 00700002   [blit_program @ 00002004]
+  00002208 -> 00700002   [blit_program @ 00002004]
+  00002284 -> 00700002   [blit_program @ 00002004]
+  00001f6e -> 00700003   [(no function)]
+  00001fc0 -> 00700003   [(no function)]
+  00002690 -> 00700004   [boot_init @ 000025dc]
+  000026f0 -> 00700004   [boot_init @ 000025dc]
+  00002750 -> 00700004   [boot_init @ 000025dc]
+  000027b8 -> 00700004   [boot_init @ 000025dc]
+  0000286a -> 00700004   [mode_clear_blits @ 00002856]
+  000028ca -> 00700004   [mode_clear_blits @ 00002856]
+  0000292a -> 00700004   [mode_clear_blits @ 00002856]
+  00002992 -> 00700004   [mode_clear_blits @ 00002856]
+  00002012 -> 00700004   [blit_program @ 00002004]
+  000020a2 -> 00700004   [blit_program @ 00002004]
+  0000213c -> 00700004   [blit_program @ 00002004]
+  000021c8 -> 00700004   [blit_program @ 00002004]
+  00002244 -> 00700004   [blit_program @ 00002004]
+  00001f5a -> 00700004   [(no function)]
+  00001fac -> 00700004   [(no function)]
+  000026c0 -> 00700006   [boot_init @ 000025dc]
+  00002720 -> 00700006   [boot_init @ 000025dc]
+  00002780 -> 00700006   [boot_init @ 000025dc]
+  000027e8 -> 00700006   [boot_init @ 000025dc]
+  0000289a -> 00700006   [mode_clear_blits @ 00002856]
+  000028fa -> 00700006   [mode_clear_blits @ 00002856]
+  0000295a -> 00700006   [mode_clear_blits @ 00002856]
+  000029c2 -> 00700006   [mode_clear_blits @ 00002856]
+  00002042 -> 00700006   [blit_program @ 00002004]
+  000020ea -> 00700006   [blit_program @ 00002004]
+  0000218c -> 00700006   [blit_program @ 00002004]
+  00002210 -> 00700006   [blit_program @ 00002004]
+  0000228c -> 00700006   [blit_program @ 00002004]
+  00001f74 -> 00700007   [(no function)]
+  00001fc6 -> 00700007   [(no function)]
+  0000262a -> 00700008   [boot_init @ 000025dc]
+  000004de -> 00700009   [irq_vblank @ 00000400]
+  00002632 -> 0070000a   [boot_init @ 000025dc]
+  000004e4 -> 0070000b   [irq_vblank @ 00000400]
+  0000072c -> 0070000b   [(no function)]
+  00002698 -> 0070000c   [boot_init @ 000025dc]
+  000026f8 -> 0070000c   [boot_init @ 000025dc]
+  00002758 -> 0070000c   [boot_init @ 000025dc]
+  000027c0 -> 0070000c   [boot_init @ 000025dc]
+  00002872 -> 0070000c   [mode_clear_blits @ 00002856]
+  000028d2 -> 0070000c   [mode_clear_blits @ 00002856]
+  00002932 -> 0070000c   [mode_clear_blits @ 00002856]
+  0000299a -> 0070000c   [mode_clear_blits @ 00002856]
+  0000201a -> 0070000c   [blit_program @ 00002004]
+  000020aa -> 0070000c   [blit_program @ 00002004]
+  00002144 -> 0070000c   [blit_program @ 00002004]
+  000021d0 -> 0070000c   [blit_program @ 00002004]
+  0000224c -> 0070000c   [blit_program @ 00002004]
+  00001f4e -> 0070000c   [(no function)]
+  00001fa0 -> 0070000c   [(no function)]
+  000026a0 -> 0070000e   [boot_init @ 000025dc]
+  00002700 -> 0070000e   [boot_init @ 000025dc]
+  00002760 -> 0070000e   [boot_init @ 000025dc]
+  000027c8 -> 0070000e   [boot_init @ 000025dc]
+  0000287a -> 0070000e   [mode_clear_blits @ 00002856]
+  000028da -> 0070000e   [mode_clear_blits @ 00002856]
+  0000293a -> 0070000e   [mode_clear_blits @ 00002856]
+  000029a2 -> 0070000e   [mode_clear_blits @ 00002856]
+  00002022 -> 0070000e   [blit_program @ 00002004]
+  000020b2 -> 0070000e   [blit_program @ 00002004]
+  0000214c -> 0070000e   [blit_program @ 00002004]
+  00002154 -> 0070000e   [blit_program @ 00002004]
+  000021d8 -> 0070000e   [blit_program @ 00002004]
+  00002254 -> 0070000e   [blit_program @ 00002004]
+  00001f60 -> 0070000f   [(no function)]
+  00001fb2 -> 0070000f   [(no function)]
+  000026a8 -> 00700010   [boot_init @ 000025dc]
+  00002708 -> 00700010   [boot_init @ 000025dc]
+  00002768 -> 00700010   [boot_init @ 000025dc]
+  000027d0 -> 00700010   [boot_init @ 000025dc]
+  00002882 -> 00700010   [mode_clear_blits @ 00002856]
+  000028e2 -> 00700010   [mode_clear_blits @ 00002856]
+  00002942 -> 00700010   [mode_clear_blits @ 00002856]
+  000029aa -> 00700010   [mode_clear_blits @ 00002856]
+  0000202a -> 00700010   [blit_program @ 00002004]
+  000020ba -> 00700010   [blit_program @ 00002004]
+  0000215c -> 00700010   [blit_program @ 00002004]
+  000021e0 -> 00700010   [blit_program @ 00002004]
+  0000225c -> 00700010   [blit_program @ 00002004]
+  00000508 -> 00700011   [irq_vblank @ 00000400]
+  0000071e -> 00700011   [(no function)]
+  000026c8 -> 00700012   [boot_init @ 000025dc]
+  00002728 -> 00700012   [boot_init @ 000025dc]
+  00002788 -> 00700012   [boot_init @ 000025dc]
+  000027f0 -> 00700012   [boot_init @ 000025dc]
+  000028a2 -> 00700012   [mode_clear_blits @ 00002856]
+  00002902 -> 00700012   [mode_clear_blits @ 00002856]
+  00002962 -> 00700012   [mode_clear_blits @ 00002856]
+  000029ca -> 00700012   [mode_clear_blits @ 00002856]
+  0000204a -> 00700012   [blit_program @ 00002004]
+  000020f2 -> 00700012   [blit_program @ 00002004]
+  00002194 -> 00700012   [blit_program @ 00002004]
+  00002218 -> 00700012   [blit_program @ 00002004]
+  00002294 -> 00700012   [blit_program @ 00002004]
+  00001f7a -> 00700013   [(no function)]
+  00001fcc -> 00700013   [(no function)]
+  000020c2 -> 00700014   [blit_program @ 00002004]
+  00002164 -> 00700014   [blit_program @ 00002004]
+  000021e8 -> 00700014   [blit_program @ 00002004]
+  00002264 -> 00700014   [blit_program @ 00002004]
+  000004d2 -> 00700015   [irq_vblank @ 00000400]
+  0000074a -> 00700015   [(no function)]
+  000020ca -> 00700016   [blit_program @ 00002004]
+  0000216c -> 00700016   [blit_program @ 00002004]
+  000021f0 -> 00700016   [blit_program @ 00002004]
+  0000226c -> 00700016   [blit_program @ 00002004]
+  000004d8 -> 00700017   [irq_vblank @ 00000400]
+  00000750 -> 00700017   [(no function)]
+  000020d2 -> 00700018   [blit_program @ 00002004]
+  00002174 -> 00700018   [blit_program @ 00002004]
+  000021f8 -> 00700018   [blit_program @ 00002004]
+  00002274 -> 00700018   [blit_program @ 00002004]
+  00002730 -> 00700019   [boot_init @ 000025dc]
+  000027f8 -> 00700019   [boot_init @ 000025dc]
+  0000290a -> 00700019   [mode_clear_blits @ 00002856]
+  000029d2 -> 00700019   [mode_clear_blits @ 00002856]
+  0000219c -> 00700019   [blit_program @ 00002004]
+  0000229c -> 00700019   [blit_program @ 00002004]
+  000026d0 -> 0070001b   [boot_init @ 000025dc]
+  00002790 -> 0070001b   [boot_init @ 000025dc]
+  000028aa -> 0070001b   [mode_clear_blits @ 00002856]
+  0000296a -> 0070001b   [mode_clear_blits @ 00002856]
+  000020fa -> 0070001b   [blit_program @ 00002004]
+  00002220 -> 0070001b   [blit_program @ 00002004]
+  00002798 -> 0070001c   [boot_init @ 000025dc]
+  00002800 -> 0070001c   [boot_init @ 000025dc]
+  00002972 -> 0070001c   [mode_clear_blits @ 00002856]
+  000029da -> 0070001c   [mode_clear_blits @ 00002856]
+  00002102 -> 0070001c   [blit_program @ 00002004]
+  000021a4 -> 0070001c   [blit_program @ 00002004]
+  00002680 -> 0070001e   [boot_init @ 000025dc]
+  000026b0 -> 0070001e   [boot_init @ 000025dc]
+  000026d8 -> 0070001e   [boot_init @ 000025dc]
+  00002710 -> 0070001e   [boot_init @ 000025dc]
+  00002738 -> 0070001e   [boot_init @ 000025dc]
+  00002770 -> 0070001e   [boot_init @ 000025dc]
+  000027a0 -> 0070001e   [boot_init @ 000025dc]
+  000027d8 -> 0070001e   [boot_init @ 000025dc]
+  00002808 -> 0070001e   [boot_init @ 000025dc]
+  0000285a -> 0070001e   [mode_clear_blits @ 00002856]
+  0000288a -> 0070001e   [mode_clear_blits @ 00002856]
+  000028b2 -> 0070001e   [mode_clear_blits @ 00002856]
+  000028ea -> 0070001e   [mode_clear_blits @ 00002856]
+  00002912 -> 0070001e   [mode_clear_blits @ 00002856]
+  0000294a -> 0070001e   [mode_clear_blits @ 00002856]
+  0000297a -> 0070001e   [mode_clear_blits @ 00002856]
+  000029b2 -> 0070001e   [mode_clear_blits @ 00002856]
+  000029e2 -> 0070001e   [mode_clear_blits @ 00002856]
+  00002032 -> 0070001e   [blit_program @ 00002004]
+  00002052 -> 0070001e   [blit_program @ 00002004]
+  000020da -> 0070001e   [blit_program @ 00002004]
+  0000210a -> 0070001e   [blit_program @ 00002004]
+  0000217c -> 0070001e   [blit_program @ 00002004]
+  000021ac -> 0070001e   [blit_program @ 00002004]
+  00002200 -> 0070001e   [blit_program @ 00002004]
+  00002228 -> 0070001e   [blit_program @ 00002004]
+  0000227c -> 0070001e   [blit_program @ 00002004]
+  000022a4 -> 0070001e   [blit_program @ 00002004]
+  00001f66 -> 0070001e   [(no function)]
+  00001f80 -> 0070001e   [(no function)]
+  00001fb8 -> 0070001e   [(no function)]
+  00001fd2 -> 0070001e   [(no function)]
+
+-- decompilation of reset --
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+/* reset: Entry/boot: init + main loop (state machine) */
+
+void reset(void)
+
+{
+  int iVar1;
+  undefined2 *puVar2;
+  undefined2 uVar3;
+  short sVar4;
+  
+  _re_snd_ctrl_shadow = 0;
+  boot_init();
+  _re_snd_ctrl_shadow = 0xd800;
+  FUN_000f24de();
+  DAT_00202ea4 = 0xf4414;
+  DAT_00202ea8 = 0x4942;
+  FUN_000f27de();
+  DAT_00202e8c = 0x10;
+  DAT_00202e8e = 0x40;
+  DAT_00202e90 = 0x10;
+  _DAT_00202e88 = 1;
+  DAT_00209206 = 5;
+  DAT_00209296 = 5;
+  DAT_0020e4a0 = 0;
+  DAT_0020e950 = 0;
+  DAT_00203514 = &DAT_002094f0;
+  DAT_00203518 = &DAT_002094f0;
+  DAT_0020796e = 0;
+  DAT_00207970 = 0;
+  _DAT_00207972 = 0;
+  _DAT_00207974 = 0;
+  DAT_0020f770 = 0;
+  _DAT_0020795c = 1;
+  FUN_000dfaba();
+  _DAT_00201020 = 1;
+  do {
+    if (_DAT_00201020 != 0) {
+      FUN_000dfaf4();
+      _DAT_00201020 = 0;
+      DAT_00203200 = 0;
+      _DAT_00203202 = 0;
+    }
+    do {
+      if (((_DAT_002091ee == 0) && (_DAT_0020795c != 0)) && (state_advance(), _DAT_0020795c == 0)) {
+        _DAT_0020f91a = &irq_blitter;
+      }
+      sVar4 = (DAT_0020795a & 3) << 4;
+      iVar1 = (int)sVar4;
+    } while (*(short *)(&DAT_002091a4 + sVar4) != 0);
+    DAT_00203508 = *(int *)((int)&PTR_DAT_000f1fd4 + iVar1);
+    DAT_0020350c = *(undefined4 *)((int)&PTR_DAT_000f1fd8 + iVar1);
+    DAT_00203510 = *(undefined2 **)((int)&PTR_DAT_000f1fdc + iVar1);
+    puVar2 = *(undefined2 **)((int)&PTR_DAT_000f2014 + (int)(short)((DAT_0020795a & 7) * 4));
+    *(undefined2 **)(&DAT_002091aa + sVar4) = puVar2;
+    DAT_00207990 = puVar2;
+    *puVar2 = 0;
+    DAT_0020798c = puVar2 + 1;
+    FUN_00001dd2();
+    FUN_000dfb7a();
+    *(undefined2 *)(DAT_00203508 + 0x16) = 5;
+    *DAT_00203510 = 0;
+    uVar3 = DAT_002010be;
+    sVar4 = (DAT_0020795a & 3) << 4;
+    *(undefined2 *)(&DAT_002091a6 + sVar4) = DAT_002010bc;
+    *(undefined2 *)(&DAT_002091a8 + sVar4) = uVar3;
+    *(undefined2 *)(&DAT_002091a4 + sVar4) = 1;
+    if ((_DAT_0020795c != 0) && (state_advance(), _DAT_0020795c == 0)) {
+      _DAT_0020f91a = &irq_blitter;
+    }
+    DAT_0020795a = DAT_0020795a + 1;
+  } while( true );
+}
+
+
+
+################################################################
+# radendur_subcpu.bin   functions: 3
+################################################################
+  00000400  snd_reset                 324 bytes
+  00000550  FUN_00000550              2 bytes
+  00000552  snd_rte_stub              2 bytes
+
+-- symbols seeded from symbols.txt --
+  00000000  vec_ssp
+  00000000  sub_rom
+  00000004  vec_reset
+  00000008  vec_buserr
+  0000000c  vec_addrerr
+  00000010  vec_illegal
+  00000014  vec_divzero
+  00000018  vec_chk
+  0000001c  vec_trapv
+  00000020  vec_privviol
+  00000024  vec_trace
+  00000060  vec_spurious
+  00000064  vec_irq1
+  0000006c  vec_irq3
+  00000074  vec_irq5
+  00000080  vec_trap0
+  00000400  snd_reset
+  00000400  reset
+  00000544  snd_soft_reset_stub
+  00000552  snd_rte_stub
+  00000554  snd_isr_mixer
+  000005ba  snd_mix_out_l
+  00000626  snd_mix_out_r
+  0000062c  snd_isr_tail_jmp
+  00000632  snd_cmd_idle
+  00000648  snd_cmd_apply_v12
+  000006bc  snd_cmd_apply_v34
+  00000730  snd_cmd_apply_v56
+  000007a4  snd_cmd_wait_block
+  000007c0  snd_cmd_recv_word
+  000007e6  snd_voice_end_v1
+  000007f4  snd_voice_end_v3
+  00000802  snd_voice_end_v5
+  00000810  snd_voice_end_v2
+  0000081e  snd_voice_end_v4
+  0000082c  snd_voice_end_v6
+  0000083a  snd_silence_loop
+  00000842  snd_vol_tables
+  00004842  snd_vol_full
+  00004946  snd_samples
+  00200000  sub_ram
+  00201000  snd_cmd_buffer
+  00201060  snd_isr_mixer_ram
+  00201062  snd_v1_opcode
+  0020106a  snd_v1_table
+  00201074  snd_v1_step
+  0020113a  snd_tail_slot
+  002012f8  snd_v1_reload
+  00700000  ldac
+  00740000  rdac
+  00780000  soundlatch_r
+
+-- code that touches the blitter (0x700000-0x70001f) --
+  000005ba -> 00700000   [(no function)]
+
+-- decompilation of reset --
+
+/* snd_reset: Sound CPU reset. It masks IRQs, copies 0x554..0x839 (742 bytes) to RAM 0x201060,
+   clears the command buffer 0x201000..0x20105f, initialises the 6 voices (pointer and loop to
+   0x83a, table 0x4842, step 0x3d09) and falls into a `bra` to itself: all the work happens in IRQ1.
+    */
+
+void snd_reset(void)
+
+{
+  undefined2 *puVar1;
+  undefined4 *puVar3;
+  undefined2 *puVar5;
+  undefined2 *puVar2;
+  undefined4 *puVar4;
+  
+  puVar1 = (undefined2 *)&snd_isr_mixer;
+  puVar5 = &snd_isr_mixer_ram;
+  do {
+    puVar2 = puVar1 + 1;
+    *puVar5 = *puVar1;
+    puVar1 = puVar2;
+    puVar5 = puVar5 + 1;
+  } while (puVar2 != (undefined2 *)&snd_silence_loop);
+  puVar3 = &snd_cmd_buffer;
+  do {
+    puVar4 = (undefined4 *)((int)puVar3 + 2);
+    *(undefined2 *)puVar3 = 0;
+    puVar3 = puVar4;
+  } while (puVar4 != (undefined4 *)&snd_isr_mixer_ram);
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+
+
+
+################################################################
+# rltennis_maincpu.bin   functions: 139
+################################################################
+  00000400  FUN_00000400              2 bytes
+  00000402  FUN_00000402              2 bytes
+  00000404  FUN_00000404              2 bytes
+  00000406  FUN_00000406              2 bytes
+  00000408  FUN_00000408              2 bytes
+  0000040a  FUN_0000040a              2 bytes
+  0000040c  FUN_0000040c              2 bytes
+  0000040e  FUN_0000040e              2 bytes
+  00000410  FUN_00000410              2 bytes
+  00000412  FUN_00000412              2 bytes
+  00000414  FUN_00000414              4 bytes
+  0000041a  FUN_0000041a              4 bytes
+  00000420  FUN_00000420              2 bytes
+  00000422  FUN_00000422              2 bytes
+  00000424  FUN_00000424              2 bytes
+  0000042a  FUN_0000042a              306 bytes
+  0000055c  FUN_0000055c              2 bytes
+  0000055e  FUN_0000055e              2 bytes
+  00000564  FUN_00000564              638 bytes
+  000007e2  FUN_000007e2              26 bytes
+  000007fc  FUN_000007fc              106 bytes
+  00000866  FUN_00000866              26 bytes
+  00000880  FUN_00000880              106 bytes
+  00002000  reset                     3136 bytes
+  00003d5a  FUN_00003d5a              1396 bytes
+  000042ce  FUN_000042ce              102 bytes
+  00004334  FUN_00004334              156 bytes
+  000043d0  FUN_000043d0              78 bytes
+  0000443e  FUN_0000443e              74 bytes
+  00004488  FUN_00004488              378 bytes
+  00004602  FUN_00004602              256 bytes
+  00004702  FUN_00004702              204 bytes
+  000047ce  FUN_000047ce              46 bytes
+  000047fc  FUN_000047fc              230 bytes
+  000048e2  FUN_000048e2              708 bytes
+  00004ba6  FUN_00004ba6              44 bytes
+  00004bd2  FUN_00004bd2              48 bytes
+  00004c02  FUN_00004c02              30 bytes
+  00004c20  FUN_00004c20              158 bytes
+  00004cbe  FUN_00004cbe              102 bytes
+  00004d24  FUN_00004d24              102 bytes
+  00004d8a  FUN_00004d8a              102 bytes
+  00004df0  FUN_00004df0              102 bytes
+  00004e56  FUN_00004e56              930 bytes
+  000053e0  FUN_000053e0              122 bytes
+  0000545a  FUN_0000545a              524 bytes
+  00005666  FUN_00005666              204 bytes
+  00005762  FUN_00005762              92 bytes
+  000057be  FUN_000057be              176 bytes
+  0000586e  FUN_0000586e              178 bytes
+  00005920  FUN_00005920              94 bytes
+  000059b4  FUN_000059b4              494 bytes
+  00005ba2  FUN_00005ba2              194 bytes
+  00005d08  FUN_00005d08              56 bytes
+  00005d40  FUN_00005d40              56 bytes
+  00005d78  FUN_00005d78              56 bytes
+  00005db0  FUN_00005db0              96 bytes
+  00005e10  FUN_00005e10              132 bytes
+  00005e94  FUN_00005e94              56 bytes
+  00005ecc  FUN_00005ecc              64 bytes
+  00005f0c  FUN_00005f0c              92 bytes
+  000062c6  FUN_000062c6              500 bytes
+  00006586  FUN_00006586              114 bytes
+  000065d2  FUN_000065d2              286 bytes
+  00006752  FUN_00006752              52 bytes
+  00006786  FUN_00006786              28 bytes
+  000067a2  FUN_000067a2              52 bytes
+  000067d6  FUN_000067d6              28 bytes
+  000067f2  FUN_000067f2              86 bytes
+  00006848  FUN_00006848              106 bytes
+  000068b2  FUN_000068b2              316 bytes
+  00006a5c  FUN_00006a5c              292 bytes
+  00006ed6  thunk_FUN_00006f08        4 bytes
+  00006f08  FUN_00006f08              20 bytes
+  00006f96  FUN_00006f96              1490 bytes
+  00006fdc  FUN_00006fdc              490 bytes
+  00007488  FUN_00007488              52 bytes
+  000074bc  FUN_000074bc              26 bytes
+  000074d6  FUN_000074d6              52 bytes
+  0000750a  FUN_0000750a              26 bytes
+  00007524  FUN_00007524              62 bytes
+  00007562  FUN_00007562              62 bytes
+  000075a0  FUN_000075a0              154 bytes
+  000076a8  FUN_000076a8              218 bytes
+  00007b2c  FUN_00007b2c              110 bytes
+  00007bee  FUN_00007bee              490 bytes
+  000080a4  FUN_000080a4              52 bytes
+  000080d8  FUN_000080d8              26 bytes
+  000080f2  FUN_000080f2              52 bytes
+  00008126  FUN_00008126              26 bytes
+  00008140  FUN_00008140              62 bytes
+  0000817e  FUN_0000817e              62 bytes
+  000081bc  FUN_000081bc              154 bytes
+  000082c4  FUN_000082c4              218 bytes
+  0000873e  FUN_0000873e              110 bytes
+  000087ac  FUN_000087ac              218 bytes
+  00008886  FUN_00008886              270 bytes
+  00008994  FUN_00008994              40 bytes
+  000089bc  FUN_000089bc              24 bytes
+  000089d4  FUN_000089d4              12 bytes
+  000089e0  FUN_000089e0              352 bytes
+  00008b40  FUN_00008b40              16 bytes
+  00008b50  FUN_00008b50              48 bytes
+  00008b80  FUN_00008b80              74 bytes
+  00008bca  FUN_00008bca              32 bytes
+  00008bea  FUN_00008bea              18 bytes
+  0000a0fc  FUN_0000a0fc              114 bytes
+  0000a16e  FUN_0000a16e              120 bytes
+  0000a1e6  FUN_0000a1e6              296 bytes
+  0000a30e  FUN_0000a30e              306 bytes
+  0000a440  FUN_0000a440              264 bytes
+  0000a642  FUN_0000a642              1578 bytes
+  0000aca6  FUN_0000aca6              56 bytes
+  0000acde  FUN_0000acde              110 bytes
+  0000ada8  FUN_0000ada8              148 bytes
+  0000b3a0  FUN_0000b3a0              288 bytes
+  0000b4c0  FUN_0000b4c0              396 bytes
+  0000baaa  FUN_0000baaa              102 bytes
+  0000bb10  FUN_0000bb10              108 bytes
+  0000bb7c  FUN_0000bb7c              74 bytes
+  0000bbc6  FUN_0000bbc6              44 bytes
+  0000bbf2  FUN_0000bbf2              108 bytes
+  0000bd0e  FUN_0000bd0e              70 bytes
+  0000bd54  FUN_0000bd54              1364 bytes
+  0000c2de  FUN_0000c2de              374 bytes
+  0000c4ee  FUN_0000c4ee              214 bytes
+  0000dfa6  FUN_0000dfa6              24 bytes
+  0000dfbe  FUN_0000dfbe              32 bytes
+  0000dfde  FUN_0000dfde              496 bytes
+  00011f08  FUN_00011f08              186 bytes
+  00011fc2  FUN_00011fc2              114 bytes
+  00030000  FUN_00030000              136 bytes
+  00030088  FUN_00030088              1012 bytes
+  00038000  FUN_00038000              1042 bytes
+  00039000  FUN_00039000              162 bytes
+  0003a000  FUN_0003a000              116 bytes
+  0003b000  FUN_0003b000              78 bytes
+  0003b04e  FUN_0003b04e              28 bytes
+  0003b06a  FUN_0003b06a              32 bytes
+
+-- symbols seeded from symbols.txt --
+  00000000  vec_ssp
+  00000000  rlt_rom
+  00000004  vec_reset
+  00000008  vec_buserr
+  0000000c  vec_addrerr
+  00000010  vec_illegal
+  00000014  vec_divzero
+  00000018  vec_chk
+  0000001c  vec_trapv
+  00000020  vec_privviol
+  00000024  vec_trace
+  00000060  vec_spurious
+  00000064  vec_irq1
+  0000006c  vec_irq3
+  00000074  vec_irq5
+  00000080  vec_trap0
+  00002000  reset
+  00100000  rlt_eeprom
+  00200000  rlt_ram
+  00700000  rlt_blitter
+  00720001  rlt_ramdac_idx
+  00720003  rlt_ramdac_pal
+  00740000  rlt_snd1
+  00760000  rlt_snd2
+  00780000  rlt_sndctrl
+  007a0000  rlt_unknown
+  007e0000  rlt_io
+  007e0002  rlt_p2
+
+-- code that touches the blitter (0x700000-0x70001f) --
+  000020ca -> 00700000   [reset @ 00002000]
+  000004bc -> 00700000   [FUN_0000042a @ 0000042a]
+  000803c0 -> 00700000   [(no function)]
+  00087620 -> 00700000   [(no function)]
+  000878f0 -> 00700000   [(no function)]
+  00095e64 -> 00700000   [(no function)]
+  000aa24c -> 00700000   [(no function)]
+  000aa51c -> 00700000   [(no function)]
+  000aa60c -> 00700000   [(no function)]
+  000aa8dc -> 00700000   [(no function)]
+  000aabac -> 00700000   [(no function)]
+  000aac9c -> 00700000   [(no function)]
+  000ab584 -> 00700000   [(no function)]
+  000ae4dc -> 00700000   [(no function)]
+  000020fa -> 00700002   [reset @ 00002000]
+  000004f6 -> 00700002   [FUN_0000042a @ 0000042a]
+  000020d2 -> 00700004   [reset @ 00002000]
+  000004c4 -> 00700004   [FUN_0000042a @ 0000042a]
+  000a4450 -> 00700004   [(no function)]
+  000b10b0 -> 00700004   [(no function)]
+  00002102 -> 00700006   [reset @ 00002000]
+  000004fe -> 00700006   [FUN_0000042a @ 0000042a]
+  000020c2 -> 00700008   [reset @ 00002000]
+  0000211a -> 00700008   [reset @ 00002000]
+  0000213a -> 00700008   [reset @ 00002000]
+  0000215a -> 00700008   [reset @ 00002000]
+  000004b6 -> 00700008   [FUN_0000042a @ 0000042a]
+  0000e67e -> 00700008   [(no function)]
+  000020da -> 0070000a   [reset @ 00002000]
+  000020e2 -> 0070000a   [reset @ 00002000]
+  000004d4 -> 0070000a   [FUN_0000042a @ 0000042a]
+  000004dc -> 0070000a   [FUN_0000042a @ 0000042a]
+  000020ba -> 0070000c   [reset @ 00002000]
+  000020f2 -> 0070000c   [reset @ 00002000]
+  0000210a -> 0070000c   [reset @ 00002000]
+  00002122 -> 0070000c   [reset @ 00002000]
+  0000212a -> 0070000c   [reset @ 00002000]
+  00002142 -> 0070000c   [reset @ 00002000]
+  0000214a -> 0070000c   [reset @ 00002000]
+  00002162 -> 0070000c   [reset @ 00002000]
+  0000216a -> 0070000c   [reset @ 00002000]
+  000004f0 -> 0070000c   [FUN_0000042a @ 0000042a]
+  0000050a -> 0070000c   [FUN_0000042a @ 0000042a]
+  000020ea -> 0070000e   [reset @ 00002000]
+  00081be4 -> 00700015   [(no function)]
+  00082274 -> 00700015   [(no function)]
+  0008fac8 -> 00700015   [(no function)]
+  00090158 -> 00700015   [(no function)]
+
+-- decompilation of reset --
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void reset(void)
+
+{
+  undefined2 *puVar1;
+  int iVar2;
+  int iVar3;
+  short sVar4;
+  int extraout_A0;
+  undefined4 extraout_A0_00;
+  int extraout_A0_01;
+  undefined4 extraout_A0_02;
+  undefined4 extraout_A0_03;
+  undefined4 extraout_A0_04;
+  undefined4 extraout_A0_05;
+  undefined4 extraout_A0_06;
+  undefined4 extraout_A0_07;
+  undefined2 *extraout_A0_08;
+  int extraout_A0_09;
+  undefined2 *extraout_A0_10;
+  undefined2 *extraout_A0_11;
+  undefined4 extraout_A0_12;
+  undefined4 extraout_A0_13;
+  undefined4 extraout_A0_14;
+  undefined4 extraout_A0_15;
+  undefined4 extraout_A0_16;
+  undefined4 extraout_A0_17;
+  undefined4 extraout_A0_18;
+  undefined4 extraout_A0_19;
+  undefined4 extraout_A0_20;
+  undefined4 extraout_A0_21;
+  undefined4 extraout_A0_22;
+  undefined4 extraout_A0_23;
+  undefined4 extraout_A0_24;
+  int extraout_A0_25;
+  int extraout_A0_26;
+  int extraout_A0_27;
+  int extraout_A0_28;
+  int extraout_A0_29;
+  int extraout_A0_30;
+  undefined4 extraout_A0_31;
+  undefined4 extraout_A0_32;
+  undefined4 extraout_A0_33;
+  undefined4 extraout_A0_34;
+  undefined4 extraout_A0_35;
+  undefined4 extraout_A0_36;
+  int extraout_A0_37;
+  undefined2 *extraout_A0_38;
+  undefined2 *extraout_A0_39;
+  undefined2 *extraout_A0_40;
+  undefined4 extraout_A0_41;
+  undefined4 extraout_A0_42;
+  undefined4 extraout_A0_43;
+  undefined4 extraout_A0_44;
+  undefined4 extraout_A0_45;
+  undefined4 extraout_A0_46;
+  undefined4 extraout_A0_47;
+  undefined4 extraout_A0_48;
+  undefined2 *extraout_A0_49;
+  undefined2 *extraout_A0_50;
+  undefined4 extraout_A0_51;
+  
+  DAT_00720000 = 0;
+  FUN_0000a0fc();
+  FUN_0000dfde();
+  DAT_0020e0d8 = DAT_0020e0c6 * 0x3c;
+  DAT_00209202 = 0x3c;
+  _DAT_00209210 = 0;
+  _DAT_0020920c = 0;
+  DAT_0020e0c8 = 0;
+  DAT_0020e0ca = 0;
+  _DAT_0020e0cc = 0;
+  _DAT_0020e0dc = 0;
+  if (DAT_0020e0bc == 0) {
+    _DAT_0020920c = 0x75300000;
+  }
+  _DAT_0020e064 = 0;
+  _DAT_0020e066 = 0;
+  FUN_000007fc();
+  FUN_00000880();
+  DAT_0020813c = 1;
+  DAT_0020813e = 1;
+  _rlt_sndctrl = 0xfffe;
+  reset();
+  _rlt_blitter = 0xaa00;
+  _DAT_00700004 = 0xc800;
+  _DAT_0070000a = 0x8080;
+  _DAT_0070000e = 0;
+  _DAT_00700002 = 0xabff;
+  _DAT_00700006 = 0xc9ff;
+  sVar4 = -1;
+  do {
+    sVar4 = sVar4 + -1;
+  } while (sVar4 != -1);
+  sVar4 = -1;
+  do {
+    sVar4 = sVar4 + -1;
+  } while (sVar4 != -1);
+  sVar4 = -1;
+  do {
+    sVar4 = sVar4 + -1;
+  } while (sVar4 != -1);
+  _DAT_00700008 = 0x34f;
+  _DAT_0070000c = 0xc000;
+  _DAT_0020818c = &DAT_0000949c;
+  _DAT_00208190 = &DAT_00009628;
+  _DAT_00208194 = 0;
+  DAT_0020e144 = 4;
+  FUN_0003b06a();
+  DAT_00208108 = 0;
+  FUN_0003b000();
+  DAT_00208114 = extraout_A0;
+  DAT_0020814c = extraout_A0;
+  *(undefined2 *)(extraout_A0 + 0xe) = 0xffff;
+  *(undefined2 *)(extraout_A0 + 0x14) = 0;
+  *(undefined2 **)(extraout_A0 + 0x22) = &DAT_00008bfc;
+  puVar1 = *(undefined2 **)(extraout_A0 + 0x22);
+  DAT_002081a4 = *(undefined4 *)(puVar1 + 0x32);
+  *(undefined2 *)(extraout_A0 + 0x3c) = *puVar1;
+  *(undefined2 *)(extraout_A0 + 0x3e) = puVar1[1];
+  *(undefined4 *)(extraout_A0 + 0x34) = *(undefined4 *)(puVar1 + 0x10);
+  _DAT_002081a0 = 0x10000;
+  _DAT_002081a8 = 0;
+  DAT_002081ac = 0;
+  _DAT_0020818c = (undefined *)0x0;
+  _DAT_002081b8 = 0;
+  _DAT_002081c0 = 0;
+  DAT_002081d0 = 0;
+  _DAT_002081d8 = 0;
+  DAT_002081dc = 0;
+  _DAT_002081ec = 0;
+  DAT_002081f8 = 0;
+  _DAT_002081fc = 0;
+  _DAT_0020e028 = 0;
+  _DAT_0020e030 = 0;
+  _DAT_0020e038 = 0;
+  DAT_0020e040 = 0;
+  DAT_0020e044 = 0;
+  _DAT_0020e048 = 0;
+  _DAT_0020e04c = 0;
+  DAT_0020e050 = 0;
+  DAT_0020e054 = 0;
+  _DAT_0020e058 = 0;
+  _DAT_0020e05c = 0;
+  _DAT_0020e080 = 0;
+  _DAT_0020e094 = 0;
+  DAT_0020e0a8 = 0;
+  _DAT_0020e0ac = 0;
+  _DAT_0020e0e0 = 0;
+  DAT_0020e0e4 = 0;
+  DAT_0020e0ec = 0x7e0000;
+  _DAT_0020e118 = 0;
+  _DAT_0020e11c = 0;
+  _DAT_0020e120 = 0;
+  _DAT_0020e128 = 0;
+  _DAT_0020e12c = 0;
+  DAT_0020e130 = 1;
+  _DAT_0020e138 = 0;
+  _DAT_0020e140 = 0;
+  _DAT_0020e13c = 0;
+  _DAT_0020e148 = 0;
+  _DAT_0020e14c = 0;
+  DAT_0020e158 = 5;
+  DAT_002081d4 = DAT_0020e0c2;
+  DAT_002081d6 = DAT_0020e0c4;
+  DAT_002081bc = 0xc;
+  DAT_002081b4 = 0x28;
+  DAT_002081b0 = &DAT_000104a2;
+  FUN_0003b000();
+  DAT_00208150 = extraout_A0_00;
+  FUN_0003a000();
+  *(undefined2 *)(extraout_A0_01 + 0x3c) = puVar1[8];
+  *(undefined2 *)(extraout_A0_01 + 0x3e) = puVar1[9];
+  *(undefined2 *)(extraout_A0_01 + 0x38) = puVar1[8];
+  *(undefined2 *)(extraout_A0_01 + 0x3a) = puVar1[9];
+  *(undefined **)(extraout_A0_01 + 0x22) = &DAT_00008d88;
+  *(undefined4 *)(extraout_A0_01 + 0x34) = *(undefined4 *)(puVar1 + 0x10);
+  FUN_0003b000();
+  DAT_0020815c = extraout_A0_02;
+  FUN_0003a000();
+  FUN_0003b000();
+  DAT_00208160 = extraout_A0_03;
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  DAT_00208154 = extraout_A0_04;
+  FUN_0003a000();
+  FUN_0003b000();
+  DAT_00208158 = extraout_A0_05;
+  FUN_0003a000();
+  FUN_0003b000();
+  DAT_0020e06c = extraout_A0_06;
+  FUN_0003a000();
+  FUN_0003b000();
+  DAT_0020e070 = extraout_A0_07;
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_08 = 0xa5a;
+  *(undefined4 *)(extraout_A0_08 + 0xd) = 0;
+  FUN_0003b000();
+  FUN_0003a000();
+  *(undefined4 *)(extraout_A0_09 + 0x1a) = 4;
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_10 = 0x992;
+  *(undefined4 *)(extraout_A0_10 + 0xd) = 0;
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_11 = 0xc3a;
+  *(undefined4 *)(extraout_A0_11 + 0xd) = 8;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e07c = extraout_A0_12;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e084 = extraout_A0_13;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e088 = extraout_A0_14;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e08c = extraout_A0_15;
+  FUN_0003b000();
+  DAT_00208164 = extraout_A0_16;
+  FUN_0003b000();
+  DAT_00208168 = extraout_A0_17;
+  FUN_0003b000();
+  DAT_0020e098 = extraout_A0_18;
+  FUN_0003b000();
+  DAT_0020e09c = extraout_A0_19;
+  FUN_0003b000();
+  DAT_0020e134 = extraout_A0_20;
+  FUN_0003b000();
+  DAT_0020816c = extraout_A0_21;
+  FUN_0003b000();
+  DAT_00208170 = extraout_A0_22;
+  FUN_0003b000();
+  DAT_00208178 = extraout_A0_23;
+  FUN_0003b000();
+  DAT_00208174 = extraout_A0_24;
+  FUN_0003b000();
+  DAT_0020817c = extraout_A0_25;
+  FUN_0003b000();
+  DAT_00208180 = extraout_A0_26;
+  FUN_0003b000();
+  DAT_0020819c = extraout_A0_27;
+  FUN_0003b000();
+  DAT_00208184 = extraout_A0_28;
+  FUN_0003b000();
+  DAT_00208188 = extraout_A0_29;
+  FUN_0003b000();
+  DAT_00208198 = extraout_A0_30;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e0d0 = extraout_A0_31;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e0d4 = extraout_A0_32;
+  FUN_0003b000();
+  DAT_002081c4 = extraout_A0_33;
+  FUN_0003b000();
+  DAT_002081c8 = extraout_A0_34;
+  FUN_0003b000();
+  _DAT_00208104 = 0;
+  DAT_002081cc = extraout_A0_35;
+  FUN_000089d4();
+  DAT_00208016 = 0x18;
+  _DAT_00208010 = 0;
+  _DAT_0020e060 = 0xffff;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e0e4 = extraout_A0_36;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0000a0fc();
+  _DAT_0020e008 = 0xffffffff;
+  FUN_0003b000();
+  DAT_0020e00c = extraout_A0_37;
+  *(undefined4 *)(extraout_A0_37 + 0x1a) = 4;
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_38 = 0x992;
+  *(undefined4 *)(extraout_A0_38 + 0xd) = 0;
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_39 = 0xc3a;
+  *(undefined4 *)(extraout_A0_39 + 0xd) = 8;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_40 = 0xa5a;
+  *(undefined4 *)(extraout_A0_40 + 0xd) = 0;
+  FUN_0003b000();
+  DAT_0020e014 = extraout_A0_41;
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e074 = extraout_A0_42;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e01c = extraout_A0_43;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e078 = extraout_A0_44;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e018 = extraout_A0_45;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e010 = extraout_A0_46;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e020 = extraout_A0_47;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e024 = extraout_A0_48;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_49 = 0x790;
+  extraout_A0_49[1] = 0x540;
+  *(undefined4 *)(extraout_A0_49 + 0xd) = 0;
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_50 = 0x9c0;
+  extraout_A0_50[1] = 0x540;
+  *(undefined4 *)(extraout_A0_50 + 0xd) = 4;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  _DAT_002081c0 = -1;
+  DAT_0020e0e8 = extraout_A0_51;
+  if (DAT_0020e0c0 == 0) {
+    DAT_00208120 = 0x11dca;
+    _DAT_00208146 = 0xff;
+  }
+  else {
+    DAT_00208120 = 0x8ea;
+    _DAT_00208146 = 0xff;
+  }
+  while( true ) {
+    if (_DAT_002081c0 != 0) {
+      FUN_0000a642();
+      return;
+    }
+    iVar2 = DAT_00208114;
+    if ((rlt_io & 0x1000) == 0) break;
+    while (iVar3 = iVar2, iVar3 != 0) {
+      iVar2 = *(int *)(iVar3 + 10);
+      if (*(int *)(iVar3 + 0x26) != 0) {
+        (**(code **)(iVar3 + 0x26))();
+      }
+    }
+    FUN_000089e0();
+    iVar2 = DAT_00208198;
+    while (iVar3 = iVar2, iVar3 != 0) {
+      iVar2 = *(int *)(iVar3 + 10);
+      if (*(int *)(iVar3 + 0x26) != 0) {
+        (**(code **)(iVar3 + 0x26))();
+      }
+    }
+    *(int *)(DAT_00208184 + 0xc) = DAT_00208114;
+    *(int *)(DAT_00208188 + 0xc) = DAT_00208114;
+    *(int *)(DAT_0020819c + 0xc) = DAT_00208198;
+    DAT_00208118 = DAT_00208118 + 1;
+    if (DAT_00208016 == 0x1c) {
+      *(undefined4 **)(DAT_0020817c + 0x10) = &DAT_0020d000;
+      DAT_0020d000 = 0;
+      DAT_0020d004 = &DAT_0020d008;
+      DAT_00208016 = 0x30;
+      FUN_00030000();
+      *(undefined4 **)(DAT_00208180 + 0x10) = &DAT_0020d000;
+      DAT_00208016 = 0x34;
+      FUN_00030000();
+      *(undefined4 **)(DAT_00208184 + 0x10) = &DAT_0020d000;
+      DAT_00208016 = 0x30;
+      FUN_00038000();
+      *(undefined4 **)(DAT_00208188 + 0x10) = &DAT_0020d000;
+      DAT_00208016 = 0x34;
+      FUN_00038000();
+      *(undefined4 **)(DAT_0020819c + 0x10) = &DAT_0020d000;
+      DAT_00208016 = 0x30;
+      FUN_00038000();
+      DAT_00208016 = 0x34;
+      DAT_00208100 = 0;
+      do {
+        DAT_00208100 = DAT_00208100 + 1;
+      } while (_DAT_00208010 != 0);
+      DAT_00208012 = &DAT_0020d000;
+      DAT_0020d004 = &DAT_0020d008;
+      _DAT_00208010 = -1;
+    }
+    else {
+      *(undefined4 **)(DAT_0020817c + 0x10) = &DAT_0020c000;
+      DAT_0020c000 = 0;
+      DAT_0020c004 = &DAT_0020c008;
+      DAT_00208016 = 0x18;
+      FUN_00030000();
+      *(undefined4 **)(DAT_00208180 + 0x10) = &DAT_0020c000;
+      DAT_00208016 = 0x1c;
+      FUN_00030000();
+      *(undefined4 **)(DAT_00208184 + 0x10) = &DAT_0020c000;
+      DAT_00208016 = 0x18;
+      FUN_00038000();
+      *(undefined4 **)(DAT_00208188 + 0x10) = &DAT_0020c000;
+      DAT_00208016 = 0x1c;
+      FUN_00038000();
+      *(undefined4 **)(DAT_0020819c + 0x10) = &DAT_0020c000;
+      DAT_00208016 = 0x18;
+      FUN_00038000();
+      DAT_00208016 = 0x1c;
+      DAT_00208100 = 0;
+      _DAT_0020e06a = DAT_0020e068;
+      DAT_0020e068 = 0;
+      do {
+        DAT_00208100 = DAT_00208100 + 1;
+        DAT_0020e068 = DAT_0020e068 + 1;
+      } while (_DAT_00208010 != 0);
+      DAT_00208012 = &DAT_0020c000;
+      DAT_0020c004 = &DAT_0020c008;
+      _DAT_00208010 = -1;
+    }
+  }
+  FUN_0000bd54();
+  return;
+}
+
+
+
+################################################################
+# rltennisa_maincpu.bin   functions: 139
+################################################################
+  00000400  FUN_00000400              2 bytes
+  00000402  FUN_00000402              2 bytes
+  00000404  FUN_00000404              2 bytes
+  00000406  FUN_00000406              2 bytes
+  00000408  FUN_00000408              2 bytes
+  0000040a  FUN_0000040a              2 bytes
+  0000040c  FUN_0000040c              2 bytes
+  0000040e  FUN_0000040e              2 bytes
+  00000410  FUN_00000410              2 bytes
+  00000412  FUN_00000412              2 bytes
+  00000414  FUN_00000414              4 bytes
+  0000041a  FUN_0000041a              4 bytes
+  00000420  FUN_00000420              2 bytes
+  00000422  FUN_00000422              2 bytes
+  00000424  FUN_00000424              2 bytes
+  0000042a  FUN_0000042a              306 bytes
+  0000055c  FUN_0000055c              2 bytes
+  0000055e  FUN_0000055e              2 bytes
+  00000564  FUN_00000564              638 bytes
+  000007e2  FUN_000007e2              26 bytes
+  000007fc  FUN_000007fc              106 bytes
+  00000866  FUN_00000866              26 bytes
+  00000880  FUN_00000880              106 bytes
+  00002000  reset                     3136 bytes
+  00003d5a  FUN_00003d5a              1396 bytes
+  000042ce  FUN_000042ce              102 bytes
+  00004334  FUN_00004334              156 bytes
+  000043d0  FUN_000043d0              78 bytes
+  0000443e  FUN_0000443e              74 bytes
+  00004488  FUN_00004488              378 bytes
+  00004602  FUN_00004602              256 bytes
+  00004702  FUN_00004702              204 bytes
+  000047ce  FUN_000047ce              46 bytes
+  000047fc  FUN_000047fc              230 bytes
+  000048e2  FUN_000048e2              708 bytes
+  00004ba6  FUN_00004ba6              44 bytes
+  00004bd2  FUN_00004bd2              48 bytes
+  00004c02  FUN_00004c02              30 bytes
+  00004c20  FUN_00004c20              158 bytes
+  00004cbe  FUN_00004cbe              102 bytes
+  00004d24  FUN_00004d24              102 bytes
+  00004d8a  FUN_00004d8a              102 bytes
+  00004df0  FUN_00004df0              102 bytes
+  00004e56  FUN_00004e56              930 bytes
+  000053e0  FUN_000053e0              122 bytes
+  0000545a  FUN_0000545a              524 bytes
+  00005666  FUN_00005666              204 bytes
+  00005762  FUN_00005762              92 bytes
+  000057be  FUN_000057be              176 bytes
+  0000586e  FUN_0000586e              178 bytes
+  00005920  FUN_00005920              94 bytes
+  000059b4  FUN_000059b4              494 bytes
+  00005ba2  FUN_00005ba2              194 bytes
+  00005d08  FUN_00005d08              56 bytes
+  00005d40  FUN_00005d40              56 bytes
+  00005d78  FUN_00005d78              56 bytes
+  00005db0  FUN_00005db0              96 bytes
+  00005e10  FUN_00005e10              132 bytes
+  00005e94  FUN_00005e94              56 bytes
+  00005ecc  FUN_00005ecc              64 bytes
+  00005f0c  FUN_00005f0c              92 bytes
+  000062c6  FUN_000062c6              500 bytes
+  00006586  FUN_00006586              114 bytes
+  000065d2  FUN_000065d2              286 bytes
+  00006752  FUN_00006752              52 bytes
+  00006786  FUN_00006786              28 bytes
+  000067a2  FUN_000067a2              52 bytes
+  000067d6  FUN_000067d6              28 bytes
+  000067f2  FUN_000067f2              86 bytes
+  00006848  FUN_00006848              106 bytes
+  000068b2  FUN_000068b2              316 bytes
+  00006a5c  FUN_00006a5c              292 bytes
+  00006ed6  thunk_FUN_00006f08        4 bytes
+  00006f08  FUN_00006f08              20 bytes
+  00006f96  FUN_00006f96              1490 bytes
+  00006fdc  FUN_00006fdc              490 bytes
+  00007488  FUN_00007488              52 bytes
+  000074bc  FUN_000074bc              26 bytes
+  000074d6  FUN_000074d6              52 bytes
+  0000750a  FUN_0000750a              26 bytes
+  00007524  FUN_00007524              62 bytes
+  00007562  FUN_00007562              62 bytes
+  000075a0  FUN_000075a0              154 bytes
+  000076a8  FUN_000076a8              218 bytes
+  00007b2c  FUN_00007b2c              110 bytes
+  00007bee  FUN_00007bee              490 bytes
+  000080a4  FUN_000080a4              52 bytes
+  000080d8  FUN_000080d8              26 bytes
+  000080f2  FUN_000080f2              52 bytes
+  00008126  FUN_00008126              26 bytes
+  00008140  FUN_00008140              62 bytes
+  0000817e  FUN_0000817e              62 bytes
+  000081bc  FUN_000081bc              154 bytes
+  000082c4  FUN_000082c4              218 bytes
+  0000873e  FUN_0000873e              110 bytes
+  000087ac  FUN_000087ac              218 bytes
+  00008886  FUN_00008886              270 bytes
+  00008994  FUN_00008994              40 bytes
+  000089bc  FUN_000089bc              24 bytes
+  000089d4  FUN_000089d4              12 bytes
+  000089e0  FUN_000089e0              352 bytes
+  00008b40  FUN_00008b40              16 bytes
+  00008b50  FUN_00008b50              48 bytes
+  00008b80  FUN_00008b80              74 bytes
+  00008bca  FUN_00008bca              32 bytes
+  00008bea  FUN_00008bea              18 bytes
+  0000a0fc  FUN_0000a0fc              114 bytes
+  0000a16e  FUN_0000a16e              120 bytes
+  0000a1e6  FUN_0000a1e6              296 bytes
+  0000a30e  FUN_0000a30e              306 bytes
+  0000a440  FUN_0000a440              264 bytes
+  0000a642  FUN_0000a642              1578 bytes
+  0000aca6  FUN_0000aca6              56 bytes
+  0000acde  FUN_0000acde              110 bytes
+  0000ada8  FUN_0000ada8              148 bytes
+  0000b3a0  FUN_0000b3a0              288 bytes
+  0000b4c0  FUN_0000b4c0              396 bytes
+  0000baaa  FUN_0000baaa              102 bytes
+  0000bb10  FUN_0000bb10              108 bytes
+  0000bb7c  FUN_0000bb7c              74 bytes
+  0000bbc6  FUN_0000bbc6              44 bytes
+  0000bbf2  FUN_0000bbf2              108 bytes
+  0000bd0e  FUN_0000bd0e              70 bytes
+  0000bd54  FUN_0000bd54              1364 bytes
+  0000c2de  FUN_0000c2de              374 bytes
+  0000c4ee  FUN_0000c4ee              214 bytes
+  0000dfa6  FUN_0000dfa6              24 bytes
+  0000dfbe  FUN_0000dfbe              32 bytes
+  0000dfde  FUN_0000dfde              496 bytes
+  00011f08  FUN_00011f08              186 bytes
+  00011fc2  FUN_00011fc2              114 bytes
+  00030000  FUN_00030000              136 bytes
+  00030088  FUN_00030088              1012 bytes
+  00038000  FUN_00038000              1042 bytes
+  00039000  FUN_00039000              162 bytes
+  0003a000  FUN_0003a000              116 bytes
+  0003b000  FUN_0003b000              78 bytes
+  0003b04e  FUN_0003b04e              28 bytes
+  0003b06a  FUN_0003b06a              32 bytes
+
+-- symbols seeded from symbols.txt --
+  00000000  vec_ssp
+  00000000  rlt_rom
+  00000004  vec_reset
+  00000008  vec_buserr
+  0000000c  vec_addrerr
+  00000010  vec_illegal
+  00000014  vec_divzero
+  00000018  vec_chk
+  0000001c  vec_trapv
+  00000020  vec_privviol
+  00000024  vec_trace
+  00000060  vec_spurious
+  00000064  vec_irq1
+  0000006c  vec_irq3
+  00000074  vec_irq5
+  00000080  vec_trap0
+  00002000  reset
+  00100000  rlt_eeprom
+  00200000  rlt_ram
+  00700000  rlt_blitter
+  00720001  rlt_ramdac_idx
+  00720003  rlt_ramdac_pal
+  00740000  rlt_snd1
+  00760000  rlt_snd2
+  00780000  rlt_sndctrl
+  007a0000  rlt_unknown
+  007e0000  rlt_io
+  007e0002  rlt_p2
+
+-- code that touches the blitter (0x700000-0x70001f) --
+  000020ca -> 00700000   [reset @ 00002000]
+  000004bc -> 00700000   [FUN_0000042a @ 0000042a]
+  000803c0 -> 00700000   [(no function)]
+  00087620 -> 00700000   [(no function)]
+  000878f0 -> 00700000   [(no function)]
+  00095e64 -> 00700000   [(no function)]
+  000aa24c -> 00700000   [(no function)]
+  000aa51c -> 00700000   [(no function)]
+  000aa60c -> 00700000   [(no function)]
+  000aa8dc -> 00700000   [(no function)]
+  000aabac -> 00700000   [(no function)]
+  000aac9c -> 00700000   [(no function)]
+  000ab584 -> 00700000   [(no function)]
+  000ae4dc -> 00700000   [(no function)]
+  000020fa -> 00700002   [reset @ 00002000]
+  000004f6 -> 00700002   [FUN_0000042a @ 0000042a]
+  000020d2 -> 00700004   [reset @ 00002000]
+  000004c4 -> 00700004   [FUN_0000042a @ 0000042a]
+  000a4450 -> 00700004   [(no function)]
+  000b10b0 -> 00700004   [(no function)]
+  00002102 -> 00700006   [reset @ 00002000]
+  000004fe -> 00700006   [FUN_0000042a @ 0000042a]
+  000020c2 -> 00700008   [reset @ 00002000]
+  0000211a -> 00700008   [reset @ 00002000]
+  0000213a -> 00700008   [reset @ 00002000]
+  0000215a -> 00700008   [reset @ 00002000]
+  000004b6 -> 00700008   [FUN_0000042a @ 0000042a]
+  0000e67e -> 00700008   [(no function)]
+  000020da -> 0070000a   [reset @ 00002000]
+  000020e2 -> 0070000a   [reset @ 00002000]
+  000004d4 -> 0070000a   [FUN_0000042a @ 0000042a]
+  000004dc -> 0070000a   [FUN_0000042a @ 0000042a]
+  000020ba -> 0070000c   [reset @ 00002000]
+  000020f2 -> 0070000c   [reset @ 00002000]
+  0000210a -> 0070000c   [reset @ 00002000]
+  00002122 -> 0070000c   [reset @ 00002000]
+  0000212a -> 0070000c   [reset @ 00002000]
+  00002142 -> 0070000c   [reset @ 00002000]
+  0000214a -> 0070000c   [reset @ 00002000]
+  00002162 -> 0070000c   [reset @ 00002000]
+  0000216a -> 0070000c   [reset @ 00002000]
+  000004f0 -> 0070000c   [FUN_0000042a @ 0000042a]
+  0000050a -> 0070000c   [FUN_0000042a @ 0000042a]
+  000020ea -> 0070000e   [reset @ 00002000]
+  00081be4 -> 00700015   [(no function)]
+  00082274 -> 00700015   [(no function)]
+  0008fac8 -> 00700015   [(no function)]
+  00090158 -> 00700015   [(no function)]
+
+-- decompilation of reset --
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void reset(void)
+
+{
+  undefined2 *puVar1;
+  int iVar2;
+  int iVar3;
+  short sVar4;
+  int extraout_A0;
+  undefined4 extraout_A0_00;
+  int extraout_A0_01;
+  undefined4 extraout_A0_02;
+  undefined4 extraout_A0_03;
+  undefined4 extraout_A0_04;
+  undefined4 extraout_A0_05;
+  undefined4 extraout_A0_06;
+  undefined4 extraout_A0_07;
+  undefined2 *extraout_A0_08;
+  int extraout_A0_09;
+  undefined2 *extraout_A0_10;
+  undefined2 *extraout_A0_11;
+  undefined4 extraout_A0_12;
+  undefined4 extraout_A0_13;
+  undefined4 extraout_A0_14;
+  undefined4 extraout_A0_15;
+  undefined4 extraout_A0_16;
+  undefined4 extraout_A0_17;
+  undefined4 extraout_A0_18;
+  undefined4 extraout_A0_19;
+  undefined4 extraout_A0_20;
+  undefined4 extraout_A0_21;
+  undefined4 extraout_A0_22;
+  undefined4 extraout_A0_23;
+  undefined4 extraout_A0_24;
+  int extraout_A0_25;
+  int extraout_A0_26;
+  int extraout_A0_27;
+  int extraout_A0_28;
+  int extraout_A0_29;
+  int extraout_A0_30;
+  undefined4 extraout_A0_31;
+  undefined4 extraout_A0_32;
+  undefined4 extraout_A0_33;
+  undefined4 extraout_A0_34;
+  undefined4 extraout_A0_35;
+  undefined4 extraout_A0_36;
+  int extraout_A0_37;
+  undefined2 *extraout_A0_38;
+  undefined2 *extraout_A0_39;
+  undefined2 *extraout_A0_40;
+  undefined4 extraout_A0_41;
+  undefined4 extraout_A0_42;
+  undefined4 extraout_A0_43;
+  undefined4 extraout_A0_44;
+  undefined4 extraout_A0_45;
+  undefined4 extraout_A0_46;
+  undefined4 extraout_A0_47;
+  undefined4 extraout_A0_48;
+  undefined2 *extraout_A0_49;
+  undefined2 *extraout_A0_50;
+  undefined4 extraout_A0_51;
+  
+  DAT_00720000 = 0;
+  FUN_0000a0fc();
+  FUN_0000dfde();
+  DAT_0020e0d8 = DAT_0020e0c6 * 0x3c;
+  DAT_00209202 = 0x3c;
+  _DAT_00209210 = 0;
+  _DAT_0020920c = 0;
+  DAT_0020e0c8 = 0;
+  DAT_0020e0ca = 0;
+  _DAT_0020e0cc = 0;
+  _DAT_0020e0dc = 0;
+  if (DAT_0020e0bc == 0) {
+    _DAT_0020920c = 0x75300000;
+  }
+  _DAT_0020e064 = 0;
+  _DAT_0020e066 = 0;
+  FUN_000007fc();
+  FUN_00000880();
+  DAT_0020813c = 1;
+  DAT_0020813e = 1;
+  _rlt_sndctrl = 0xfffe;
+  reset();
+  _rlt_blitter = 0xaa00;
+  _DAT_00700004 = 0xc800;
+  _DAT_0070000a = 0x8080;
+  _DAT_0070000e = 0;
+  _DAT_00700002 = 0xabff;
+  _DAT_00700006 = 0xc9ff;
+  sVar4 = -1;
+  do {
+    sVar4 = sVar4 + -1;
+  } while (sVar4 != -1);
+  sVar4 = -1;
+  do {
+    sVar4 = sVar4 + -1;
+  } while (sVar4 != -1);
+  sVar4 = -1;
+  do {
+    sVar4 = sVar4 + -1;
+  } while (sVar4 != -1);
+  _DAT_00700008 = 0x34f;
+  _DAT_0070000c = 0xc000;
+  _DAT_0020818c = &DAT_0000949c;
+  _DAT_00208190 = &DAT_00009628;
+  _DAT_00208194 = 0;
+  DAT_0020e144 = 4;
+  FUN_0003b06a();
+  DAT_00208108 = 0;
+  FUN_0003b000();
+  DAT_00208114 = extraout_A0;
+  DAT_0020814c = extraout_A0;
+  *(undefined2 *)(extraout_A0 + 0xe) = 0xffff;
+  *(undefined2 *)(extraout_A0 + 0x14) = 0;
+  *(undefined2 **)(extraout_A0 + 0x22) = &DAT_00008bfc;
+  puVar1 = *(undefined2 **)(extraout_A0 + 0x22);
+  DAT_002081a4 = *(undefined4 *)(puVar1 + 0x32);
+  *(undefined2 *)(extraout_A0 + 0x3c) = *puVar1;
+  *(undefined2 *)(extraout_A0 + 0x3e) = puVar1[1];
+  *(undefined4 *)(extraout_A0 + 0x34) = *(undefined4 *)(puVar1 + 0x10);
+  _DAT_002081a0 = 0x10000;
+  _DAT_002081a8 = 0;
+  DAT_002081ac = 0;
+  _DAT_0020818c = (undefined *)0x0;
+  _DAT_002081b8 = 0;
+  _DAT_002081c0 = 0;
+  DAT_002081d0 = 0;
+  _DAT_002081d8 = 0;
+  DAT_002081dc = 0;
+  _DAT_002081ec = 0;
+  DAT_002081f8 = 0;
+  _DAT_002081fc = 0;
+  _DAT_0020e028 = 0;
+  _DAT_0020e030 = 0;
+  _DAT_0020e038 = 0;
+  DAT_0020e040 = 0;
+  DAT_0020e044 = 0;
+  _DAT_0020e048 = 0;
+  _DAT_0020e04c = 0;
+  DAT_0020e050 = 0;
+  DAT_0020e054 = 0;
+  _DAT_0020e058 = 0;
+  _DAT_0020e05c = 0;
+  _DAT_0020e080 = 0;
+  _DAT_0020e094 = 0;
+  DAT_0020e0a8 = 0;
+  _DAT_0020e0ac = 0;
+  _DAT_0020e0e0 = 0;
+  DAT_0020e0e4 = 0;
+  DAT_0020e0ec = 0x7e0000;
+  _DAT_0020e118 = 0;
+  _DAT_0020e11c = 0;
+  _DAT_0020e120 = 0;
+  _DAT_0020e128 = 0;
+  _DAT_0020e12c = 0;
+  DAT_0020e130 = 1;
+  _DAT_0020e138 = 0;
+  _DAT_0020e140 = 0;
+  _DAT_0020e13c = 0;
+  _DAT_0020e148 = 0;
+  _DAT_0020e14c = 0;
+  DAT_0020e158 = 5;
+  DAT_002081d4 = DAT_0020e0c2;
+  DAT_002081d6 = DAT_0020e0c4;
+  DAT_002081bc = 0xc;
+  DAT_002081b4 = 0x28;
+  DAT_002081b0 = &DAT_000104a2;
+  FUN_0003b000();
+  DAT_00208150 = extraout_A0_00;
+  FUN_0003a000();
+  *(undefined2 *)(extraout_A0_01 + 0x3c) = puVar1[8];
+  *(undefined2 *)(extraout_A0_01 + 0x3e) = puVar1[9];
+  *(undefined2 *)(extraout_A0_01 + 0x38) = puVar1[8];
+  *(undefined2 *)(extraout_A0_01 + 0x3a) = puVar1[9];
+  *(undefined **)(extraout_A0_01 + 0x22) = &DAT_00008d88;
+  *(undefined4 *)(extraout_A0_01 + 0x34) = *(undefined4 *)(puVar1 + 0x10);
+  FUN_0003b000();
+  DAT_0020815c = extraout_A0_02;
+  FUN_0003a000();
+  FUN_0003b000();
+  DAT_00208160 = extraout_A0_03;
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  DAT_00208154 = extraout_A0_04;
+  FUN_0003a000();
+  FUN_0003b000();
+  DAT_00208158 = extraout_A0_05;
+  FUN_0003a000();
+  FUN_0003b000();
+  DAT_0020e06c = extraout_A0_06;
+  FUN_0003a000();
+  FUN_0003b000();
+  DAT_0020e070 = extraout_A0_07;
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_08 = 0xa5a;
+  *(undefined4 *)(extraout_A0_08 + 0xd) = 0;
+  FUN_0003b000();
+  FUN_0003a000();
+  *(undefined4 *)(extraout_A0_09 + 0x1a) = 4;
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_10 = 0x992;
+  *(undefined4 *)(extraout_A0_10 + 0xd) = 0;
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_11 = 0xc3a;
+  *(undefined4 *)(extraout_A0_11 + 0xd) = 8;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e07c = extraout_A0_12;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e084 = extraout_A0_13;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e088 = extraout_A0_14;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e08c = extraout_A0_15;
+  FUN_0003b000();
+  DAT_00208164 = extraout_A0_16;
+  FUN_0003b000();
+  DAT_00208168 = extraout_A0_17;
+  FUN_0003b000();
+  DAT_0020e098 = extraout_A0_18;
+  FUN_0003b000();
+  DAT_0020e09c = extraout_A0_19;
+  FUN_0003b000();
+  DAT_0020e134 = extraout_A0_20;
+  FUN_0003b000();
+  DAT_0020816c = extraout_A0_21;
+  FUN_0003b000();
+  DAT_00208170 = extraout_A0_22;
+  FUN_0003b000();
+  DAT_00208178 = extraout_A0_23;
+  FUN_0003b000();
+  DAT_00208174 = extraout_A0_24;
+  FUN_0003b000();
+  DAT_0020817c = extraout_A0_25;
+  FUN_0003b000();
+  DAT_00208180 = extraout_A0_26;
+  FUN_0003b000();
+  DAT_0020819c = extraout_A0_27;
+  FUN_0003b000();
+  DAT_00208184 = extraout_A0_28;
+  FUN_0003b000();
+  DAT_00208188 = extraout_A0_29;
+  FUN_0003b000();
+  DAT_00208198 = extraout_A0_30;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e0d0 = extraout_A0_31;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e0d4 = extraout_A0_32;
+  FUN_0003b000();
+  DAT_002081c4 = extraout_A0_33;
+  FUN_0003b000();
+  DAT_002081c8 = extraout_A0_34;
+  FUN_0003b000();
+  _DAT_00208104 = 0;
+  DAT_002081cc = extraout_A0_35;
+  FUN_000089d4();
+  DAT_00208016 = 0x18;
+  _DAT_00208010 = 0;
+  _DAT_0020e060 = 0xffff;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e0e4 = extraout_A0_36;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0000a0fc();
+  _DAT_0020e008 = 0xffffffff;
+  FUN_0003b000();
+  DAT_0020e00c = extraout_A0_37;
+  *(undefined4 *)(extraout_A0_37 + 0x1a) = 4;
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_38 = 0x992;
+  *(undefined4 *)(extraout_A0_38 + 0xd) = 0;
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_39 = 0xc3a;
+  *(undefined4 *)(extraout_A0_39 + 0xd) = 8;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_40 = 0xa5a;
+  *(undefined4 *)(extraout_A0_40 + 0xd) = 0;
+  FUN_0003b000();
+  DAT_0020e014 = extraout_A0_41;
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e074 = extraout_A0_42;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e01c = extraout_A0_43;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e078 = extraout_A0_44;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e018 = extraout_A0_45;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e010 = extraout_A0_46;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e020 = extraout_A0_47;
+  FUN_0003b000();
+  FUN_0003a000();
+  DAT_0020e024 = extraout_A0_48;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_49 = 0x790;
+  extraout_A0_49[1] = 0x540;
+  *(undefined4 *)(extraout_A0_49 + 0xd) = 0;
+  FUN_0003b000();
+  FUN_0003a000();
+  *extraout_A0_50 = 0x9c0;
+  extraout_A0_50[1] = 0x540;
+  *(undefined4 *)(extraout_A0_50 + 0xd) = 4;
+  FUN_0003b000();
+  FUN_0003a000();
+  FUN_0003b000();
+  FUN_0003a000();
+  _DAT_002081c0 = -1;
+  DAT_0020e0e8 = extraout_A0_51;
+  if (DAT_0020e0c0 == 0) {
+    DAT_00208120 = 0x11dca;
+    _DAT_00208146 = 0xff;
+  }
+  else {
+    DAT_00208120 = 0x8ea;
+    _DAT_00208146 = 0xff;
+  }
+  while( true ) {
+    if (_DAT_002081c0 != 0) {
+      FUN_0000a642();
+      return;
+    }
+    iVar2 = DAT_00208114;
+    if ((rlt_io & 0x1000) == 0) break;
+    while (iVar3 = iVar2, iVar3 != 0) {
+      iVar2 = *(int *)(iVar3 + 10);
+      if (*(int *)(iVar3 + 0x26) != 0) {
+        (**(code **)(iVar3 + 0x26))();
+      }
+    }
+    FUN_000089e0();
+    iVar2 = DAT_00208198;
+    while (iVar3 = iVar2, iVar3 != 0) {
+      iVar2 = *(int *)(iVar3 + 10);
+      if (*(int *)(iVar3 + 0x26) != 0) {
+        (**(code **)(iVar3 + 0x26))();
+      }
+    }
+    *(int *)(DAT_00208184 + 0xc) = DAT_00208114;
+    *(int *)(DAT_00208188 + 0xc) = DAT_00208114;
+    *(int *)(DAT_0020819c + 0xc) = DAT_00208198;
+    DAT_00208118 = DAT_00208118 + 1;
+    if (DAT_00208016 == 0x1c) {
+      *(undefined4 **)(DAT_0020817c + 0x10) = &DAT_0020d000;
+      DAT_0020d000 = 0;
+      DAT_0020d004 = &DAT_0020d008;
+      DAT_00208016 = 0x30;
+      FUN_00030000();
+      *(undefined4 **)(DAT_00208180 + 0x10) = &DAT_0020d000;
+      DAT_00208016 = 0x34;
+      FUN_00030000();
+      *(undefined4 **)(DAT_00208184 + 0x10) = &DAT_0020d000;
+      DAT_00208016 = 0x30;
+      FUN_00038000();
+      *(undefined4 **)(DAT_00208188 + 0x10) = &DAT_0020d000;
+      DAT_00208016 = 0x34;
+      FUN_00038000();
+      *(undefined4 **)(DAT_0020819c + 0x10) = &DAT_0020d000;
+      DAT_00208016 = 0x30;
+      FUN_00038000();
+      DAT_00208016 = 0x34;
+      DAT_00208100 = 0;
+      do {
+        DAT_00208100 = DAT_00208100 + 1;
+      } while (_DAT_00208010 != 0);
+      DAT_00208012 = &DAT_0020d000;
+      DAT_0020d004 = &DAT_0020d008;
+      _DAT_00208010 = -1;
+    }
+    else {
+      *(undefined4 **)(DAT_0020817c + 0x10) = &DAT_0020c000;
+      DAT_0020c000 = 0;
+      DAT_0020c004 = &DAT_0020c008;
+      DAT_00208016 = 0x18;
+      FUN_00030000();
+      *(undefined4 **)(DAT_00208180 + 0x10) = &DAT_0020c000;
+      DAT_00208016 = 0x1c;
+      FUN_00030000();
+      *(undefined4 **)(DAT_00208184 + 0x10) = &DAT_0020c000;
+      DAT_00208016 = 0x18;
+      FUN_00038000();
+      *(undefined4 **)(DAT_00208188 + 0x10) = &DAT_0020c000;
+      DAT_00208016 = 0x1c;
+      FUN_00038000();
+      *(undefined4 **)(DAT_0020819c + 0x10) = &DAT_0020c000;
+      DAT_00208016 = 0x18;
+      FUN_00038000();
+      DAT_00208016 = 0x1c;
+      DAT_00208100 = 0;
+      _DAT_0020e06a = DAT_0020e068;
+      DAT_0020e068 = 0;
+      do {
+        DAT_00208100 = DAT_00208100 + 1;
+        DAT_0020e068 = DAT_0020e068 + 1;
+      } while (_DAT_00208010 != 0);
+      DAT_00208012 = &DAT_0020c000;
+      DAT_0020c004 = &DAT_0020c008;
+      _DAT_00208010 = -1;
+    }
+  }
+  FUN_0000bd54();
+  return;
+}
+
+
+
+################################################################
+# wheelfir_maincpu.bin   functions: 211
+################################################################
+  0009b220  FUN_0009b220              2140 bytes
+  0009ba7c  FUN_0009ba7c              5086 bytes
+  0009ceba  FUN_0009ceba              74 bytes
+  0009dd06  FUN_0009dd06              28 bytes
+  000a43aa  FUN_000a43aa              318 bytes
+  000a450e  FUN_000a450e              902 bytes
+  000a4894  FUN_000a4894              110 bytes
+  000a4902  FUN_000a4902              42 bytes
+  000a492c  wf_port_7c0001            54 bytes
+  000a4962  FUN_000a4962              284 bytes
+  000a4a7e  FUN_000a4a7e              594 bytes
+  000a4cd8  FUN_000a4cd8              164 bytes
+  000a4e74  FUN_000a4e74              164 bytes
+  000a5052  FUN_000a5052              36 bytes
+  000a5076  FUN_000a5076              36 bytes
+  000a509a  FUN_000a509a              36 bytes
+  000a50be  FUN_000a50be              36 bytes
+  000a50e2  FUN_000a50e2              240 bytes
+  000a51d2  wf_link_share_difficulty  296 bytes
+  000a52fa  FUN_000a52fa              66 bytes
+  000a535c  FUN_000a535c              66 bytes
+  000a53c2  FUN_000a53c2              46 bytes
+  000a53f0  FUN_000a53f0              56 bytes
+  000a5428  FUN_000a5428              94 bytes
+  000a5486  FUN_000a5486              302 bytes
+  000a55b4  FUN_000a55b4              40 bytes
+  000a55dc  FUN_000a55dc              48 bytes
+  000a560c  FUN_000a560c              40 bytes
+  000a5634  FUN_000a5634              48 bytes
+  000a5664  FUN_000a5664              1504 bytes
+  000a5b7e  FUN_000a5b7e              42 bytes
+  000a5ba8  FUN_000a5ba8              42 bytes
+  000a5c98  FUN_000a5c98              70 bytes
+  000a5d08  wf_highscores_loop        2104 bytes
+  000a6540  FUN_000a6540              82 bytes
+  000a6592  FUN_000a6592              88 bytes
+  000a65ea  FUN_000a65ea              66 bytes
+  000da448  FUN_000da448              216 bytes
+  000da520  FUN_000da520              96 bytes
+  000da580  wf_snd_load_song          436 bytes
+  000da734  wf_snd_tick               132 bytes
+  000da7b8  wf_snd_effect_tick        404 bytes
+  000da94c  wf_snd_apply_volume       68 bytes
+  000da990  FUN_000da990              436 bytes
+  000dab44  wf_snd_read_cell          234 bytes
+  000dc248  FUN_000dc248              38 bytes
+  000dc26e  FUN_000dc26e              74 bytes
+  000dc2b8  FUN_000dc2b8              66 bytes
+  000dc2fa  FUN_000dc2fa              70 bytes
+  000dc340  FUN_000dc340              694 bytes
+  000dc820  FUN_000dc820              56 bytes
+  000dc860  FUN_000dc860              42 bytes
+  000dc88a  FUN_000dc88a              1230 bytes
+  000dcc6c  FUN_000dcc6c              60 bytes
+  000dcd46  FUN_000dcd46              180 bytes
+  000dce70  FUN_000dce70              932 bytes
+  000dd118  FUN_000dd118              60 bytes
+  000dd194  FUN_000dd194              206 bytes
+  000dd31e  FUN_000dd31e              162 bytes
+  000dd3c0  FUN_000dd3c0              646 bytes
+  000dd646  FUN_000dd646              462 bytes
+  000dd814  FUN_000dd814              4086 bytes
+  000ddc5e  FUN_000ddc5e              72 bytes
+  000ddce2  FUN_000ddce2              232 bytes
+  000de59e  FUN_000de59e              152 bytes
+  000de636  FUN_000de636              170 bytes
+  000de6e0  FUN_000de6e0              202 bytes
+  000de7aa  FUN_000de7aa              482 bytes
+  000de98c  FUN_000de98c              122 bytes
+  000deae6  FUN_000deae6              202 bytes
+  000df320  FUN_000df320              60 bytes
+  000df5fa  FUN_000df5fa              296 bytes
+  000dfa42  FUN_000dfa42              684 bytes
+  000dfcee  FUN_000dfcee              542 bytes
+  000e009c  FUN_000e009c              130 bytes
+  000e011e  FUN_000e011e              254 bytes
+  000e021c  FUN_000e021c              296 bytes
+  000e0344  FUN_000e0344              290 bytes
+  000e0466  FUN_000e0466              304 bytes
+  000e0596  FUN_000e0596              298 bytes
+  000e06c0  FUN_000e06c0              18 bytes
+  000e06d2  FUN_000e06d2              158 bytes
+  000e0770  FUN_000e0770              2948 bytes
+  000e0b7e  FUN_000e0b7e              226 bytes
+  000e13d6  FUN_000e13d6              84 bytes
+  000e142a  FUN_000e142a              90 bytes
+  000e1484  FUN_000e1484              86 bytes
+  000e14da  FUN_000e14da              94 bytes
+  000e1538  FUN_000e1538              156 bytes
+  000e15d4  FUN_000e15d4              106 bytes
+  000e163e  FUN_000e163e              146 bytes
+  000e16d0  FUN_000e16d0              106 bytes
+  000e173a  FUN_000e173a              132 bytes
+  000e17be  FUN_000e17be              112 bytes
+  000e182e  FUN_000e182e              136 bytes
+  000e18b6  FUN_000e18b6              112 bytes
+  000e1926  FUN_000e1926              84 bytes
+  000e199c  FUN_000e199c              134 bytes
+  000e1a22  FUN_000e1a22              98 bytes
+  000e1a84  FUN_000e1a84              102 bytes
+  000e1bae  FUN_000e1bae              1780 bytes
+  000e219e  FUN_000e219e              56 bytes
+  000e2488  FUN_000e2488              92 bytes
+  000e24e4  FUN_000e24e4              260 bytes
+  000e25e8  FUN_000e25e8              42 bytes
+  000e2e32  FUN_000e2e32              1284 bytes
+  000e3252  FUN_000e3252              142 bytes
+  000e32e0  FUN_000e32e0              46 bytes
+  000e330e  FUN_000e330e              70 bytes
+  000e3438  FUN_000e3438              112 bytes
+  000e34a8  FUN_000e34a8              70 bytes
+  000e3976  FUN_000e3976              510 bytes
+  000e3b74  FUN_000e3b74              78 bytes
+  000e3bc2  FUN_000e3bc2              490 bytes
+  000e3dac  FUN_000e3dac              230 bytes
+  000e3e92  FUN_000e3e92              106 bytes
+  000e3efc  FUN_000e3efc              106 bytes
+  000e3f66  FUN_000e3f66              422 bytes
+  000e410c  FUN_000e410c              464 bytes
+  000e42dc  FUN_000e42dc              378 bytes
+  000e4456  FUN_000e4456              102 bytes
+  000e44bc  FUN_000e44bc              64 bytes
+  000e44fc  FUN_000e44fc              190 bytes
+  000e45ba  FUN_000e45ba              188 bytes
+  000e4676  FUN_000e4676              50 bytes
+  000e46a8  FUN_000e46a8              8 bytes
+  000e46b0  FUN_000e46b0              132 bytes
+  000e4734  FUN_000e4734              58 bytes
+  000e476e  FUN_000e476e              144 bytes
+  000e47fe  wf_scale_coord            80 bytes
+  000e484e  wf_clip_dispatch          1932 bytes
+  000e5140  FUN_000e5140              308 bytes
+  000e5274  wf_irq_sprite_list        22 bytes
+  000e528a  wf_sprite_case0           762 bytes
+  000e5584  wf_arm_register           406 bytes
+  000e571a  FUN_000e571a              80 bytes
+  000e576a  FUN_000e576a              358 bytes
+  000e58d0  FUN_000e58d0              374 bytes
+  000e5a46  FUN_000e5a46              48 bytes
+  000e5a76  FUN_000e5a76              68 bytes
+  000e5aba  FUN_000e5aba              56 bytes
+  000e5af2  FUN_000e5af2              54 bytes
+  000e5b28  FUN_000e5b28              24 bytes
+  000e5b40  FUN_000e5b40              340 bytes
+  000e5c94  FUN_000e5c94              274 bytes
+  000e5da6  FUN_000e5da6              2592 bytes
+  000e5fae  FUN_000e5fae              44 bytes
+  000e5fda  FUN_000e5fda              86 bytes
+  000e6046  FUN_000e6046              156 bytes
+  000e60cc  FUN_000e60cc              36 bytes
+  000e60f0  FUN_000e60f0              732 bytes
+  000e622a  FUN_000e622a              74 bytes
+  000e631a  FUN_000e631a              120 bytes
+  000e6392  FUN_000e6392              92 bytes
+  000e6c38  FUN_000e6c38              58 bytes
+  000e6c72  FUN_000e6c72              58 bytes
+  000e6cac  FUN_000e6cac              72 bytes
+  000e6cf4  FUN_000e6cf4              64 bytes
+  000e6d34  FUN_000e6d34              74 bytes
+  000e6d7e  FUN_000e6d7e              52 bytes
+  000e6db2  FUN_000e6db2              288 bytes
+  000e6ed2  FUN_000e6ed2              262 bytes
+  000e6fd8  FUN_000e6fd8              50 bytes
+  000e700a  FUN_000e700a              232 bytes
+  000e72e2  FUN_000e72e2              520 bytes
+  000e74ea  FUN_000e74ea              112 bytes
+  000e755a  FUN_000e755a              88 bytes
+  000e75b2  FUN_000e75b2              100 bytes
+  000e7616  FUN_000e7616              54 bytes
+  000e764c  FUN_000e764c              116 bytes
+  000e76c0  FUN_000e76c0              146 bytes
+  000e7752  FUN_000e7752              210 bytes
+  000e7824  FUN_000e7824              260 bytes
+  000e7928  FUN_000e7928              102 bytes
+  000e798e  FUN_000e798e              204 bytes
+  000e7a5a  FUN_000e7a5a              126 bytes
+  000e7ad8  FUN_000e7ad8              184 bytes
+  000e7b90  FUN_000e7b90              886 bytes
+  000e7f06  FUN_000e7f06              80 bytes
+  000e7f56  FUN_000e7f56              198 bytes
+  000e801c  FUN_000e801c              762 bytes
+  000e8316  FUN_000e8316              132 bytes
+  000e839a  FUN_000e839a              116 bytes
+  000e8426  FUN_000e8426              184 bytes
+  000e84de  FUN_000e84de              170 bytes
+  000e8588  FUN_000e8588              74 bytes
+  000e85d2  FUN_000e85d2              172 bytes
+  000e867e  FUN_000e867e              126 bytes
+  000e86fc  FUN_000e86fc              76 bytes
+  000e8748  FUN_000e8748              76 bytes
+  000e8794  FUN_000e8794              44 bytes
+  000e87c0  FUN_000e87c0              78 bytes
+  000e8836  FUN_000e8836              864 bytes
+  000e8b96  FUN_000e8b96              78 bytes
+  000e8be4  FUN_000e8be4              34 bytes
+  000e8c28  FUN_000e8c28              34 bytes
+  000e8c8e  FUN_000e8c8e              700 bytes
+  000e8f4a  wf_pal_upload             30 bytes
+  000e8f68  wf_pal_fill               30 bytes
+  000e8f86  wf_print_text             98 bytes
+  000e8fe8  FUN_000e8fe8              96 bytes
+  000e9048  FUN_000e9048              144 bytes
+  000e9146  wf_clear_screen_end       236 bytes
+  000e9232  FUN_000e9232              604 bytes
+  000e948e  FUN_000e948e              366 bytes
+  000ea1f0  FUN_000ea1f0              164 bytes
+  000ea294  FUN_000ea294              96 bytes
+  000ea2f4  FUN_000ea2f4              218 bytes
+  000ea3ce  FUN_000ea3ce              6 bytes
+  000ea3d4  FUN_000ea3d4              6 bytes
+  000ea3da  reset                     2376 bytes
+
+-- symbols seeded from symbols.txt --
+  00000000  vec_ssp
+  00000000  main_rom
+  00000004  vec_reset
+  00000008  vec_buserr
+  0000000c  vec_addrerr
+  00000010  vec_illegal
+  00000014  vec_divzero
+  00000018  vec_chk
+  0000001c  vec_trapv
+  00000020  vec_privviol
+  00000024  vec_trace
+  00000060  vec_spurious
+  00000064  vec_irq1
+  0000006c  vec_irq3
+  00000074  vec_irq5
+  00000080  vec_trap0
+  00000400  wf_zoom_desc_x
+  00001d10  wf_zoom_desc_y
+  00011832  wf_curtain_desc
+  0002105e  wf_pal_highscores
+  0002285e  wf_track_table
+  00079ea8  wf_song_bank
+  0009b3da  wf_page_toggle
+  0009b442  wf_main_loop_trigger
+  0009b4a2  wf_build_scroll_table
+  0009cc98  wf_car_graphic
+  0009ccc2  wf_car_curtain
+  0009cda4  wf_car_table
+  0009ceda  wf_pal_blast
+  0009de98  wf_pal_accumulate
+  0009df50  wf_pal_to_black
+  0009df76  wf_pal_to_white
+  000a4462  wf_generate_road_table
+  000a492c  wf_port_7c0001
+  000a51d2  wf_link_share_difficulty
+  000a5d08  wf_highscores_loop
+  000da580  wf_snd_load_song
+  000da734  wf_snd_tick
+  000da7b8  wf_snd_effect_tick
+  000da94c  wf_snd_apply_volume
+  000daa66  wf_snd_read_row
+  000dab44  wf_snd_read_cell
+  000dac2e  wf_note_period_table
+  000dac76  wf_period_hz_table
+  000db248  wf_volume_matrix_table
+  000dc490  wf_snd_commit
+  000dc49c  wf_snd_enqueue_block
+  000dc50a  wf_scroll_frame
+  000dc544  wf_scroll_vblank
+  000dc5f6  wf_raster_starts_road
+  000dc61a  wf_page_of_frame
+  000dc624  wf_write_scroll_and_raster
+  000dc756  wf_stream_scroll_line
+  000dc75e  wf_raster_walk
+  000dc78a  wf_snd_stream_word
+  000dc7c6  wf_raster_band
+  000dc7d0  wf_road_scroll
+  000e47fe  wf_scale_coord
+  000e484e  wf_clip_dispatch
+  000e489c  wf_sprite_build_swapped
+  000e48c2  wf_sprite_build
+  000e498a  wf_clip
+  000e4a4c  wf_clip_xb
+  000e4b16  wf_clip_yb
+  000e4be0  wf_clip_xb_yb
+  000e4caa  wf_clip_swap
+  000e4d76  wf_clip_swap_xb
+  000e4e42  wf_clip_swap_yb
+  000e4f0e  wf_clip_swap_xb_yb
+  000e4fdc  wf_fill_direct
+  000e5274  wf_irq_sprite_list
+  000e528a  wf_sprite_case0
+  000e52a8  wf_sprite_reg7
+  000e52f0  wf_fire_case0
+  000e5300  wf_sprite_dispatch
+  000e531c  wf_sprite_null
+  000e539c  wf_sprite_mode1
+  000e540a  wf_background_fill
+  000e541a  wf_sprite_mode2
+  000e5488  wf_sprite_fill
+  000e5498  wf_sprite_mode3
+  000e550e  wf_sprite_mode4
+  000e5584  wf_arm_register
+  000e55ea  wf_arm_flags
+  000e8d3c  wf_video_reset
+  000e8f4a  wf_pal_upload
+  000e8f68  wf_pal_fill
+  000e8f86  wf_print_text
+  000e9062  wf_clear_screen_b
+  000e9146  wf_clear_screen_end
+  000e934e  wf_clear_screen_3
+  000ea3da  reset
+  00200000  main_ram
+  00200fe5  wf_bar_master_count
+  00201056  wf_fade_length
+  00201058  wf_pal_idx
+  0020105a  wf_pal_count
+  0020105c  wf_pal_steps
+  0020105e  wf_pal_pending
+  00201064  wf_pal_delta
+  00201664  wf_pal_buffer
+  00201ac8  wf_line_scroll_table
+  00201cbc  wf_horizon
+  00201cc2  wf_upper_band
+  00201cc8  wf_scroll_source_table
+  00201e8c  wf_vector_raster
+  002069aa  wf_horizon_raster_chain
+  002069b3  wf_bar_count_page0
+  00208f33  wf_bar_count_page1
+  0020b4ae  wf_sprite_list_current
+  0020b4b2  wf_sprite_list_other
+  0020b4b6  wf_page_flag
+  0020b4b8  wf_clip_x0
+  0020b4ba  wf_clip_y0
+  0020b4bc  wf_clip_x1
+  0020b4be  wf_clip_y1
+  0020b4c0  wf_page_yoffset
+  0020b4c2  wf_page_bit
+  0020b4d2  wf_double_buffer_on
+  0020bc4e  wf_camera_y
+  0020bc54  wf_car_scroll
+  0020bc6e  wf_race_class
+  0020bc84  wf_difficulty
+  0020bc98  wf_link_player_number
+  0020cc24  wf_snd_active
+  0020cc2c  wf_snd_master_volume
+  0020cc3c  wf_snd_speed
+  0020cc40  wf_snd_song
+  0020cc44  wf_snd_sample_base
+  0020cd40  wf_snd_channel1
+  0020cda8  wf_snd_block
+  00700000  blit_data
+  00720001  ramdac_index
+  00720003  ramdac_pal
+  00720005  ramdac_mask
+  00740000  soundlatch
+  00760000  coin_cnt
+  00780000  adc
+  007a0000  line_counter
+  007c0000  control_and_link
+  007e0000  player_inputs
+  007e0002  player_inputs_p2
+
+-- code that touches the blitter (0x700000-0x70001f) --
+  000e8d3c -> 00700000   [FUN_000e8c8e @ 000e8c8e]
+  000e8d9c -> 00700000   [FUN_000e8c8e @ 000e8c8e]
+  000e8e0c -> 00700000   [FUN_000e8c8e @ 000e8c8e]
+  000e8e74 -> 00700000   [FUN_000e8c8e @ 000e8c8e]
+  000e916a -> 00700000   [wf_clear_screen_end @ 000e9146]
+  000e926a -> 00700000   [FUN_000e9232 @ 000e9232]
+  000e92f6 -> 00700000   [FUN_000e9232 @ 000e9232]
+  000e5292 -> 00700000   [wf_sprite_case0 @ 000e528a]
+  000e531c -> 00700000   [wf_sprite_case0 @ 000e528a]
+  000e539c -> 00700000   [wf_sprite_case0 @ 000e528a]
+  000e541a -> 00700000   [wf_sprite_case0 @ 000e528a]
+  000e5498 -> 00700000   [wf_sprite_case0 @ 000e528a]
+  000e550e -> 00700000   [wf_sprite_case0 @ 000e528a]
+  000e4fe4 -> 00700000   [(no function)]
+  000e50b4 -> 00700000   [(no function)]
+  000e8d6c -> 00700002   [FUN_000e8c8e @ 000e8c8e]
+  000e8dcc -> 00700002   [FUN_000e8c8e @ 000e8c8e]
+  000e8e3c -> 00700002   [FUN_000e8c8e @ 000e8c8e]
+  000e8ea4 -> 00700002   [FUN_000e8c8e @ 000e8c8e]
+  000e91b2 -> 00700002   [wf_clear_screen_end @ 000e9146]
+  000e92b2 -> 00700002   [FUN_000e9232 @ 000e9232]
+  000e9326 -> 00700002   [FUN_000e9232 @ 000e9232]
+  000e52d8 -> 00700002   [wf_sprite_case0 @ 000e528a]
+  000e5364 -> 00700002   [wf_sprite_case0 @ 000e528a]
+  000e53e2 -> 00700002   [wf_sprite_case0 @ 000e528a]
+  000e5460 -> 00700002   [wf_sprite_case0 @ 000e528a]
+  000e54de -> 00700002   [wf_sprite_case0 @ 000e528a]
+  000e5554 -> 00700002   [wf_sprite_case0 @ 000e528a]
+  000e503c -> 00700002   [(no function)]
+  000e510c -> 00700002   [(no function)]
+  000e8d44 -> 00700004   [FUN_000e8c8e @ 000e8c8e]
+  000e8da4 -> 00700004   [FUN_000e8c8e @ 000e8c8e]
+  000e8e14 -> 00700004   [FUN_000e8c8e @ 000e8c8e]
+  000e8e7c -> 00700004   [FUN_000e8c8e @ 000e8c8e]
+  000e9172 -> 00700004   [wf_clear_screen_end @ 000e9146]
+  000e9272 -> 00700004   [FUN_000e9232 @ 000e9232]
+  000e92fe -> 00700004   [FUN_000e9232 @ 000e9232]
+  000e5298 -> 00700004   [wf_sprite_case0 @ 000e528a]
+  000e5324 -> 00700004   [wf_sprite_case0 @ 000e528a]
+  000e53a2 -> 00700004   [wf_sprite_case0 @ 000e528a]
+  000e5420 -> 00700004   [wf_sprite_case0 @ 000e528a]
+  000e549e -> 00700004   [wf_sprite_case0 @ 000e528a]
+  000e5514 -> 00700004   [wf_sprite_case0 @ 000e528a]
+  000e4fec -> 00700004   [(no function)]
+  000e50bc -> 00700004   [(no function)]
+  000e8d74 -> 00700006   [FUN_000e8c8e @ 000e8c8e]
+  000e8dd4 -> 00700006   [FUN_000e8c8e @ 000e8c8e]
+  000e8e44 -> 00700006   [FUN_000e8c8e @ 000e8c8e]
+  000e8eac -> 00700006   [FUN_000e8c8e @ 000e8c8e]
+  000e91ba -> 00700006   [wf_clear_screen_end @ 000e9146]
+  000e92ba -> 00700006   [FUN_000e9232 @ 000e9232]
+  000e932e -> 00700006   [FUN_000e9232 @ 000e9232]
+  000e52e0 -> 00700006   [wf_sprite_case0 @ 000e528a]
+  000e536c -> 00700006   [wf_sprite_case0 @ 000e528a]
+  000e53ea -> 00700006   [wf_sprite_case0 @ 000e528a]
+  000e5468 -> 00700006   [wf_sprite_case0 @ 000e528a]
+  000e54e6 -> 00700006   [wf_sprite_case0 @ 000e528a]
+  000e555c -> 00700006   [wf_sprite_case0 @ 000e528a]
+  000e5044 -> 00700006   [(no function)]
+  000e5114 -> 00700006   [(no function)]
+  000e8cea -> 00700008   [FUN_000e8c8e @ 000e8c8e]
+  000e4ff4 -> 00700008   [(no function)]
+  000e50c4 -> 00700008   [(no function)]
+  0009b47a -> 00700009   [FUN_0009b220 @ 0009b220]
+  0009bcac -> 00700009   [FUN_0009ba7c @ 0009ba7c]
+  000dc906 -> 00700009   [FUN_000dc88a @ 000dc88a]
+  000e1bba -> 00700009   [FUN_000e1bae @ 000e1bae]
+  000e8cf2 -> 0070000a   [FUN_000e8c8e @ 000e8c8e]
+  000e4ffc -> 0070000a   [(no function)]
+  000e50cc -> 0070000a   [(no function)]
+  0009b464 -> 0070000b   [FUN_0009b220 @ 0009b220]
+  0009bc96 -> 0070000b   [FUN_0009ba7c @ 0009ba7c]
+  000a640a -> 0070000b   [wf_highscores_loop @ 000a5d08]
+  000a64c0 -> 0070000b   [wf_highscores_loop @ 000a5d08]
+  000dc8fe -> 0070000b   [FUN_000dc88a @ 000dc88a]
+  000e1bb2 -> 0070000b   [FUN_000e1bae @ 000e1bae]
+  000dc54a -> 0070000b   [FUN_000dc340 @ 000dc340]
+  000e8d4c -> 0070000c   [FUN_000e8c8e @ 000e8c8e]
+  000e8dac -> 0070000c   [FUN_000e8c8e @ 000e8c8e]
+  000e8e1c -> 0070000c   [FUN_000e8c8e @ 000e8c8e]
+  000e8e84 -> 0070000c   [FUN_000e8c8e @ 000e8c8e]
+  000e917a -> 0070000c   [wf_clear_screen_end @ 000e9146]
+  000e927a -> 0070000c   [FUN_000e9232 @ 000e9232]
+  000e9306 -> 0070000c   [FUN_000e9232 @ 000e9232]
+  000e52a0 -> 0070000c   [wf_sprite_case0 @ 000e528a]
+  000e532c -> 0070000c   [wf_sprite_case0 @ 000e528a]
+  000e53aa -> 0070000c   [wf_sprite_case0 @ 000e528a]
+  000e5428 -> 0070000c   [wf_sprite_case0 @ 000e528a]
+  000e54a6 -> 0070000c   [wf_sprite_case0 @ 000e528a]
+  000e551c -> 0070000c   [wf_sprite_case0 @ 000e528a]
+  000e5004 -> 0070000c   [(no function)]
+  000e50d4 -> 0070000c   [(no function)]
+  000e8df8 -> 0070000d   [FUN_000e8c8e @ 000e8c8e]
+  000ea2a4 -> 0070000d   [FUN_000ea294 @ 000ea294]
+  000ea2e4 -> 0070000d   [FUN_000ea294 @ 000ea294]
+  000ea304 -> 0070000d   [FUN_000ea2f4 @ 000ea2f4]
+  000ea344 -> 0070000d   [FUN_000ea2f4 @ 000ea2f4]
+  000ea34e -> 0070000d   [FUN_000ea2f4 @ 000ea2f4]
+  000ea35e -> 0070000d   [FUN_000ea2f4 @ 000ea2f4]
+  000ea36e -> 0070000d   [FUN_000ea2f4 @ 000ea2f4]
+  000ea37e -> 0070000d   [FUN_000ea2f4 @ 000ea2f4]
+  000ea38e -> 0070000d   [FUN_000ea2f4 @ 000ea2f4]
+  000ea39e -> 0070000d   [FUN_000ea2f4 @ 000ea2f4]
+  000ea3ae -> 0070000d   [FUN_000ea2f4 @ 000ea2f4]
+  000ea3be -> 0070000d   [FUN_000ea2f4 @ 000ea2f4]
+  000e9204 -> 0070000d   [wf_clear_screen_end @ 000e9146]
+  000e9214 -> 0070000d   [wf_clear_screen_end @ 000e9146]
+  000e5060 -> 0070000d   [(no function)]
+  000e5068 -> 0070000d   [(no function)]
+  000e5070 -> 0070000d   [(no function)]
+  000e5078 -> 0070000d   [(no function)]
+  000e5080 -> 0070000d   [(no function)]
+  000e5088 -> 0070000d   [(no function)]
+  000e5090 -> 0070000d   [(no function)]
+  000e5098 -> 0070000d   [(no function)]
+  000e50a0 -> 0070000d   [(no function)]
+  000e5130 -> 0070000d   [(no function)]
+  000e8d54 -> 0070000e   [FUN_000e8c8e @ 000e8c8e]
+  000e8db4 -> 0070000e   [FUN_000e8c8e @ 000e8c8e]
+  000e8e24 -> 0070000e   [FUN_000e8c8e @ 000e8c8e]
+  000e8e8c -> 0070000e   [FUN_000e8c8e @ 000e8c8e]
+  000e9182 -> 0070000e   [wf_clear_screen_end @ 000e9146]
+  000e9282 -> 0070000e   [FUN_000e9232 @ 000e9232]
+  000e930e -> 0070000e   [FUN_000e9232 @ 000e9232]
+  000e52a8 -> 0070000e   [wf_sprite_case0 @ 000e528a]
+  000e5334 -> 0070000e   [wf_sprite_case0 @ 000e528a]
+  000e53b2 -> 0070000e   [wf_sprite_case0 @ 000e528a]
+  000e5430 -> 0070000e   [wf_sprite_case0 @ 000e528a]
+  000e54ae -> 0070000e   [wf_sprite_case0 @ 000e528a]
+  000e5524 -> 0070000e   [wf_sprite_case0 @ 000e528a]
+  000e500c -> 0070000e   [(no function)]
+  000e50dc -> 0070000e   [(no function)]
+  000e8d5c -> 00700010   [FUN_000e8c8e @ 000e8c8e]
+  000e8dbc -> 00700010   [FUN_000e8c8e @ 000e8c8e]
+  000e8e2c -> 00700010   [FUN_000e8c8e @ 000e8c8e]
+  000e8e94 -> 00700010   [FUN_000e8c8e @ 000e8c8e]
+  000e918a -> 00700010   [wf_clear_screen_end @ 000e9146]
+  000e928a -> 00700010   [FUN_000e9232 @ 000e9232]
+  000e9316 -> 00700010   [FUN_000e9232 @ 000e9232]
+  000e52b0 -> 00700010   [wf_sprite_case0 @ 000e528a]
+  000e533c -> 00700010   [wf_sprite_case0 @ 000e528a]
+  000e53ba -> 00700010   [wf_sprite_case0 @ 000e528a]
+  000e5438 -> 00700010   [wf_sprite_case0 @ 000e528a]
+  000e54b6 -> 00700010   [wf_sprite_case0 @ 000e528a]
+  000e552c -> 00700010   [wf_sprite_case0 @ 000e528a]
+  000e5014 -> 00700010   [(no function)]
+  000e50e4 -> 00700010   [(no function)]
+  000dc544 -> 00700011   [FUN_000dc340 @ 000dc340]
+  000dc61a -> 00700011   [(no function)]
+  000dc756 -> 00700011   [(no function)]
+  000dc7d0 -> 00700011   [(no function)]
+  000dc806 -> 00700011   [(no function)]
+  000e8d7c -> 00700012   [FUN_000e8c8e @ 000e8c8e]
+  000e8ddc -> 00700012   [FUN_000e8c8e @ 000e8c8e]
+  000e8e4c -> 00700012   [FUN_000e8c8e @ 000e8c8e]
+  000e8eb4 -> 00700012   [FUN_000e8c8e @ 000e8c8e]
+  000e91c2 -> 00700012   [wf_clear_screen_end @ 000e9146]
+  000e92c2 -> 00700012   [FUN_000e9232 @ 000e9232]
+  000e9336 -> 00700012   [FUN_000e9232 @ 000e9232]
+  000e52e8 -> 00700012   [wf_sprite_case0 @ 000e528a]
+  000e5374 -> 00700012   [wf_sprite_case0 @ 000e528a]
+  000e53f2 -> 00700012   [wf_sprite_case0 @ 000e528a]
+  000e5470 -> 00700012   [wf_sprite_case0 @ 000e528a]
+  000e54ee -> 00700012   [wf_sprite_case0 @ 000e528a]
+  000e5564 -> 00700012   [wf_sprite_case0 @ 000e528a]
+  000e504c -> 00700012   [(no function)]
+  000e511c -> 00700012   [(no function)]
+  000e9192 -> 00700014   [wf_clear_screen_end @ 000e9146]
+  000e9292 -> 00700014   [FUN_000e9232 @ 000e9232]
+  000e52b8 -> 00700014   [wf_sprite_case0 @ 000e528a]
+  000e5344 -> 00700014   [wf_sprite_case0 @ 000e528a]
+  000e53c2 -> 00700014   [wf_sprite_case0 @ 000e528a]
+  000e5440 -> 00700014   [wf_sprite_case0 @ 000e528a]
+  000e54be -> 00700014   [wf_sprite_case0 @ 000e528a]
+  000e5534 -> 00700014   [wf_sprite_case0 @ 000e528a]
+  000e501c -> 00700014   [(no function)]
+  000e50ec -> 00700014   [(no function)]
+  000dc510 -> 00700015   [FUN_000dc340 @ 000dc340]
+  000dc75e -> 00700015   [(no function)]
+  000e919a -> 00700016   [wf_clear_screen_end @ 000e9146]
+  000e929a -> 00700016   [FUN_000e9232 @ 000e9232]
+  000e52c0 -> 00700016   [wf_sprite_case0 @ 000e528a]
+  000e534c -> 00700016   [wf_sprite_case0 @ 000e528a]
+  000e53ca -> 00700016   [wf_sprite_case0 @ 000e528a]
+  000e5448 -> 00700016   [wf_sprite_case0 @ 000e528a]
+  000e54c6 -> 00700016   [wf_sprite_case0 @ 000e528a]
+  000e553c -> 00700016   [wf_sprite_case0 @ 000e528a]
+  000e5024 -> 00700016   [(no function)]
+  000e50f4 -> 00700016   [(no function)]
+  000dc52e -> 00700017   [FUN_000dc340 @ 000dc340]
+  000dc624 -> 00700017   [(no function)]
+  000dc764 -> 00700017   [(no function)]
+  000dc7d8 -> 00700017   [(no function)]
+  000e91a2 -> 00700018   [wf_clear_screen_end @ 000e9146]
+  000e92a2 -> 00700018   [FUN_000e9232 @ 000e9232]
+  000e52c8 -> 00700018   [wf_sprite_case0 @ 000e528a]
+  000e5354 -> 00700018   [wf_sprite_case0 @ 000e528a]
+  000e53d2 -> 00700018   [wf_sprite_case0 @ 000e528a]
+  000e5450 -> 00700018   [wf_sprite_case0 @ 000e528a]
+  000e54ce -> 00700018   [wf_sprite_case0 @ 000e528a]
+  000e5544 -> 00700018   [wf_sprite_case0 @ 000e528a]
+  000e502c -> 00700018   [(no function)]
+  000e50fc -> 00700018   [(no function)]
+  000e8de4 -> 00700019   [FUN_000e8c8e @ 000e8c8e]
+  000e8ebc -> 00700019   [FUN_000e8c8e @ 000e8c8e]
+  000e933e -> 00700019   [FUN_000e9232 @ 000e9232]
+  000e5478 -> 00700019   [wf_sprite_case0 @ 000e528a]
+  000e556c -> 00700019   [wf_sprite_case0 @ 000e528a]
+  000e8d84 -> 0070001b   [FUN_000e8c8e @ 000e8c8e]
+  000e8e54 -> 0070001b   [FUN_000e8c8e @ 000e8c8e]
+  000e53fa -> 0070001b   [wf_sprite_case0 @ 000e528a]
+  000e54f6 -> 0070001b   [wf_sprite_case0 @ 000e528a]
+  000e8e5c -> 0070001c   [FUN_000e8c8e @ 000e8c8e]
+  000e8ec4 -> 0070001c   [FUN_000e8c8e @ 000e8c8e]
+  000e9346 -> 0070001c   [FUN_000e9232 @ 000e9232]
+  000e5402 -> 0070001c   [wf_sprite_case0 @ 000e528a]
+  000e5480 -> 0070001c   [wf_sprite_case0 @ 000e528a]
+  000eab8e -> 0070001e   [reset @ 000ea3da]
+  0009b442 -> 0070001e   [FUN_0009b220 @ 0009b220]
+  0009bc74 -> 0070001e   [FUN_0009ba7c @ 0009ba7c]
+  000a4746 -> 0070001e   [FUN_000a450e @ 000a450e]
+  000ddab0 -> 0070001e   [FUN_000dd814 @ 000dd814]
+  000a5878 -> 0070001e   [FUN_000a5664 @ 000a5664]
+  000a5ebe -> 0070001e   [wf_highscores_loop @ 000a5d08]
+  000dcb6c -> 0070001e   [FUN_000dc88a @ 000dc88a]
+  000dd004 -> 0070001e   [FUN_000dce70 @ 000dce70]
+  000e0a28 -> 0070001e   [FUN_000e0770 @ 000e0770]
+  000e1eda -> 0070001e   [FUN_000e1bae @ 000e1bae]
+  000e303e -> 0070001e   [FUN_000e2e32 @ 000e2e32]
+  000e8d34 -> 0070001e   [FUN_000e8c8e @ 000e8c8e]
+  000e8d64 -> 0070001e   [FUN_000e8c8e @ 000e8c8e]
+  000e8d8c -> 0070001e   [FUN_000e8c8e @ 000e8c8e]
+  000e8dc4 -> 0070001e   [FUN_000e8c8e @ 000e8c8e]
+  000e8dec -> 0070001e   [FUN_000e8c8e @ 000e8c8e]
+  000e8e34 -> 0070001e   [FUN_000e8c8e @ 000e8c8e]
+  000e8e64 -> 0070001e   [FUN_000e8c8e @ 000e8c8e]
+  000e8e9c -> 0070001e   [FUN_000e8c8e @ 000e8c8e]
+  000e8ecc -> 0070001e   [FUN_000e8c8e @ 000e8c8e]
+  000e90b8 -> 0070001e   [FUN_000e9048 @ 000e9048]
+  000e9162 -> 0070001e   [wf_clear_screen_end @ 000e9146]
+  000e91aa -> 0070001e   [wf_clear_screen_end @ 000e9146]
+  000e91ca -> 0070001e   [wf_clear_screen_end @ 000e9146]
+  000e9262 -> 0070001e   [FUN_000e9232 @ 000e9232]
+  000e92aa -> 0070001e   [FUN_000e9232 @ 000e9232]
+  000e92ca -> 0070001e   [FUN_000e9232 @ 000e9232]
+  000e931e -> 0070001e   [FUN_000e9232 @ 000e9232]
+  000e934e -> 0070001e   [FUN_000e9232 @ 000e9232]
+  000e52d0 -> 0070001e   [wf_sprite_case0 @ 000e528a]
+  000e52f0 -> 0070001e   [wf_sprite_case0 @ 000e528a]
+  000e535c -> 0070001e   [wf_sprite_case0 @ 000e528a]
+  000e53da -> 0070001e   [wf_sprite_case0 @ 000e528a]
+  000e540a -> 0070001e   [wf_sprite_case0 @ 000e528a]
+  000e5458 -> 0070001e   [wf_sprite_case0 @ 000e528a]
+  000e5488 -> 0070001e   [wf_sprite_case0 @ 000e528a]
+  000e54d6 -> 0070001e   [wf_sprite_case0 @ 000e528a]
+  000e54fe -> 0070001e   [wf_sprite_case0 @ 000e528a]
+  000e554c -> 0070001e   [wf_sprite_case0 @ 000e528a]
+  000e5574 -> 0070001e   [wf_sprite_case0 @ 000e528a]
+  000e4fdc -> 0070001e   [(no function)]
+  000e5034 -> 0070001e   [(no function)]
+  000e5054 -> 0070001e   [(no function)]
+  000e50ac -> 0070001e   [(no function)]
+  000e5104 -> 0070001e   [(no function)]
+  000e5124 -> 0070001e   [(no function)]
+
+-- decompilation of reset --
+
+/* WARNING: This function may have set the stack pointer */
+/* WARNING: Removing unreachable block (ram,0x000ea9b0) */
+/* WARNING: Removing unreachable block (ram,0x000eaa54) */
+/* WARNING: Removing unreachable block (ram,0x000ea9ba) */
+/* WARNING: Removing unreachable block (ram,0x000ea9c2) */
+/* WARNING: Removing unreachable block (ram,0x000ea9cc) */
+/* WARNING: Removing unreachable block (ram,0x000ea9d4) */
+/* WARNING: Removing unreachable block (ram,0x000ea9dc) */
+/* WARNING: Removing unreachable block (ram,0x000ea9e6) */
+/* WARNING: Removing unreachable block (ram,0x000ea9f2) */
+/* WARNING: Removing unreachable block (ram,0x000eaa04) */
+/* WARNING: Removing unreachable block (ram,0x000eaa1c) */
+/* WARNING: Removing unreachable block (ram,0x000eaa3c) */
+/* WARNING: Removing unreachable block (ram,0x000eaa4c) */
+/* WARNING: Removing unreachable block (ram,0x000eaa58) */
+/* WARNING: Removing unreachable block (ram,0x000eaaa4) */
+/* WARNING: Removing unreachable block (ram,0x000eaaae) */
+/* WARNING: Removing unreachable block (ram,0x000eaab8) */
+/* WARNING: Removing unreachable block (ram,0x000eaad4) */
+/* WARNING: Removing unreachable block (ram,0x000eaae6) */
+/* WARNING: Removing unreachable block (ram,0x000eaaf4) */
+/* WARNING: Removing unreachable block (ram,0x000eab02) */
+/* WARNING: Removing unreachable block (ram,0x000eab0a) */
+/* WARNING: Removing unreachable block (ram,0x000eab14) */
+/* WARNING: Removing unreachable block (ram,0x000eab4c) */
+/* WARNING: Removing unreachable block (ram,0x000eab1c) */
+/* WARNING: Removing unreachable block (ram,0x000eab32) */
+/* WARNING: Removing unreachable block (ram,0x000eab42) */
+/* WARNING: Removing unreachable block (ram,0x000eab38) */
+/* WARNING: Removing unreachable block (ram,0x000eaadc) */
+/* WARNING: Removing unreachable block (ram,0x000eaac0) */
+/* WARNING: Removing unreachable block (ram,0x000eaa60) */
+/* WARNING: Removing unreachable block (ram,0x000eaa6a) */
+/* WARNING: Removing unreachable block (ram,0x000eaa74) */
+/* WARNING: Removing unreachable block (ram,0x000eaa82) */
+/* WARNING: Removing unreachable block (ram,0x000eaa8a) */
+/* WARNING: Removing unreachable block (ram,0x000eaa96) */
+/* WARNING: Removing unreachable block (ram,0x000eab5a) */
+/* WARNING: Removing unreachable block (ram,0x000eab62) */
+/* WARNING: Removing unreachable block (ram,0x000eab6a) */
+/* WARNING: Removing unreachable block (ram,0x000eab84) */
+/* WARNING: Removing unreachable block (ram,0x000eab9e) */
+/* WARNING: Removing unreachable block (ram,0x000eabcc) */
+/* WARNING: Removing unreachable block (ram,0x000eabe2) */
+/* WARNING: Removing unreachable block (ram,0x000eabe4) */
+/* WARNING: Removing unreachable block (ram,0x000eabf8) */
+/* WARNING: Removing unreachable block (ram,0x000eac28) */
+/* WARNING: Removing unreachable block (ram,0x000eac40) */
+/* WARNING: Removing unreachable block (ram,0x000eac52) */
+/* WARNING: Removing unreachable block (ram,0x000eac48) */
+/* WARNING: Removing unreachable block (ram,0x000eac34) */
+/* WARNING: Removing unreachable block (ram,0x000eac56) */
+/* WARNING: Removing unreachable block (ram,0x000eac8c) */
+/* WARNING: Removing unreachable block (ram,0x000eac92) */
+/* WARNING: Removing unreachable block (ram,0x000eac9a) */
+/* WARNING: Removing unreachable block (ram,0x000eaca2) */
+/* WARNING: Removing unreachable block (ram,0x000eacaa) */
+/* WARNING: Removing unreachable block (ram,0x000eacc8) */
+/* WARNING: Removing unreachable block (ram,0x000eacf2) */
+/* WARNING: Removing unreachable block (ram,0x000eacf8) */
+/* WARNING: Removing unreachable block (ram,0x000ead0c) */
+/* WARNING: Removing unreachable block (ram,0x000ead1e) */
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void reset(void)
+
+{
+  undefined4 uVar1;
+  undefined4 uVar2;
+  undefined *puVar3;
+  short sVar4;
+  undefined4 unaff_D2;
+  undefined4 unaff_D3;
+  undefined4 unaff_D4;
+  undefined4 unaff_D5;
+  undefined4 unaff_D6;
+  undefined4 unaff_D7;
+  undefined4 *puVar5;
+  undefined1 *puVar6;
+  undefined4 extraout_A0;
+  undefined **ppuVar7;
+  undefined1 *puVar8;
+  undefined4 extraout_A1;
+  undefined4 unaff_A2;
+  undefined *puVar9;
+  undefined4 unaff_A3;
+  undefined4 unaff_A4;
+  undefined8 uVar10;
+  
+  puVar3 = &DAT_000186a0;
+  do {
+    puVar3 = puVar3 + -1;
+  } while (puVar3 != (undefined *)0x0);
+  DAT_0020ce30 = 0;
+  DAT_0020ce31 = 0;
+  DAT_0020ce34 = 0;
+  DAT_0020ce32 = 0xf0;
+  _DAT_0020d0e8 = 0;
+  _DAT_0020d0ea = 0;
+  _DAT_0020d0f2 = 0;
+  DAT_00200448 = 0x88;
+  DAT_0020d0ec = 0x20;
+  sVar4 = 9;
+  puVar5 = &DAT_0020ce36;
+  ppuVar7 = &PTR_PTR_000a67ca;
+  do {
+    *puVar5 = *ppuVar7;
+    sVar4 = sVar4 + -1;
+    puVar5 = puVar5 + 1;
+    ppuVar7 = ppuVar7 + 1;
+  } while (sVar4 != -1);
+  sVar4 = 99;
+  puVar6 = &DAT_000a67f2;
+  puVar8 = &DAT_0020d05b;
+  do {
+    *puVar8 = *puVar6;
+    sVar4 = sVar4 + -1;
+    puVar6 = puVar6 + 1;
+    puVar8 = puVar8 + 1;
+  } while (sVar4 != -1);
+  FUN_000a55b4();
+  control_and_link._1_1_ = 0;
+  _DAT_0020d0f0 = 1;
+  DAT_00200448 = 0x88;
+  while( true ) {
+    DAT_00200ffc = 0xea478;
+    uVar10 = FUN_000e8c8e();
+    DAT_00200fc8 = (undefined4)((ulonglong)uVar10 >> 0x20);
+    DAT_00200fcc = (undefined4)uVar10;
+    DAT_00200fc4 = 0xea482;
+    DAT_00200fd0 = unaff_D2;
+    DAT_00200fd4 = unaff_D3;
+    DAT_00200fd8 = unaff_D4;
+    DAT_00200fdc = unaff_D5;
+    DAT_00200fe0 = unaff_D6;
+    DAT_00200fe4 = unaff_D7;
+    DAT_00200fe8 = extraout_A0;
+    DAT_00200fec = extraout_A1;
+    DAT_00200ff0 = unaff_A2;
+    DAT_00200ff4 = unaff_A3;
+    DAT_00200ff8 = unaff_A4;
+    FUN_000dd3c0();
+    unaff_A4 = DAT_00200ff8;
+    unaff_A3 = DAT_00200ff4;
+    unaff_A2 = DAT_00200ff0;
+    unaff_D7 = DAT_00200fe4;
+    unaff_D6 = DAT_00200fe0;
+    unaff_D5 = DAT_00200fdc;
+    uVar2 = DAT_00200fd8;
+    uVar1 = DAT_00200fd0;
+    unaff_D3 = CONCAT22((short)((uint)DAT_00200fd4 >> 0x10),DAT_0020bc8c);
+    DAT_00200ffc = 0xea4a6;
+    FUN_000a5428();
+    DAT_00200ffc = 0xea4c0;
+    FUN_000a53f0();
+    unaff_D2 = CONCAT22((short)((uint)uVar1 >> 0x10),DAT_0020bc94);
+    unaff_D4 = CONCAT22((short)((uint)uVar2 >> 0x10),2);
+    DAT_00200ffc = 0xea4da;
+    FUN_000a53f0();
+    if ((DAT_0020bc9a != 0) && (_DAT_0020d0f0 != 0)) {
+      DAT_00201000._0_2_ = 1;
+      DAT_00200ffc = 0xea4f8;
+      FUN_000a450e();
+      _DAT_0020d0f0 = 0;
+      DAT_00201000._0_2_ = 0;
+    }
+    if (DAT_0020bc9a != 0) {
+      if (wf_link_player_number == 0) {
+        DAT_00200ffc = 0xea51a;
+        FUN_000a5076();
+        control_and_link._1_1_ = 0xff;
+      }
+      else {
+        DAT_00200ffc = 0xea52a;
+        FUN_000a5052();
+      }
+    }
+    wf_race_class = **(ushort **)((int)&PTR_PTR_00076f98 + (int)(short)((DAT_0020ce32 & 3) << 2));
+    DAT_00200ffc = 0xea54c;
+    FUN_0009ba7c();
+    if ((DAT_0020ce34 == 0) && (_DAT_0020d0e8 == 0)) {
+      _DAT_0020bec8 = 1;
+      goto LAB_000ea66c;
+    }
+    _DAT_0020bec8 = 0;
+    if (_DAT_0020d0e8 == 0) {
+      DAT_00200ffc = 0xea57c;
+      FUN_0009b220();
+    }
+    else {
+      _DAT_0020d0e8 = 0;
+      if (DAT_0020bc9a != 0) {
+        DAT_00200ffc = 0xea596;
+        FUN_000a4894();
+        DAT_00200ffc = 0xea59c;
+        wf_port_7c0001();
+        if (_DAT_0020d0ea != 0) {
+          DAT_00200ffc = 0xea5ae;
+          FUN_000a4894();
+          _DAT_0020bd20 = 1;
+        }
+      }
+    }
+    if ((DAT_0020bc9a != 0) && (_DAT_0020d0ea == 0)) {
+      DAT_00200ffc = 0xea5cc;
+      FUN_000dc88a();
+    }
+    _DAT_0020d0ea = 0;
+    DAT_00200ffc = 0xea5d8;
+    FUN_000e1bae();
+    if (_DAT_0020bd20 == 0) {
+      DAT_00200ffc = 0xea5e6;
+      FUN_000dce70();
+    }
+    DAT_0020beca = 3;
+    _DAT_0020beb8 = 1;
+    if (_DAT_0020beba != 0) goto LAB_000ea66c;
+    DAT_0020beca = 3;
+    _DAT_0020beb8 = 1;
+    _DAT_0020beba = 0;
+    if ((DAT_0020bc6a >> (DAT_0020bc6c * 3 & 0x3fU) & 7) != 7) break;
+    DAT_00200ffc = 0xea626;
+    FUN_000e2e32();
+    DAT_0020bc6c = DAT_0020bc6c + 1;
+    if (DAT_0020bc6c < 4) break;
+    DAT_00200ffc = 0xea640;
+    FUN_000a5486();
+  }
+  sVar4 = 0xff;
+  _DAT_00720000 = 0;
+  do {
+    ramdac_pal = 0;
+    sVar4 = sVar4 + -1;
+  } while (sVar4 != -1);
+  DAT_00200ffc = 0xea66c;
+  FUN_000e0770();
+LAB_000ea66c:
+  DAT_0020beb4 = 300;
+  _DAT_0020beb2 = 1;
+  DAT_0020be96 = 0;
+  DAT_0020be98 = 0;
+  if (_DAT_0020bec8 != 0) {
+    DAT_0020ce32 = DAT_0020ce32 + 1;
+    DAT_00200ffc = 0xea6a4;
+    FUN_000e948e();
+  }
+  _DAT_0020bec0 = 0;
+  _DAT_0020bebe = 0;
+  DAT_0020bebc = 0xe1;
+  if (_DAT_0020bec8 == 0) {
+    wf_snd_song = *(undefined4 *)((uint)wf_race_class * 0x8c + 0x22876);
+    wf_snd_sample_base = *(undefined4 *)((uint)wf_race_class * 0x8c + 0x2287a);
+    DAT_00200ffc = 0xea6ea;
+    wf_snd_load_song();
+    wf_snd_master_volume = 0x26;
+    _wf_snd_active = 1;
+  }
+  DAT_0020bdcc = 0;
+  DAT_0020bdb2 = 0;
+  DAT_0020bd5a = 1;
+  DAT_0020bdb4 = 0x2200;
+  _DAT_0020bda4 = 0x12;
+  _DAT_0020bda6 = 0;
+  _DAT_0020bc46 = 0xffff;
+  sVar4 = 0x6d;
+  puVar5 = &DAT_0020692e;
+  do {
+    *(undefined1 *)puVar5 = 0;
+    sVar4 = sVar4 + -1;
+    puVar5 = (undefined4 *)((int)puVar5 + 1);
+  } while (sVar4 != -1);
+  if (_DAT_0020bec8 == 0) {
+    DAT_00200ffc = 0xea750;
+    FUN_000da448();
+  }
+  _DAT_00201cb6 = 1;
+  puVar3 = &DAT_002069ae;
+  puVar9 = &DAT_00208f2e;
+  sVar4 = 0xc6;
+  do {
+    *(undefined2 *)(puVar3 + 0x16) = 5;
+    *(undefined2 *)(puVar9 + 0x16) = 5;
+    puVar3 = puVar3 + 0x18;
+    puVar9 = puVar9 + 0x18;
+    sVar4 = sVar4 + -1;
+  } while (sVar4 != -1);
+  do {
+  } while (_DAT_00201cb6 == 0);
+  do {
+  } while( true );
+}
+
+
+
+################################################################
+# wheelfir_subcpu.bin   functions: 3
+################################################################
+  00000400  snd_reset                 324 bytes
+  00000550  FUN_00000550              2 bytes
+  00000552  snd_rte_stub              2 bytes
+
+-- symbols seeded from symbols.txt --
+  00000000  vec_ssp
+  00000000  sub_rom
+  00000004  vec_reset
+  00000008  vec_buserr
+  0000000c  vec_addrerr
+  00000010  vec_illegal
+  00000014  vec_divzero
+  00000018  vec_chk
+  0000001c  vec_trapv
+  00000020  vec_privviol
+  00000024  vec_trace
+  00000060  vec_spurious
+  00000064  vec_irq1
+  0000006c  vec_irq3
+  00000074  vec_irq5
+  00000080  vec_trap0
+  00000400  snd_reset
+  00000400  reset
+  00000544  snd_soft_reset_stub
+  00000552  snd_rte_stub
+  00000554  snd_isr_mixer
+  000005ba  snd_mix_out_l
+  00000626  snd_mix_out_r
+  0000062c  snd_isr_tail_jmp
+  00000632  snd_cmd_idle
+  00000648  snd_cmd_apply_v12
+  000006bc  snd_cmd_apply_v34
+  00000730  snd_cmd_apply_v56
+  000007a4  snd_cmd_wait_block
+  000007c0  snd_cmd_recv_word
+  000007e6  snd_voice_end_v1
+  000007f4  snd_voice_end_v3
+  00000802  snd_voice_end_v5
+  00000810  snd_voice_end_v2
+  0000081e  snd_voice_end_v4
+  0000082c  snd_voice_end_v6
+  0000083a  snd_silence_loop
+  00000842  snd_vol_tables
+  00004842  snd_vol_full
+  00004946  snd_samples
+  00200000  sub_ram
+  00201000  snd_cmd_buffer
+  00201060  snd_isr_mixer_ram
+  00201062  snd_v1_opcode
+  0020106a  snd_v1_table
+  00201074  snd_v1_step
+  0020113a  snd_tail_slot
+  002012f8  snd_v1_reload
+  00700000  ldac
+  00740000  rdac
+  00780000  soundlatch_r
+
+-- code that touches the blitter (0x700000-0x70001f) --
+  000005ba -> 00700000   [(no function)]
+
+-- decompilation of reset --
+
+/* snd_reset: Sound CPU reset. It masks IRQs, copies 0x554..0x839 (742 bytes) to RAM 0x201060,
+   clears the command buffer 0x201000..0x20105f, initialises the 6 voices (pointer and loop to
+   0x83a, table 0x4842, step 0x3d09) and falls into a `bra` to itself: all the work happens in IRQ1.
+    */
+
+void snd_reset(void)
+
+{
+  undefined2 *puVar1;
+  undefined4 *puVar3;
+  undefined2 *puVar5;
+  undefined2 *puVar2;
+  undefined4 *puVar4;
+  
+  puVar1 = (undefined2 *)&snd_isr_mixer;
+  puVar5 = &snd_isr_mixer_ram;
+  do {
+    puVar2 = puVar1 + 1;
+    *puVar5 = *puVar1;
+    puVar1 = puVar2;
+    puVar5 = puVar5 + 1;
+  } while (puVar2 != (undefined2 *)&snd_silence_loop);
+  puVar3 = &snd_cmd_buffer;
+  do {
+    puVar4 = (undefined4 *)((int)puVar3 + 2);
+    *(undefined2 *)puVar3 = 0;
+    puVar3 = puVar4;
+  } while (puVar4 != (undefined4 *)&snd_isr_mixer_ram);
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+
+
+

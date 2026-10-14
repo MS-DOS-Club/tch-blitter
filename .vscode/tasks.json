@@ -1,0 +1,45 @@
+{
+  // Tasks that wrap the Makefile targets.
+  // Run with: Terminal > Run Task, or Cmd+Shift+B for the default (verify).
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "MAME: doctor (checks prerequisites)",
+      "type": "shell",
+      "command": "make doctor",
+      "problemMatcher": []
+    },
+    {
+      "label": "MAME: setup (clones + builds upstream)",
+      "type": "shell",
+      "command": "make setup",
+      "problemMatcher": []
+    },
+    {
+      "label": "MAME: play (radendur interactive)",
+      "type": "shell",
+      "command": "make play",
+      "problemMatcher": []
+    },
+    {
+      "label": "MAME: debug (gdbstub on :23946)",
+      "type": "shell",
+      "command": "make debug",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "MAME: verify (boot goldens)",
+      "type": "shell",
+      "command": "make verify",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "MAME: patch (dumps upstream/ into patches/)",
+      "type": "shell",
+      "command": "make patch",
+      "problemMatcher": []
+    }
+  ]
+}

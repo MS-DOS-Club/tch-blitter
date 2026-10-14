@@ -1,0 +1,24 @@
+{
+  // MAME exposes the gdbstub with `make debug`
+  // (-debugger gdbstub, port 23946). The GUEST 68000 is what is debugged, and it
+  // has no ELF symbol file: debugging goes by address and the gdbstub's native
+  // m68k register map. It needs a gdb that understands m68k (e.g. m68k-elf-gdb,
+  // or a multiarch gdb with `set architecture m68k`).
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to MAME gdbstub (m68k guest)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/upstream/radendu",
+      "miDebuggerServerAddress": "localhost:23946",
+      "MIMode": "gdb",
+      "miDebuggerPath": "m68k-elf-gdb",
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false,
+      "setupCommands": [
+        { "text": "set architecture m68k", "ignoreFailures": true }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+pairs:
+- id: wheelfir-repeated-road
+  game: wheelfir
+  frame: 2300
+  before: wheelfir-repeated-road-before.png
+  after: wheelfir-repeated-road-after.png
+  changes_pct: 82.78
+  box: x 0..335, y 0..247
+  caption: 'The original driver''s signature failure: it draws the ROAD A SECOND TIME where the sky belongs,
+    lane markings and all, with the real road below it. 82.8% of the pixels change.'
+  alt: 'Wheels & Fire: the road drawn again where the sky should be'
+- id: wheelfir-cars
+  game: wheelfir
+  frame: 600
+  before: wheelfir-cars-before.png
+  after: wheelfir-cars-after.png
+  changes_pct: 66.83
+  box: x 0..335, y 0..247
+  caption: Of the two Porsches in the presentation the original driver draws only one, surrounded by leftovers
+    of the previous screen. 66.8% of the pixels change.
+  alt: 'Wheels & Fire: the two Porsches of the presentation'
+- id: wheelfir-sky
+  game: wheelfir
+  frame: 1800
+  before: wheelfir-sky-before.png
+  after: wheelfir-sky-after.png
+  changes_pct: 76.38
+  box: x 0..335, y 0..247
+  caption: 'In-race, the original driver leaves the sky unpainted: no horizon, no mountain, no sea, none
+    of the roadside signs. 76.4% of the pixels change.'
+  alt: 'Wheels & Fire: the sky during the race'
+- id: kongball-title
+  game: kongball
+  frame: 200
+  before: kongball-title-before.png
+  after: kongball-title-after.png
+  changes_pct: 76.67
+  box: x 16..335, y 20..247
+  caption: Kong Ball's title, which the original driver paints over the leftovers of the previous screen
+    instead of over the gorilla. 76.7% of the pixels change.
+  alt: 'Kong Ball: the title screen'
+visible_area_note: 'The original driver declares 248 visible lines and this one 252. The four rows of
+  difference carry content in the three pairs, so they are not a margin: they are image the original
+  does not show.'

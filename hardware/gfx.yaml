@@ -1,0 +1,172 @@
+# The blitter command of the TCH family as data: which word, which bits, for every coordinate a
+# blit carries. It is the ONE owner of those positions and widths: `registers.yaml` keeps what each
+# bit means and how that was established, and names the field here instead of repeating its mask
+# (`gen-hw-docs.py` derives the mask from this file). Beside it, the BT478 RAMDAC's two ports, which
+# say which write set a pen's colour.
+#
+# Plain scalars that a YAML reader could type differently are quoted.
+#
+# `status`: `proved` when every part of the field is a bit `registers.yaml` holds as confirmed
+# (the source names it), `declared` when it is transcribed from the driver and not established
+# on its own. No measured figure lives here: the measurements are in `registers.yaml`'s evidence.
+schema: 1
+systems: [radendur, wheelfir, pwball, kongball]
+
+formats:
+  page_512x512x8:
+    layout:
+      width: 512
+      height: 512
+      planes: 8
+      planeoffset: '{ 0, 1, 2, 3, 4, 5, 6, 7 }'
+      xoffset: '{ STEP512(0,8) }'
+      yoffset: '{ STEP512(0,4096) }'
+      charincrement: 512*512*8
+    status: declared
+    source: tch/radendur.cpp, radendur_512x512x8_texlayout (a graphics page is 512x512 at 8 bits)
+
+assets:
+  pages:
+    format: page_512x512x8
+    tag: gfx1
+    palette: palette
+    wrap: true
+    status: declared
+    source: tch/radendur.cpp, do_blit (the source wraps inside its 512x512 page)
+
+commands:
+  blit:
+    block: {address: 0x700000, words: 16, word_bytes: 2, cpu: maincpu, status: declared, source: 'tch/radendur.cpp, main_map (0x700000..0x70001f, blit_w and the blitram share)'}
+    fire: {word: 15, value: 0xffff, status: proved, source: hardware/registers.yaml blitter word 15 trigger (confirmed)}
+    asset: pages
+    fields:
+      dest_x:
+        parts:
+          - {word: 0, mask: 0x00ff}
+          - {word: 7, mask: 0x0040, at: 8}
+        status: declared
+        source: tch/radendur.cpp do_blit; word 7 dst_x_bit8 is confirmed, word 0's low byte has no entry
+      dest_y:
+        parts:
+          - {word: 2, mask: 0x00ff}
+          - {word: 7, mask: 0x0080, at: 8}
+        status: proved
+        source: hardware/registers.yaml blitter word 2 dst_y0_bits0_7 and word 7 dst_y_bit8 (confirmed)
+      dest_x_end:
+        parts:
+          - {word: 1, mask: 0x00ff}
+          - {word: 9, mask: 0x0004, at: 8}
+        status: proved
+        source: hardware/registers.yaml blitter word 1 dst_x1_bits0_7 and word 9 dst_x1_bit8 (confirmed)
+      dest_y_end:
+        parts:
+          - {word: 3, mask: 0x00ff}
+          - {word: 9, mask: 0x0008, at: 8}
+        status: proved
+        source: hardware/registers.yaml blitter word 3 dst_y1_bits0_7 and word 9 dst_y1_bit8 (confirmed)
+      dest_dir_x:
+        parts: [{word: 7, mask: 0x0001}]
+        asserted: 1
+        status: proved
+        source: hardware/registers.yaml blitter word 7 dst_dir_x (confirmed)
+      dest_dir_y:
+        parts: [{word: 7, mask: 0x0002}]
+        asserted: 1
+        status: proved
+        source: hardware/registers.yaml blitter word 7 dst_dir_y (confirmed)
+      source_x:
+        parts:
+          - {word: 0, mask: 0xff00}
+          - {word: 6, mask: 0x0100, at: 8}
+        status: declared
+        source: tch/radendur.cpp do_blit; word 6 src_u_bit8 is confirmed, word 0's high byte has no entry
+      source_y:
+        parts:
+          - {word: 2, mask: 0xff00}
+          - {word: 6, mask: 0x0200, at: 8}
+        # At 1:1 the first row the blitter reads is the one after the origin (the seam fix,
+        # v_bias in both drivers): this is what an unscaled blit reads, not a scale law.
+        add: 1
+        status: declared
+        source: tch/radendur.cpp do_blit, v_bias; the two parts are confirmed bits of words 2 and 6
+      source_tile:
+        parts: [{word: 6, mask: 0xfc00}]
+        status: proved
+        source: hardware/registers.yaml blitter word 6 gfx_page (confirmed, six bits read with >> 10)
+      source_dir_x:
+        parts: [{word: 8, mask: 0x4000}]
+        asserted: 1
+        status: proved
+        source: hardware/registers.yaml blitter word 8 src_dir_x (confirmed)
+      source_dir_y:
+        parts: [{word: 8, mask: 0x8000}]
+        asserted: 1
+        status: declared
+        source: tch/radendur.cpp do_blit; hardware/registers.yaml holds word 8 src_dir_y open
+      plane:
+        parts: [{word: 7, mask: 0x0010}]
+        status: proved
+        source: hardware/registers.yaml blitter word 7 plane (confirmed)
+      reads_source:
+        parts: [{word: 7, mask: 0x0004}]
+        asserted: 1
+        status: proved
+        source: hardware/registers.yaml blitter word 7 reads_source (confirmed)
+    flags:
+      writes_index_0:
+        parts: [{word: 7, mask: 0x0008}]
+        status: proved
+        source: hardware/registers.yaml blitter word 7 writes_index_0 (confirmed)
+      visible_page:
+        parts: [{word: 8, mask: 0x0020}]
+        status: proved
+        source: hardware/registers.yaml blitter word 8 visible_page (confirmed)
+      # The half of the sprite plane a blit lands in is its own destination y's bit 8, whatever
+      # the page bit meant to the driver that set it: that is what places its box on the screen.
+      dest_y_half:
+        parts: [{word: 7, mask: 0x0080}]
+        status: proved
+        source: hardware/registers.yaml blitter word 7 dst_y_bit8 (confirmed)
+      scroll_x:
+        parts:
+          - {word: 10, mask: 0x00ff}
+          - {word: 8, mask: 0x0040, at: 8}
+        status: proved
+        source: hardware/registers.yaml blitter word 10 scroll_x_low_byte and word 8 scroll_x_bit8 (confirmed)
+      scroll_y:
+        parts:
+          - {word: 11, mask: 0x00ff}
+          - {word: 8, mask: 0x0080, at: 8}
+        status: declared
+        source: tch/radendur.cpp scanline_timer_callback; word 8 scroll_y_bit8 is confirmed, word 11's low byte has no entry
+    planes:
+      - name: sprites
+        when: 0
+        order: 1
+        origin_y: {field: dest_y_half, scale: 256}
+        page: dest_y_half
+        width: 512
+        height: 512
+        status: declared
+        source: tch/radendur.cpp flip_page and screen_update (two halves of 256 rows, one shown unscrolled)
+      - name: background
+        when: 1
+        order: 0
+        origin_x: {field: scroll_x}
+        origin_y: {field: scroll_y}
+        width: 512
+        height: 512
+        status: declared
+        source: tch/radendur.cpp screen_update (the background plane scrolled by words 10 and 11)
+
+palette_ports:
+  ramdac:
+    palette: palette
+    cpu: maincpu
+    index_port: 0x720001
+    data_port: 0x720003
+    order: [r, g, b]
+    component_bits: 8
+    auto_increment: true
+    status: declared
+    source: 'tch/radendur.cpp and tch/wheelfir.cpp, main_map (index_w at 0x720001, pal_w at 0x720003) and ramdac_map (ramdac_rgb888_w, 8 bits a component)'
