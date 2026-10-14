@@ -42,7 +42,7 @@ def game_macro(machine: str) -> str | None:
     if not TCH.exists():
         return None
     for f in sorted(TCH.glob("*.cpp")):
-        for line in f.read_text(errors="replace").splitlines():
+        for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
             if line.startswith("GAME(") and re.search(rf"\b{re.escape(machine)}\b", line):
                 return line
     return None
@@ -52,13 +52,15 @@ def game_macro(machine: str) -> str | None:
 def stock_macros() -> dict[str, str] | None:
     """Every tch `GAME(...)` line of stock MAME at the pinned commit, by set; None when the clone
     cannot answer. The pin is read from the one file that declares it, never repeated here."""
-    pin = re.search(r'^MAME_PINNED_COMMIT="([0-9a-f]{40})"', MAME_SRC_LIB.read_text(), re.M)
+    pin = re.search(
+        r'^MAME_PINNED_COMMIT="([0-9a-f]{40})"', MAME_SRC_LIB.read_text(encoding="utf-8"), re.M
+    )
     clone = ROOT / "upstream"
     if pin is None or not (clone / ".git").exists():
         return None
 
     def git(*args: str) -> str | None:
-        r = subprocess.run(["git", "-C", str(clone), *args], capture_output=True, text=True)
+        r = subprocess.run(["git", "-C", str(clone), *args], capture_output=True, encoding="utf-8")
         return r.stdout if r.returncode == 0 else None
 
     names = git("ls-tree", "--name-only", pin.group(1), "src/mame/tch/")
@@ -111,7 +113,7 @@ def driver_phrase(who: str, ev: str) -> tuple[bool, list[str]]:
     phrase = re.search(r'"([^"]{8,})"', ev)
     if not (src and phrase and (TCH / src.group(1)).exists()):
         return False, []
-    if phrase.group(1) in (TCH / src.group(1)).read_text(errors="replace"):
+    if phrase.group(1) in (TCH / src.group(1)).read_text(encoding="utf-8", errors="replace"):
         return True, []
     return True, [f"{who}: {phrase.group(1)!r} was not found in {src.group(1)}"]
 
@@ -172,7 +174,7 @@ def check_fact(
 
 
 def main() -> int:
-    data = yaml.safe_load(GAMES.read_text())
+    data = yaml.safe_load(GAMES.read_text(encoding="utf-8"))
     failures: list[str] = []
     checked = 0
     uncheckable: list[str] = []

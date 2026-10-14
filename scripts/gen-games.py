@@ -231,7 +231,7 @@ def regions(romset: str) -> dict[str, tuple[int, int]]:
     """
     seen: dict[str, dict[str, tuple[int, int]]] = {}
     for f in sorted(TCH.glob("*.cpp")) if TCH.exists() else []:
-        text = f.read_text(errors="replace")
+        text = f.read_text(encoding="utf-8", errors="replace")
         m = re.search(rf"ROM_START\(\s*{re.escape(romset)}\s*\).*?ROM_END", text, re.S)
         if not m:
             continue
@@ -317,13 +317,13 @@ def main() -> int:
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args()
 
-    data = yaml.safe_load(GAMES.read_text())
+    data = yaml.safe_load(GAMES.read_text(encoding="utf-8"))
     if not data.get("games"):
         print("INVALID: hardware/games.yaml declares not one game")
         sys.exit(3)
 
     path = ROOT / "README.md"
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     new_text = insert_block(text, "games-table", games_table(data), "README.md")
     new_text = insert_block(new_text, "resources-table", resources_table(data), "README.md")
     new_text = insert_block(new_text, "credits-table", credits_table(data), "README.md")
@@ -335,7 +335,7 @@ def main() -> int:
         if not page_path.is_file():
             print(f"INVALID: {page_path.relative_to(ROOT)}, the page of {j['set']}, does not exist")
             sys.exit(3)
-        page_text = page_path.read_text()
+        page_text = page_path.read_text(encoding="utf-8")
         where = str(page_path.relative_to(ROOT))
         new_page = insert_block(page_text, "facts", facts_table(j), where)
         new_page = insert_block(new_page, "thanks", thanks_list(data, j["set"]), where)
@@ -346,7 +346,7 @@ def main() -> int:
             print(f"out of sync: {p.relative_to(ROOT)}  (run: uv run scripts/gen-games.py)")
         return 1
     for p in stale:
-        p.write_text(pending[p][1])
+        p.write_text(pending[p][1], encoding="utf-8", newline="\n")
         print(f"  blocks written into {p.relative_to(ROOT)}")
     if not stale:
         print("==> the game tables are up to date")

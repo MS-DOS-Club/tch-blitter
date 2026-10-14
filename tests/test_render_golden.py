@@ -48,7 +48,7 @@ def fingerprints(rd, sec):
 
 @pytest.fixture(scope="module")
 def refs():
-    with open(REFS) as f:
+    with open(REFS, encoding="utf-8") as f:
         return json.load(f)
 
 

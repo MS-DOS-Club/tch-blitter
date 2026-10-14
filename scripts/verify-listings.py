@@ -101,7 +101,7 @@ def parse(text: str) -> Listing:
 
 def rom_symbols(image: str) -> dict[int, set[str]]:
     want: dict[int, set[str]] = {}
-    for key, rows in yaml.safe_load(SYMBOLS.read_text())["images"].items():
+    for key, rows in yaml.safe_load(SYMBOLS.read_text(encoding="utf-8"))["images"].items():
         if reaches(key, image):
             for r in rows or []:
                 if r["addr"] < ROM_END:
@@ -111,7 +111,7 @@ def rom_symbols(image: str) -> dict[int, set[str]]:
 
 def port_names(path: Path, image: str) -> dict[int, str]:
     names: dict[int, str] = {}
-    for line in path.read_text().splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         img, addr, name = line.split("\t")
         if img == image:
             names[int(addr, 16)] = name
@@ -214,13 +214,13 @@ def main() -> int:
         if not img.exists():
             print(f"==> INVALID: no image for {path.name}")
             return 3
-        listing = parse(path.read_text())
+        listing = parse(path.read_text(encoding="utf-8"))
         if not listing.units:
             print(f"==> INVALID: {path.name} parses to nothing")
             return 3
         units += len(listing.units)
         try:
-            facts = json.loads((args.facts / f"{image}.json").read_text())
+            facts = json.loads((args.facts / f"{image}.json").read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             print(f"==> INVALID: no readable facts for {image} in {args.facts}")
             return 3
@@ -245,7 +245,7 @@ def main() -> int:
             starts = {u.addr for u in listing.units if not u.text.startswith("dc.")}
             traced = [
                 int(json.loads(ln)["addr"], 16)
-                for ln in args.trace.read_text().splitlines()
+                for ln in args.trace.read_text(encoding="utf-8").splitlines()
                 if ln.strip()
             ]
             rom = [a for a in traced if a < ROM_END]
@@ -259,7 +259,9 @@ def main() -> int:
                 f"{len(off)} not instruction starts"
             )
     if args.suspects:
-        args.suspects.write_text("".join(f"{i}\t{a:#08x}\n" for i, a in suspects))
+        args.suspects.write_text(
+            "".join(f"{i}\t{a:#08x}\n" for i, a in suspects), encoding="utf-8", newline="\n"
+        )
     for b in bad:
         print(f"  {b}")
     if bad:

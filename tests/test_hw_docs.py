@@ -28,7 +28,9 @@ def test_insert_respects_the_prose_around_it():
         f.write_text(
             "# Title\n\nprose before\n\n"
             f"{doc_blocks.opener('gen-hw-docs.py', 'x')}\n\nold\n"
-            f"{doc_blocks.END}\n\nprose after\n"
+            f"{doc_blocks.END}\n\nprose after\n",
+            encoding="utf-8",
+            newline="\n",
         )
         new = gen.insert_block(f, "x", "new\n")
         assert "prose before" in new and "prose after" in new
@@ -51,12 +53,14 @@ def test_insert_does_not_nest_three_blocks_in_the_same_file(tmp_path):
         "# title\n\n"
         + f"{doc_blocks.opener('gen-hw-docs.py', 'a')}\nold A\n{end}\n\nprose in between\n\n"
         + f"{doc_blocks.opener('gen-hw-docs.py', 'b')}\nold B\n{end}\n\nmore prose\n\n"
-        + f"{doc_blocks.opener('gen-hw-docs.py', 'c')}\nold C\n{end}\n"
+        + f"{doc_blocks.opener('gen-hw-docs.py', 'c')}\nold C\n{end}\n",
+        encoding="utf-8",
+        newline="\n",
     )
     for name, body in (("a", "AAA"), ("b", "BBB"), ("c", "CCC")):
-        doc.write_text(gen.insert_block(doc, name, body))
+        doc.write_text(gen.insert_block(doc, name, body), encoding="utf-8", newline="\n")
 
-    text = doc.read_text()
+    text = doc.read_text(encoding="utf-8")
     assert text.count(doc_blocks.OPENER) == 3, f"blocks have been duplicated:\n{text}"
     assert text.count(end) == 3
     for body in ("AAA", "BBB", "CCC"):
@@ -164,8 +168,8 @@ def test_the_reality_tennis_access_table_names_each_row_from_its_own_symbols():
 
 def test_the_real_reality_tennis_access_table_counts_what_the_yaml_holds():
     root = pathlib.Path(__file__).resolve().parents[1]
-    accesses = yaml.safe_load((root / "hardware" / "accesses.yaml").read_text())
-    symbols = yaml.safe_load((root / "hardware" / "symbols.yaml").read_text())
+    accesses = yaml.safe_load((root / "hardware" / "accesses.yaml").read_text(encoding="utf-8"))
+    symbols = yaml.safe_load((root / "hardware" / "symbols.yaml").read_text(encoding="utf-8"))
     info = accesses["images"]["rltennis_maincpu"]
     out = gen.rltennis_accesses_table(accesses, symbols)
     rows = [line for line in out.splitlines() if line.startswith("| `0x")]

@@ -33,6 +33,11 @@ paths:
   shell, and is clean under `shellcheck -x -P SCRIPTDIR`.
 - Exit codes: 0 clean, 2 a usage error, anything else a failure; 3 where a check could not look (an
   input missing, nothing to examine). A check that examined nothing never answers 0.
+- Every text a Python script reads or writes, a subprocess's output included, names
+  `encoding="utf-8"`, and every text it writes `newline="\n"`: Windows Python reads with the
+  locale's code page and writes CRLF, and the generated files and the `--check`s must be the same
+  bytes on every host. Output that is only quoted back in a message adds `errors="replace"`, so an
+  odd byte cannot turn the report into a traceback.
 - What a script can validate while it runs is validated there. No git hooks and no tests of tests:
   a test exercises a script's real behaviour.
 

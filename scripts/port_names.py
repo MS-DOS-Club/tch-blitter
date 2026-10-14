@@ -45,11 +45,13 @@ def main() -> int:
     if len(sys.argv) != 2:
         print(f"usage: {sys.argv[0]} OUT", file=sys.stderr)
         return 2
-    rows = names(yaml.safe_load(REGISTERS.read_text()))
+    rows = names(yaml.safe_load(REGISTERS.read_text(encoding="utf-8")))
     if not rows:
         print("INVALID: registers.yaml named no hardware address", file=sys.stderr)
         return 3
-    Path(sys.argv[1]).write_text("".join(f"{i}\t{a:#08x}\t{n}\n" for i, a, n in rows))
+    Path(sys.argv[1]).write_text(
+        "".join(f"{i}\t{a:#08x}\t{n}\n" for i, a, n in rows), encoding="utf-8", newline="\n"
+    )
     print(f"port_names: {len(rows)} addresses named")
     return 0
 

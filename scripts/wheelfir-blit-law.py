@@ -171,7 +171,7 @@ class Blit:
 
 
 def read_rows(path: Path) -> list[list[str]]:
-    with lzma.open(path, "rt") as f:
+    with lzma.open(path, "rt", encoding="utf-8") as f:
         return [line.split() for line in f if line.strip()]
 
 
@@ -374,7 +374,7 @@ def frame_png(frame: int) -> Path:
 
 
 def zoom_index(driver: Path = DRIVER) -> list[int]:
-    parts = driver.read_text().split("static const uint16_t zoom_index[400] =", 1)
+    parts = driver.read_text(encoding="utf-8").split("static const uint16_t zoom_index[400] =", 1)
     if len(parts) != 2:
         raise InvalidRunError(f"{driver.name} declares no zoom_index[400]")
     body = parts[1]

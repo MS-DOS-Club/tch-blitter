@@ -30,7 +30,7 @@ OUTDIR = ROOT / "disasm" / "executed"
 
 def rom_addresses(set_path: Path) -> set[int]:
     out = set()
-    for line in set_path.read_text().splitlines():
+    for line in set_path.read_text(encoding="utf-8").splitlines():
         if line.strip():
             addr = int(json.loads(line)["addr"], 16)
             if addr < ROM_END:
@@ -59,7 +59,9 @@ def main() -> int:
         "# Every one is an instruction start; SetupTCH.java disassembles them before the analysis.",
     ]
     body = [f"0x{a:06x}" for a in sorted(addrs)]
-    (OUTDIR / f"{args.image}.txt").write_text("\n".join(header + body) + "\n")
+    (OUTDIR / f"{args.image}.txt").write_text(
+        "\n".join(header + body) + "\n", encoding="utf-8", newline="\n"
+    )
     print(f"trace-seeds: {args.image}: {len(addrs)} addresses")
     return 0
 

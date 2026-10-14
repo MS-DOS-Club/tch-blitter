@@ -35,7 +35,7 @@ def load_facts(directory: Path, images: list[str]) -> dict[str, dict] | None:
     facts = {}
     for image in images:
         try:
-            data = json.loads((directory / f"{image}.json").read_text())
+            data = json.loads((directory / f"{image}.json").read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             return None
         if "symbols" not in data:
@@ -74,7 +74,7 @@ def main() -> int:
     if facts is None:
         print(f"==> INVALID: no images in disasm/img, or no readable facts in {args.facts}")
         return 3
-    symbols = yaml.safe_load(SYMBOLS.read_text())["images"]
+    symbols = yaml.safe_load(SYMBOLS.read_text(encoding="utf-8"))["images"]
     found = [c for image in images for c in conflicts(image, symbols, facts[image])]
     for c in found:
         print(f"  {c}")

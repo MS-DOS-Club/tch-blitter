@@ -44,7 +44,7 @@ def ffprobe(gif: Path, fields: str, count: bool = False) -> str:
     if count:
         command += ["-count_frames"]
     command += ["-select_streams", "v:0", "-show_entries", fields, "-of", "csv=p=0", str(gif)]
-    return subprocess.run(command, capture_output=True, text=True, check=True).stdout.strip()
+    return subprocess.run(command, capture_output=True, encoding="utf-8", check=True).stdout.strip()
 
 
 @functools.cache
@@ -54,7 +54,7 @@ def refresh_for_set(game: str) -> float:
     run = subprocess.run(
         ["bash", "-c", shell, "_", str(ROOT / "scripts" / "lib"), game],
         capture_output=True,
-        text=True,
+        encoding="utf-8",
         env={**os.environ, "PROJECT_DIR": str(ROOT)},
     )
     if run.returncode != 0:
@@ -85,7 +85,7 @@ def measure() -> dict:
                     str(g),
                 ],
                 capture_output=True,
-                text=True,
+                encoding="utf-8",
                 check=True,
             ).stdout
         )
@@ -121,13 +121,13 @@ def main() -> int:
         if not MANIFEST.exists():
             print(f"INVALID: {MANIFEST.relative_to(ROOT)} is missing")
             return 3
-        if MANIFEST.read_text() != text:
+        if MANIFEST.read_text(encoding="utf-8") != text:
             print("the GIF manifest does not match the files; run the generator")
             return 1
         print(f"GIFs checked: {len(doc['gifs'])}")
         return 0
 
-    MANIFEST.write_text(text)
+    MANIFEST.write_text(text, encoding="utf-8", newline="\n")
     for e in doc["gifs"]:
         print(
             f"  {e['file']:28s} {e['gif_frames']:4d} frames at {e['fps']} fps = "

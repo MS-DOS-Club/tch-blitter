@@ -123,7 +123,7 @@ def write_manifest():
         "`../sections/README.md`).",
         "",
     ]
-    with open(os.path.join(OUT, "README.md"), "w") as f:
+    with open(os.path.join(OUT, "README.md"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))
 
 

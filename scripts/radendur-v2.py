@@ -82,7 +82,7 @@ def keys(d: Any, kind: str, where: str) -> None:
 
 
 def load_table(path: Path) -> dict[str, Any]:
-    table: dict[str, Any] = yaml.safe_load(path.read_text())
+    table: dict[str, Any] = yaml.safe_load(path.read_text(encoding="utf-8"))
     keys(table, "table", path.name)
     for k in ("target", "clone"):
         keys(table[k], "romset", k)
@@ -104,7 +104,9 @@ def load_table(path: Path) -> dict[str, Any]:
 def rom_manifest(setname: str) -> dict[str, tuple[int, str, str]]:
     """{rom: (load offset, crc32, sha1)} of ROM_START(setname) in the driver patch's added lines."""
     added = "\n".join(
-        line[1:] for line in DRIVER_PATCH.read_text().splitlines() if line.startswith("+")
+        line[1:]
+        for line in DRIVER_PATCH.read_text(encoding="utf-8").splitlines()
+        if line.startswith("+")
     )
     m = re.search(rf"ROM_START\(\s*{re.escape(setname)}\s*\)(.*?)ROM_END", added, re.S)
     if not m:

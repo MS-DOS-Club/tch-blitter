@@ -56,7 +56,7 @@ def block(pairs: list[dict]) -> str:
 
 
 def insert_block(path: Path, content: str) -> tuple[str, bool]:
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     new = doc_blocks.replace(
         text, doc_blocks.opener("gen-before-after.py"), content + "\n", path.name
     )
@@ -71,7 +71,7 @@ def main() -> int:
     if not MANIFEST.exists():
         print(f"INVALID: {MANIFEST} is missing")
         sys.exit(3)
-    pairs = (yaml.safe_load(MANIFEST.read_text()) or {}).get("pairs") or []
+    pairs = (yaml.safe_load(MANIFEST.read_text(encoding="utf-8")) or {}).get("pairs") or []
     if not pairs:
         print("INVALID: the manifest declares not one pair")
         sys.exit(3)
@@ -84,7 +84,7 @@ def main() -> int:
         if args.check:
             print(f"out of sync: {README.name}  (run: uv run {Path(__file__).name})")
             return 1
-        README.write_text(new)
+        README.write_text(new, encoding="utf-8", newline="\n")
         print(f"  wrote the block into {README.name}")
         return 0
     print(f"==> the block of {len(pairs)} pairs is up to date in {README.name}")

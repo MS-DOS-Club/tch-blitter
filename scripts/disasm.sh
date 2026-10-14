@@ -31,7 +31,7 @@ for t in $TARGETS; do
     DRIVER="$TCH/$drv" SET="$set" REGION="$region" ZIP="run/mame_roms/$set.zip" BIN="$IMG/${set}_${region}.bin" python3 - <<'PY'
 import os, re, sys, zipfile
 drv, setname, region, zippath, out = (os.environ[k] for k in ("DRIVER","SET","REGION","ZIP","BIN"))
-rs = re.search(r"ROM_START\(\s*%s\s*\).*?ROM_END" % re.escape(setname), open(drv).read(), re.S).group(0)
+rs = re.search(r"ROM_START\(\s*%s\s*\).*?ROM_END" % re.escape(setname), open(drv, encoding="utf-8").read(), re.S).group(0)
 rm = re.search(r'ROM_REGION\d*\(\s*[^,]+,\s*"%s".*?(?=ROM_REGION|ROM_END)' % re.escape(region), rs, re.S)
 if not rm: sys.exit(f"  ROM_REGION {region} not found in {setname}")
 loads = re.findall(r'ROM_LOAD16_BYTE\(\s*"([^"]+)",\s*(0x[0-9a-fA-F]+),\s*(0x[0-9a-fA-F]+)', rm.group(0))

@@ -81,7 +81,7 @@ def main():
 
     text = yaml.safe_dump(data, allow_unicode=True, sort_keys=False, width=100)
     if args.check:
-        if not OUT_FILE.exists() or OUT_FILE.read_text() != text:
+        if not OUT_FILE.exists() or OUT_FILE.read_text(encoding="utf-8") != text:
             print(
                 f"{OUT_FILE.relative_to(ROOT)} is out of date: run "
                 "uv run scripts/scan-hw-accesses.py"
@@ -90,7 +90,7 @@ def main():
         print(f"accesses up to date ({len(images)} images)")
         return 0
 
-    OUT_FILE.write_text(text)
+    OUT_FILE.write_text(text, encoding="utf-8", newline="\n")
     for name, info_ in data["images"].items():
         print(
             f"  {name:22s} {info_['total']:5d} hardware references, "

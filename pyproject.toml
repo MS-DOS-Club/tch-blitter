@@ -23,8 +23,13 @@ line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
-# N and SIM catch files opened and never closed
-select = ["E", "F", "W", "I", "UP", "B", "N", "SIM"]
+# N and SIM catch files opened and never closed. PLW1514 catches a text open() without an encoding
+# (.claude/rules/checks.md says why), and a Path call only where ruff can tell it is a Path: one held
+# in a module constant, subprocess output and lzma pass unseen. It is a preview rule, so preview is
+# on for the rules named here only.
+select = ["E", "F", "W", "I", "UP", "B", "N", "SIM", "PLW1514"]
+preview = true
+explicit-preview-rules = true
 
 
 [tool.mypy]

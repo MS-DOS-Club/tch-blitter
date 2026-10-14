@@ -74,7 +74,9 @@ def capture_set(game: str, entries: list[tuple[int, str, str]], tmp: pathlib.Pat
     out = tmp / game
     command = ["./scripts/frame-series.sh", game, "0", str(last), str(out)]
     print(f"== {game}: up to frame {last}")
-    r = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, check=False)
+    r = subprocess.run(
+        command, cwd=ROOT, capture_output=True, encoding="utf-8", errors="replace", check=False
+    )
     if r.returncode != 0:
         print(r.stdout[-2000:], r.stderr[-2000:], file=sys.stderr)
         print(f"==> INVALID: the capture of {game} failed (rc={r.returncode})", file=sys.stderr)

@@ -73,8 +73,8 @@ SWALLOWABLE_KEYS = ("evidence", "observed", "refuted")
 def load_registers():
     """`registers.yaml` with every bit that names a `field` given the mask `gfx.yaml` holds for
     it, and the problems met doing so (`resolve_fields`)."""
-    data = yaml.safe_load(SOURCE.read_text())
-    return data, resolve_fields(data, yaml.safe_load(GFX.read_text()))
+    data = yaml.safe_load(SOURCE.read_text(encoding="utf-8"))
+    return data, resolve_fields(data, yaml.safe_load(GFX.read_text(encoding="utf-8")))
 
 
 def resolve_fields(data, gfx):
@@ -221,7 +221,7 @@ def disasm_table(accesses, symbols):
     """
     functions = {}
     if ANALYSIS.exists():
-        for line in ANALYSIS.read_text().splitlines():
+        for line in ANALYSIS.read_text(encoding="utf-8").splitlines():
             m = re.match(r"#\s*(\S+)\.bin\s+functions:\s*(\d+)", line)  # `analysis.txt`'s own key
             if m:
                 functions[m.group(1)] = int(m.group(2))
@@ -467,7 +467,7 @@ def insert_block(path, block_name, content):
         print(f"INVALID: {path.name} does not exist; a generated block needs its page")
         raise SystemExit(3)
     start = doc_blocks.opener("gen-hw-docs.py", block_name)
-    return doc_blocks.replace(path.read_text(), start, f"\n{content}\n", path.name)
+    return doc_blocks.replace(path.read_text(encoding="utf-8"), start, f"\n{content}\n", path.name)
 
 
 def main():
@@ -488,7 +488,7 @@ def main():
         (SYMBOLS, "every symbol block"),
         (ACCESSES, "the accesses and findings blocks"),
     ):
-        loaded = yaml.safe_load(path.read_text()) if path.exists() else None
+        loaded = yaml.safe_load(path.read_text(encoding="utf-8")) if path.exists() else None
         if (
             not isinstance(loaded, dict)
             or not isinstance(loaded.get("images"), dict)
@@ -529,10 +529,10 @@ def main():
     stale = []
     for path, content in complete.items():
         if args.check:
-            if not path.exists() or path.read_text() != content:
+            if not path.exists() or path.read_text(encoding="utf-8") != content:
                 stale.append(path.relative_to(ROOT))
         else:
-            path.write_text(content)
+            path.write_text(content, encoding="utf-8", newline="\n")
             print(f"  written {path.relative_to(ROOT)}")
 
     # In order and one after another: `insert_block` re-reads the file every time, so several blocks
@@ -540,10 +540,10 @@ def main():
     for path, name, content in outputs:
         result = insert_block(path, name, content)
         if args.check:
-            if not path.exists() or path.read_text() != result:
+            if not path.exists() or path.read_text(encoding="utf-8") != result:
                 stale.append(f"{path.relative_to(ROOT)} [{name}]")
         else:
-            path.write_text(result)
+            path.write_text(result, encoding="utf-8", newline="\n")
 
     if args.check:
         if stale:

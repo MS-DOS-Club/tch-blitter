@@ -32,7 +32,7 @@ def main() -> int:
     if not MANIFEST.exists():
         print(f"INVALID: {MANIFEST} is missing")
         sys.exit(3)
-    data = yaml.safe_load(MANIFEST.read_text())
+    data = yaml.safe_load(MANIFEST.read_text(encoding="utf-8"))
     pairs = data.get("pairs") or []
     if not pairs:
         print("INVALID: the manifest declares not one pair; nothing has been checked")

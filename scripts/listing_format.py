@@ -19,7 +19,9 @@ GAP = re.compile(r"^([0-9a-f]{8})  ; ([0-9a-f]{8})\.\.([0-9a-f]{8})  \d+ bytes")
 def executed_addresses(path: Path) -> list[int]:
     """The addresses of an executed-seeds file; a file that holds none is an error, never an
     empty run."""
-    ran = [int(word, 16) for word in path.read_text().split() if word.startswith("0x")]
+    ran = [
+        int(word, 16) for word in path.read_text(encoding="utf-8").split() if word.startswith("0x")
+    ]
     if not ran:
         raise ValueError(f"{path.name} holds no address")
     return ran

@@ -27,7 +27,7 @@ import glob, os, re, subprocess, sys
 setname = os.environ["SET"]
 block = None
 for path in glob.glob(os.path.join(os.environ["MAME_SRC"], "src/mame/tch/*.cpp")):
-    m = re.search(r"ROM_START\(\s*%s\s*\).*?ROM_END" % re.escape(setname), open(path).read(), re.S)
+    m = re.search(r"ROM_START\(\s*%s\s*\).*?ROM_END" % re.escape(setname), open(path, encoding="utf-8").read(), re.S)
     if m:
         block = m.group(0); driver = os.path.basename(path); break
 if not block:
@@ -38,7 +38,7 @@ def contents(zippath):
     """{name: crc} of a zip, or {} if it does not exist."""
     if not os.path.exists(zippath):
         return {}
-    out = subprocess.check_output(["unzip", "-v", zippath], text=True)
+    out = subprocess.check_output(["unzip", "-v", zippath], encoding="utf-8")
     d = {}
     for line in out.splitlines():
         m = re.match(r"\s*\d+\s+\S+\s+\d+\s+\S+\s+[\d-]+\s+[\d:]+\s+([0-9a-fA-F]{8})\s+(\S+)", line)
@@ -50,7 +50,7 @@ actual = contents(os.environ["ZIP"])
 # a clone (the GAME line's third field names its parent) takes the files it lacks from the parent
 parent = None
 gm = re.search(r"^GAME\w*\(\s*[^,]+,\s*%s\s*,\s*([a-z0-9_]+)\s*," % re.escape(setname),
-               open(os.path.join(os.environ["MAME_SRC"], "src/mame/tch", driver)).read(), re.M)
+               open(os.path.join(os.environ["MAME_SRC"], "src/mame/tch", driver), encoding="utf-8").read(), re.M)
 if gm and gm.group(1) != "0":
     parent = gm.group(1)
 from_parent = contents(f"run/mame_roms/{parent}.zip") if parent else {}
