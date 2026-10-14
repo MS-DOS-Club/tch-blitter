@@ -7,8 +7,8 @@
 #   ./scripts/radendur-session.sh stop              ends the instance this script started
 #
 # MACHINE=radendur runs the board's dump, which stops on the prototype's own faults; the default,
-# radendurv2, plays. The instances this script starts are told apart from any other MAME by the
-# snapshot directory it gives them, so `stop` never touches a run it did not start.
+# radendurv2, plays. `stop` never touches a run this script did not start: the instance is told
+# apart by the snapshot directory it is given, or on Windows by the pid kept when it was launched.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -22,17 +22,44 @@ MACHINE="${MACHINE:-radendurv2}"
 GDB_PORT="${GDB_PORT:-23946}"
 MARK="-snapshot_directory $PROJECT_DIR/tmp/snap"
 
-# ps and not pgrep -f, which on macOS fails outright when any process holds a non-UTF-8 argument
-own_pids() { ps -Ao pid=,args= | awk -v m="$MARK " 'index($0, m) && $2 != "awk" {print $1}'; }
+# ps and not pgrep -f, which on macOS fails outright when any process holds a non-UTF-8 argument.
+# MSYS2's ps takes no -o and shows no arguments, so on Windows the instance is the pid and the binary
+# launch() kept, and only while that pid is still running that binary.
+PIDFILE="$PROJECT_DIR/tmp/session.pid"
+case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) PID_KEPT=1 ;; *) PID_KEPT=0 ;; esac
+
+own_pids() {
+    if [ "$PID_KEPT" = 0 ]; then
+        ps -Ao pid=,args= | awk -v m="$MARK " 'index($0, m) && $2 != "awk" {print $1}'
+        return
+    fi
+    local pid bin
+    [ -f "$PIDFILE" ] || return 0
+    IFS=$'\t' read -r pid bin < "$PIDFILE" || return 0
+    # COMMAND is the last column and may hold spaces; the row's first number is its pid
+    ps -p "$pid" 2>/dev/null | awk -v b=" $bin" 'NR > 1 && substr($0, length($0) - length(b) + 1) == b {
+        for (i = 1; i <= NF; i++) if ($i ~ /^[0-9]+$/) { print $i; exit } }'
+    return 0
+}
+
+# record_instance <pid> -- what own_pids reads back where ps cannot show the snapshot directory
+record_instance() {
+    [ "$PID_KEPT" = 1 ] || return 0
+    local bin
+    bin=$(mame_binary_for_set "$MACHINE")
+    printf '%s\t%s\n' "$1" "$(cd "$(dirname "$bin")" && pwd)/$(basename "$bin")" > "$PIDFILE"
+}
 
 stop() {
     local pids
     pids=$(own_pids)
-    [ -z "$pids" ] && return 0
-    # shellcheck disable=SC2086  # one pid per word
-    kill -9 $pids 2>/dev/null || true
-    sleep 1
-    [ -z "$(own_pids)" ] || { echo "ERROR: still running: $(own_pids | tr '\n' ' ')" >&2; return 1; }
+    if [ -n "$pids" ]; then
+        # shellcheck disable=SC2086  # one pid per word
+        kill -9 $pids 2>/dev/null || true
+        sleep 1
+        [ -z "$(own_pids)" ] || { echo "ERROR: still running: $(own_pids | tr '\n' ' ')" >&2; return 1; }
+    fi
+    rm -f "$PIDFILE"
 }
 
 # a window at 3/4 of the main display on macOS, 1280x960 elsewhere
@@ -53,6 +80,7 @@ launch() {
     [ "${#cmd[@]}" -gt 0 ] || exit 1
     echo "==> $MACHINE ($log)"
     nohup "${cmd[@]}" > "$log" 2>&1 &
+    record_instance "$!"
     disown
     for _ in 1 2 3 4 5 6 7 8 9 10; do [ -n "$(own_pids)" ] && break; sleep 1; done
     [ -n "$(own_pids)" ] || { echo "ERROR: MAME did not start; $log says:"; tail -20 "$log"; exit 1; }

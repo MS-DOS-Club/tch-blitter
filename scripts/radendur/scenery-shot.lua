@@ -12,7 +12,9 @@
 local here = debug.getinfo(1, "S").source:match("^@(.*)/[^/]*$") or "."
 local SHOT_FRAME = tonumber(os.getenv("SHOT_FRAME") or "")
 local OUT = os.getenv("OUT")
-if not SHOT_FRAME or not OUT or OUT:sub(1, 1) ~= "/" then
+-- absolute on either host: MSYS2 hands a Windows MAME its environment's paths as C:/...
+local function is_absolute(p) return p:sub(1, 1) == "/" or p:match("^%a:[/\\]") ~= nil end
+if not SHOT_FRAME or not OUT or not is_absolute(OUT) then
     emu.print_error("__SCENERY: INVALID -- SHOT_FRAME must be a frame number and OUT an absolute path")
     manager.machine:exit()
     return

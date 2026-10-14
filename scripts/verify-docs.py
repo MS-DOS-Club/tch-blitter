@@ -29,18 +29,40 @@ GENERATED = re.compile(
 
 
 def documents() -> list[Path]:
-    """Every Markdown file git tracks or would track, so a page written today is checked too."""
+    """Every Markdown file git tracks or would track, so a page written today is checked too.
+
+    The filter is applied here and not as a `*.md` pathspec: MSYS2's git, started from a Windows
+    Python, expands an unquoted wildcard itself, against the working directory, and then lists only
+    the pages at the root.
+    """
     out: list[str] = []
     for extra in ([], ["--others", "--exclude-standard"]):
         r = subprocess.run(
-            ["git", "ls-files", "-z", *extra, "*.md"],
+            ["git", "ls-files", "-z", *extra],
             cwd=ROOT,
             capture_output=True,
-            text=True,
+            encoding="utf-8",
             check=True,
         )
         out += r.stdout.split("\0")
-    return sorted({ROOT / d for d in out if d and (ROOT / d).is_file()})
+    return sorted({ROOT / d for d in out if d.endswith(".md") and (ROOT / d).is_file()})
+
+
+def spelled_exactly(base: Path, target: str) -> bool:
+    """Whether every component of `target`, walked from `base`, exists with that exact case.
+
+    Walked as written rather than resolved: `resolve()` returns the case the disk holds on
+    Windows, so a resolved name always matches its directory listing there.
+    """
+    here = base
+    for part in Path(target).parts:
+        if part == "..":
+            here = here.parent
+        elif part not in {q.name for q in here.iterdir()}:
+            return False
+        else:
+            here = here / part
+    return True
 
 
 def targets(text: str) -> list[str]:
@@ -57,15 +79,15 @@ def main() -> int:
     failures: list[str] = []
     generators: set[str] = set()
     for md in docs:
-        text = md.read_text()
+        text = md.read_text(encoding="utf-8")
         rel = md.relative_to(ROOT)
         for target in targets(text):
             if target.startswith(("http://", "https://", "mailto:", "#")):
                 continue
-            path = (md.parent / unquote(target.split("#")[0])).resolve()
-            if not path.exists():
+            written = unquote(target.split("#")[0])
+            if not (md.parent / written).exists():
                 failures.append(f"{rel}: broken link to `{target}`")
-            elif path.name not in [q.name for q in path.parent.iterdir()]:
+            elif not spelled_exactly(md.parent, written):
                 failures.append(f"{rel}: `{target}` only matches ignoring case")
         for m in GENERATED.finditer(text):
             generators.add(m.group(1))
@@ -77,7 +99,11 @@ def main() -> int:
             failures.append(f"{rel}: a generated block is not closed")
     for generator in sorted(generators):
         r = subprocess.run(
-            ["uv", "run", generator, "--check"], cwd=ROOT, capture_output=True, text=True
+            ["uv", "run", generator, "--check"],
+            cwd=ROOT,
+            capture_output=True,
+            encoding="utf-8",
+            errors="replace",
         )
         if r.returncode != 0:
             failures.append(f"`{generator} --check` fails: {r.stdout.strip() or r.stderr.strip()}")

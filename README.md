@@ -234,6 +234,13 @@ make play       # run it (radendurv2: faults fixed, music kept, full scenery)
 make doctor     # what a fresh machine is missing
 ```
 
+On Windows every command runs in the **MSYS2 UCRT64** shell, the one MAME itself builds in, with
+the packages MAME's [Windows build instructions](https://docs.mamedev.org/initialsetup/compilingmame.html#microsoft-windows)
+list for it, plus `make`, `git`, `unzip`, `diffutils`, [uv](https://docs.astral.sh/uv/) and
+[ShellCheck](https://github.com/koalaman/shellcheck), all on that shell's `PATH`; `make doctor`
+names whatever is missing. The binaries are `upstream/*.exe`, built on MAME's native Windows OSD
+rather than SDL, and the scripts call them by the same names.
+
 `make setup` also builds `radendurv2`, the fixed clone, from the `radendur` dump: its ROM is made
 here, never shipped. MAME itself checks the romsets, one binary per driver:
 

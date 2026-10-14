@@ -45,12 +45,18 @@ dumped_sets() {
 doctor() {
     missing=0
     info "Tools"
-    if echo '#include <type_traits>' | clang++ -x c++ -c -o /dev/null - >/dev/null 2>&1; then ok "a C++ compiler (clang++)"
-    else miss "a C++ compiler: clang++ cannot build (macOS: xcode-select --install; Linux: g++)"; fi
+    # whichever the platform's MAME build uses; the message says which that is
+    local cxx="" cand
+    for cand in clang++ g++; do
+        if echo '#include <type_traits>' | "$cand" -x c++ -c -o /dev/null - >/dev/null 2>&1; then cxx=$cand; break; fi
+    done
+    if [ -n "$cxx" ]; then ok "a C++ compiler ($cxx)"
+    else miss "a C++ compiler: neither clang++ nor g++ builds (macOS: xcode-select --install; Linux: g++; Windows: MSYS2 UCRT64 gcc)"; fi
     if python3 -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null; then ok "Python >= 3.11"
     else miss "Python >= 3.11"; fi
+    # what the scripts call and a bare macOS or MSYS2 install may lack; the rest is in both base sets
     local cmd
-    for cmd in uv git make unzip shasum shellcheck; do
+    for cmd in uv git make unzip shasum diff cmp shellcheck; do
         if command -v "$cmd" >/dev/null 2>&1; then ok "$cmd"; else miss "$cmd"; fi
     done
 
