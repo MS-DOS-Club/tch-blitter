@@ -1,5 +1,5 @@
 diff --git a/src/mame/tch/rltennis.cpp b/src/mame/tch/rltennis.cpp
-index d86f2a72..84ae5106 100644
+index d86f2a72..3e528fcc 100644
 --- a/src/mame/tch/rltennis.cpp
 +++ b/src/mame/tch/rltennis.cpp
 @@ -1,9 +1,12 @@
@@ -27,8 +27,8 @@ index d86f2a72..84ae5106 100644
 -  or just rect clipping?)
 -- what the 70000a blitter reg is for ?
 +- IRQ1 is a level held while the blitter is idle (the main loop starts a list by unmasking
-+  it); blits take no time here, so a pulse on every blit strobe and one at vblank stand in until
-+  their duration is modelled
++  it); blits take no time here, so an interrupt request (HOLD_LINE) on every blit strobe and one
++  at vblank stand in until their duration is modelled
 +- which source pixel a scaled blit drops in each period (the phase) is a model choice, see
 +  blitter_w; the right and bottom edges of the visible area are not established
  - awfully similar to littlerb;
