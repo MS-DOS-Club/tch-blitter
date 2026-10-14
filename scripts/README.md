@@ -63,4 +63,4 @@ Python runs with `uv run scripts/<name>.py`, and every MAME launch goes through 
 | `listing_format.py` | the line formats of a listing and of an executed-address file |
 | `trace-seeds.py` | the ROM addresses MAME executed, from a debugger trace, into `disasm/executed/` |
 | `scan-hw-accesses.py` | which hardware each game touches, into `hardware/accesses.yaml` |
-| `ghidra/*.java` | the scripts Ghidra runs headless: `SetupTCH` seeds the analysis, `ExportTCH`, `ListTCH` and `FactsTCH` write it out, `DumpFuncs` and `Xref` answer one question by hand |
+| `ghidra/*.java` | the scripts Ghidra runs headless: `SetupTCH` seeds the analysis, `MemoryMapTCH` declares the board's memory map, `ExportTCH`, `ListTCH` and `FactsTCH` write it out, `DumpFuncs` and `Xref` answer one question by hand |

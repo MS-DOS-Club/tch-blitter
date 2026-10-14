@@ -13,7 +13,9 @@ change is has to be looked at before anything is re-blessed.
 | `rltennis` | the same |
 | `rltennisa` | the same. It is the SECOND dump of Reality Tennis, captured at the same frames as `rltennis`; what it draws there differs |
 
-**How many scenes each one has is `goldens/<set>/scenes.conf`**; it is not counted here, because a
+**How many scenes each one has is `goldens/<set>/scenes.conf`** for the family sets, and for the
+two Radical Enduro sets the scene list in `scripts/radendur-goldens.sh` beside each set's
+`checksums.sha256`; it is not counted here, because a
 count nothing keeps true is a debt handed to whoever reads it next.
 
 ## Which binary they are blessed with

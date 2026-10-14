@@ -88,7 +88,7 @@ The menu walks `seg` from 0 to 2 and, past 2, jumps to the next level, so
 **segment 3 is unreachable**: of the 16 sections in the `0xa2a62` table, only 12 can
 be requested.
 
-### What is actually playable in this dump
+### What is actually playable, on radendurh
 
 Each section run from boot, with the section loaded read from RAM and the race seen drawn
 (`docs/img/radendur/starts/`), against the render of each section made **from the ROM with no

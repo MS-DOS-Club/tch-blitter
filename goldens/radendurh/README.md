@@ -28,7 +28,7 @@ dump, emulated as it is, stops on its own faults; its baseline is `../radendur/`
 | `05_desert_scenery` | **the stage tent in the desert, mid-race**, driven by `scripts/drive.lua`: the tent, palms and bushes the prototype's own engine leaves out and radendurh's full-scenery layer draws (not the board's behaviour). `scripts/radendur/scenery-shot.lua` writes the game's view origin with it, and the gate refuses a capture taken anywhere else. |
 | `06_desert_descent` | **the desert while the view scrolls DOWN the track**, driven the same way: the bottom row the view adds keeps its trees, palm and fence, which radendurh's `scenery_strip_row` draws in the row it belongs to (the prototype's strip drawer leaves it bare). |
 
-If the colour work changes any of those screens, the golden FAILS on purpose and is re-blessed once
+If a change to the palette model alters any of those screens, the golden fails on purpose and is re-blessed once
 the change is checked to be the one that was sought.
 
 ## They are versioned: why, and what to do if they fail on another machine
