@@ -71,7 +71,7 @@ footage.
 | MAME set | `pwball` |
 | driver in MAME | `tch/wheelfir.cpp` |
 | driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten |
-| status in MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`, with the comment "mostly complete" |
+| status in stock MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`, with the comment "mostly complete" |
 <!-- end of generated block -->
 
 ## Its role in this project: the clean reference
@@ -104,7 +104,10 @@ vblank request still pending, so a counter left running would expire just before
 and cut the first block short. The way out is a bit the game writes itself: bit 13 of the control
 port, set at vblank and cleared after the 48th word, enables the counter, and the boot clears it
 on its way out. Wheels & Fire keeps it set while it plays, which is why its road keeps its
-per-line clock.
+per-line clock. A board that has run before boots on the EEPROM it wrote, gets through that read
+sooner and unmasks with a counter request from the masked frames still pending; served, it opens a
+block that nothing follows, so the driver withdraws a request not taken by the next vblank, a rule
+fitted to this boot (the driver's TODO says so).
 
 ## Sources
 

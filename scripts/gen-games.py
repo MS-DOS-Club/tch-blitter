@@ -31,7 +31,7 @@ PAGE = {
     "radendur": "radical-enduro",
 }
 # two states, because there are two drivers: stock MAME's at the pin, and this repository's
-HEAD_GAMES = "| game | set | year | manufacturer | state in MAME | state here |"
+HEAD_GAMES = "| game | set | year | manufacturer | state in stock MAME | state here |"
 HEAD_RESOURCES = "| game | main 68000 | sound 68000 | graphics | other ROMs |"
 HEAD_CREDITS = "| game | who made it, according to its own ROM |"
 HEAD_PRESERVED = "| game | who preserved it |"
@@ -95,8 +95,9 @@ def check_page(j: dict) -> None:
 
 
 def facts_table(j: dict) -> str:
-    """A game page's fact table: the year, the sets, the driver and the state in MAME are the data
-    file's; the board, the driver here and the short notes are the page's own, under `page:`."""
+    """A game page's fact table: the year, the sets, the driver and the state in stock MAME are
+    the data file's; the board, the driver here and the short notes are the page's own, under
+    `page:`."""
     page = j["page"]
     year = j["year"]
     known = "no known date" if year["level"] == "unknown" else str(year["value"])
@@ -121,7 +122,7 @@ def facts_table(j: dict) -> str:
         ]
     else:
         rows.append(f"| driver | {driver} |")
-    rows.append(f"| status in MAME | {state}{page.get('status_note', '')} |")
+    rows.append(f"| status in stock MAME | {state}{page.get('status_note', '')} |")
     return "\n".join(rows) + "\n"
 
 

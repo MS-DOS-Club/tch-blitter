@@ -278,7 +278,8 @@ Photos by OldComputers ES unless marked, from the
   16 MHz / 1024, 32 MHz / 2048 and one mailbox word per line all agree, but nobody has measured a
   board. Whether the field runs at 50 or 60 Hz hangs from the same question.
 - **How long a blit takes**, and how long the board holds a level 5 request. The drivers complete
-  every blit at once and hold the request until the CPU takes it; the length of the drawing chain on
+  every blit at once and hold the request until the CPU takes it, withdrawing it when bit 13 of
+  0x7c0000 clears or when vblank comes first (both fitted); the length of the drawing chain on
   a real board is unknown.
 - **The vertical source direction** of word 8, taken by symmetry with the horizontal one, and the
   scale index bits of word 10.
@@ -290,7 +291,7 @@ Photos by OldComputers ES unless marked, from the
 - **Why layout A's sockets are empty**, and what its wires and its cut fix: nobody has traced the
   nets.
 - **The P6, P100 and P200/P201 headers**, U300, and the DACs, which no photo identifies.
-- **The pedal.** Wheels & Fire will not pass the second gear's ceiling without Button 1, which is the
+- **The pedal.** Wheels & Fire will not accelerate past a low speed without Button 1, which is the
   original driver's "slow throttle": whether the cabinet's pedal closed it at the end of its travel.
 
 ## Register reference

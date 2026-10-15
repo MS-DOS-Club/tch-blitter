@@ -18,6 +18,7 @@ run/mame_roms/*.zip
 
 # MAME runtime
 *.cfg
+!/ctrlr/*.cfg
 *.nv
 nvram/
 snap/

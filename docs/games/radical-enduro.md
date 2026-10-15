@@ -43,7 +43,7 @@ fixed in the ROM it boots, enters a game and its playable tracks finish the race
 | MAME set | `radendur` (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs and, as an enhancement that is not the board's behaviour, its full scenery drawn, built from the dump by `make radendurh` |
 | driver in MAME | `tch/wheelfir.cpp` |
 | driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten and the game's differences in `radendur_state` |
-| status in MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: a comment in its driver says that some courses reach gameplay but crash quickly |
+| status in stock MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: a comment in its driver says that some courses reach gameplay but crash quickly |
 <!-- end of generated block -->
 
 ## What was achieved here
@@ -51,9 +51,10 @@ fixed in the ROM it boots, enters a game and its playable tracks finish the race
 With its faults fixed it boots, enters a game and **five tracks finish the race** with no grey
 screen. The faults that are the prototype's own are fixed in the code of the `radendurh` ROM, never
 by the driver, which emulates the dump as it is. The same ROM starts each sound block after the
-drawing, as Power Ball and Kong Ball do, so the music lasts the race; and it draws every prop near the
-view where it belongs, which the prototype's engine does not: an enhancement, not the board, which
-costs game speed: in some races a few steps of the race clock take more frames than without it.
+drawing, as Power Ball and Kong Ball do, so the music lasts the race; and it draws more of the
+scenery round the view, where it belongs, which the prototype's engine does not: an enhancement,
+not the board, which costs game speed: on some tracks steps of the race clock take more frames
+than without it (measured on an earlier build of that layer).
 
 The root causes, all read from the code rather than guessed:
 
@@ -234,6 +235,9 @@ them, which is the prototype being unfinished rather than an emulation gap.
 **What is open**, said plainly rather than left out:
 
 - The bike's engine sound is not heard, although its samples are in the ROMs.
+- On `radendurh` the sound CPU still reads a word twice now and then, which is why the clone is
+  flagged with imperfect sound, and a few silent stretches repeat at the same places of the attract
+  and the race.
 - The two attract screens right after a race keep part of the race's background. That is what the
   game draws: this board does not clear on its own, and the game's own plane fills
   are modelled.

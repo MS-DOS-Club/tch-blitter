@@ -93,9 +93,9 @@ games:
     level: verified
     evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
   driver_status:
-    value: works, with imperfect graphics; plays a race to its time out
+    value: works; the whole game plays
     level: verified
-    evidence: MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE
+    evidence: MACHINE_SUPPORTS_SAVE
   authors:
   - role: executive producer
     role_rom: EXECUTIVE PRODUCER
@@ -149,9 +149,9 @@ games:
     level: verified
     evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
   driver_status:
-    value: works, with imperfect graphics; plays a match to its game over
+    value: works; the whole game plays
     level: verified
-    evidence: MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE
+    evidence: MACHINE_SUPPORTS_SAVE
   authors: []
 - set: kongball
   name: Kong Ball
@@ -174,9 +174,9 @@ games:
     level: verified
     evidence: MACHINE_NOT_WORKING | MACHINE_NO_SOUND | MACHINE_IMPERFECT_GRAPHICS
   driver_status:
-    value: works, with no sound and imperfect graphics; plays to its game over
+    value: works, with no sound; plays to its game over
     level: verified
-    evidence: MACHINE_NO_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE
+    evidence: MACHINE_NO_SOUND | MACHINE_SUPPORTS_SAVE
   authors:
   - role: programming
     role_rom: PROGRAMMING
@@ -234,7 +234,7 @@ games:
   driver_status:
     value: NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurh clone,
       its maincpu ROM fixed (plus full scenery, not the board's) and built from the dump, finishes a
-      race with its music at its real 16 MHz
+      race with its music (a few silent stretches) at its real 16 MHz
     level: verified
     evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE
   authors: []

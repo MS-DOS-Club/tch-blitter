@@ -19,7 +19,7 @@ GAME: dict[str, Any] = {
 
 def test_the_state_is_every_flag_of_the_macro() -> None:
     table = gg.facts_table(GAME)
-    assert "| status in MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: it hangs |" in table
+    assert "| status in stock MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: it hangs |" in table
     assert "| year | no known date |" in table
     assert "| driver | `tch/wheelfir.cpp` |" in table
 
@@ -29,7 +29,7 @@ def test_a_working_set_says_so_and_drops_the_save_flag() -> None:
     game: dict[str, Any] = dict(GAME, mame_status={"evidence": flags})
     game["variants"] = [{"set": "rltennis"}, {"set": "rltennisa"}]
     table = gg.facts_table(game)
-    assert "| status in MAME | **working**, `IMPERFECT_TIMING`: it hangs |" in table
+    assert "| status in stock MAME | **working**, `IMPERFECT_TIMING`: it hangs |" in table
     assert "| MAME sets | `rltennis` and `rltennisa` |" in table
 
 

@@ -15,9 +15,10 @@ Python runs with `uv run scripts/<name>.py`, and every MAME launch goes through 
 | `verify-patches.sh` | the patches rebuild `upstream/`'s changes on a clean tree at the pin |
 | `verify-romset.sh <set>` | a romset against its driver's `ROM_START` |
 | `radendur-goldens.sh` | `make verify` / `make goldens`: Radical Enduro's goldens (boot, race start, desert scenery) |
-| `goldens-family.sh` | `make verify-family` / `make bless-family`: the siblings' goldens, the frames in each `goldens/<set>/scenes.conf` |
+| `goldens-family.sh` | `make verify-family` / `make bless-family`: the siblings' goldens, the frames in each `goldens/<set>/scenes.conf`, and the sound CRC where a set declares a `sound` line |
 | `savestate-gate.sh` | `make savestate`: a state saved and loaded in a fresh process gives the same frames |
-| `lib/mame_run.sh` | which binary runs each set, and the MAME command line every script launches (a quick unattended window, or a session to play) |
+| `lib/mame_run.sh` | which binary runs each set, and the MAME command line every script launches (a quick unattended window, or a session to play, which for Wheels & Fire loads `ctrlr/gamepad.cfg`) |
+| `lib/sound_crc.lua` | the goldens' sound check: a CRC-32 of the words the sound CPU writes to its DACs |
 | `lib/mame_src.sh` | where the MAME checkout is, and the commit it is pinned to |
 | `lib/patch_table.sh` | the patches and the MAME files each one owns |
 | `lib/binary.sh` | prints the binary a run uses, and warns when its driver source is newer |
@@ -42,7 +43,7 @@ Python runs with `uv run scripts/<name>.py`, and every MAME launch goes through 
 |--------|--------------|
 | `frame-series.sh <set> <from> <to> <dir>` | consecutive frames of one set |
 | `gif.sh` | a stretch of frames into a GIF at real time, for the documentation |
-| `family-captures.py` | the title stills of the seven sets |
+| `family-captures.py` | the documentation's stills of the seven sets (titles, attract and race frames, as its manifest lists them) |
 | `before-after.py` | measures a before/after pair: how much changes and where |
 | `make-readme-images.py` | the light images of Radical Enduro's page |
 | `radendur_track_render.py` | Radical Enduro's isometric track renderer, from the ROM, no emulator |

@@ -70,15 +70,15 @@ corrected video model:
 | MAME set | `wheelfir` |
 | driver in MAME | `tch/wheelfir.cpp` |
 | driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten |
-| status in MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS` |
+| status in stock MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS` |
 <!-- end of generated block -->
 
-## Why it is marked as not working
+## Why stock MAME marks it as not working
 
-Not because nothing shows up, but because its emulation is not faithful, and the driver header
-carries the list: gaps and extra rows of pixels, zoom by lookup table
-instead of by parameters, double buffering not applied, layer clearing, wrong coordinates for
-the intro sprites, and unidentified layer enable bits.
+Not because nothing shows up, but because its emulation is not faithful, and stock MAME's driver
+header carries the list: gaps and extra rows of pixels, zoom by lookup table
+instead of by parameters, double buffering not applied, the road and the sky, layer clearing, wrong
+coordinates for the intro sprites, unidentified layer enable bits, and a slow analogue accelerator.
 
 **Of the eight points on that list, SIX are closed** and two remain open. The closures are in this
 repository's driver; in stock MAME all eight are still open. Point by point, against the TODO
@@ -86,14 +86,14 @@ exactly as it is written:
 
 | author's point | status |
 |----------------|--------|
-| *real gfx zoom, based on the zoom params, not lookup table* | **closed, and solved the opposite way round**: the board's law IS table based. Each scale has a 16-byte descriptor in ROM with a shift and two tables, and the percentage is only the index. It goes up to 400 because each axis has one descriptor per scale from 1 to 400 |
+| *real gfx zoom, based on the zoom params, not lookup table* | **closed**: the parameter is an index into 16-byte descriptors the program ROM carries, a shift and two tables, one per scale from 1 to 400 on each axis, which the game's own blit setup reads; the driver follows them, so each step's source is the one the game computes. On the board the zoom appears to be a pair of stall counters |
 | *apply double buffering* | **closed**: they are the two pages of the sprite layer and the bit that declares which one is shown |
 | *fix road/sky (extra bits in the scroll reg.)* | **closed**: the scroll is captured when the Y is written, and the background is a 512 torus that wraps |
 | *bitmap layer clearing* | **closed**: the game does it, with one fill per frame declaring the half page it reuses |
 | *fix wrong coords of sprites rendered into the bitmap layer (intro car)* | **closed**: the car comes out whole; its strip is 632 px on a 512 layer and one slice wraps around |
 | *various gfx size/pos glitches* | **closed**: it asked about gaps and extra rows of pixels, and the seam fix and the exact scale law close those |
 | *implement (and find) layer enable/disable bits* | **open** |
-| *analogue accelerator is really slow* | **the cause is the game's, not the driver's**: the game refuses to accelerate past the second gear's ceiling unless BUTTON 1 is held, which the attract's own controls screen never names. With that button held the car reaches the top gear on the analogue pedal alone. What stays open is the CABINET, not the emulation: whether the pedal had a switch at the end of its travel wired to that button. In MAME the keyboard binds the two to one key (see *How it is driven in MAME*) |
+| *analogue accelerator is really slow* | **the cause is the game's, not the driver's**: the game refuses to accelerate past a low speed unless BUTTON 1 is held, which the attract's own controls screen never names. With that button held the car reaches the top gear on the analogue pedal alone. What stays open is the CABINET, not the emulation: whether the pedal had a switch at the end of its travel wired to that button. In MAME the keyboard binds the two to one key (see *How it is driven in MAME*) |
 
 **And the 2 px fill columns are not what is left of that point.** The list asks about gaps and rows
 of pixels; the columns are word 14 blits carrying bit 3 **and** bit 2, that is, a clear that does
@@ -215,20 +215,26 @@ emulated" means for this board.
 The board serves two cabinets, a steering-wheel one and a joystick one, and asks which at the door
 of its service menu; the driver models the wheel cabinet by default and offers the other as the
 `Cabinet` setting in MAME's machine configuration. The game needs button 1 held to accelerate past
-the second gear's ceiling, so on a keyboard that button shares the accelerator's key: one key is
-full throttle, as one pedal-and-button is on the cabinet.
+a low speed, so on a keyboard that button shares the accelerator's key: one key is
+full throttle; `make ref SET=wheelfir` plays it. The
+game reads each pedal as a switch,
+so a key takes its pedal to full travel at once, and a tap of left Shift also selects in the menus
+and the high-score table, which accept on the accelerator. On a game controller, `make ref
+SET=wheelfir` loads `ctrlr/gamepad.cfg`, which makes the right trigger alone full throttle (MAME
+names that trigger `SLIDER2`) and the first face button the turbo; the stick and the brake are
+MAME's defaults. Without the file, full throttle is the trigger and the first face button together,
+and the turbo is button 3.
 
-| control | keyboard | pad (MAME's defaults) |
-|---------|----------|-----------------------|
+| control | keyboard | game controller |
+|---------|----------|-----------------|
 | steering wheel | left / right arrows | left stick |
-| accelerator, full throttle (pedal and button 1) | left Shift | trigger and first button together |
-| accelerator alone (what the menus and the high-score table accept on) | left Ctrl | trigger |
-| brake | left Alt | second trigger |
-| turbo (button 3) | Space | third button |
+| accelerator, full throttle (pedal and button 1) | left Shift | right trigger |
+| brake | left Alt | left trigger |
+| turbo (button 3) | Space | first face button (Cross, A) |
 | coin, start, test switch | 5, 1, F2 | |
 
 Up on a joystick would be a second, weaker accelerator (the game folds it into the pedal's bit), so
-the wheel cabinet has no joystick directions at all.
+the wheel cabinet gives player 1 no joystick directions at all.
 
 ## Sources
 

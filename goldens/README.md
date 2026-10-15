@@ -18,6 +18,12 @@ two Radical Enduro sets the scene list in `scripts/radendur-goldens.sh` beside e
 `checksums.sha256`; it is not counted here, because a
 count nothing keeps true is a debt handed to whoever reads it next.
 
+**Sound.** A family set whose sound CPU writes its DACs declares a `sound` line in its
+`scenes.conf`, and `goldens/<set>/sound.crc` holds a CRC-32 of those writes from a cold boot and
+from a second boot on the EEPROM the first one left, the way a board that has run before boots. The
+writes are the game's integers, so the CRC is the same on every host; a sound CPU that dies stops
+writing, and the count beside the CRC drops with it.
+
 ## Which binary they are blessed with
 
 With **ours**, never with upstream's: `upstream/wheelfir` for Wheels & Fire, Power Ball, Kong Ball
@@ -48,8 +54,10 @@ validated in RED before it is believed in green.
 
 ## Determinism
 
-Every run creates its NVRAM **clean**: an inherited EEPROM changes the attract and makes
-comparisons fail that should not. And Radical Enduro's goldens are tied to the driver's real CPU clock,
+Every run starts from a **clean** NVRAM: an inherited EEPROM changes the attract and makes
+comparisons fail that should not. Radical Enduro's passes then share theirs, because its scenes are
+reached by navigating after the boot, and the family's sound check boots a second time on the
+EEPROM the first run left, on purpose. And Radical Enduro's goldens are tied to the driver's real CPU clock,
 with no multiplier ([radendurh/README.md](radendurh/README.md)).
 
 ## The siblings' goldens are not a validated reference

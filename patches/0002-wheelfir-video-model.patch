@@ -11,7 +11,7 @@ index dc1cace8..6f5c7a56 100644
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa..bfccd896 100644
+index 1de425fa..ab5f191e 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,21 @@
@@ -41,7 +41,7 @@ index 1de425fa..bfccd896 100644
 +Kong Ball (prototype, TCH / Digital Dreams Multimedia)
 +Radical Enduro (early prototype, TCH / Sator Videogames)
 +Radical Enduro, fixed (hack): the prototype's program with its faults fixed in code, its
-+sound blocks started after the drawing and every scenery prop near the view drawn
++sound blocks started after the drawing and the scenery drawn further round the view
  
 +Original driver by Tomasz Slanina.
 +The video model, the blitter and their confirmation against the machine by Marcos
@@ -53,7 +53,7 @@ index 1de425fa..bfccd896 100644
  ----------------------------------
  Produttore  TCH
  N.revisione E133
-@@ -54,46 +48,56 @@ Note
+@@ -54,46 +48,64 @@ Note
  
  ----
  
@@ -122,19 +122,27 @@ index 1de425fa..bfccd896 100644
 +- the zoom appears to be a pair of stall counters on the board; here each step's source comes from the
 +  scale descriptors the program ROM carries for its own blit setup (found at start by their
 +  known answers: 100% the identity, 200% exactly double), with an approximation from
-+  ZOOM_INDEX for a program without them. Power Ball carries none and scales nothing
++  ZOOM_INDEX for a program without them. Power Ball and Radical Enduro carry none and were
++  not seen drawing a scaled blit
 +- a zoomed blit stops one step short of its endpoint, and a blit at 1:1 vertically skips its
 +  first source row, a border the art carries: both fitted to the games' output
-+- the background is drawn three rows lower than its scroll places it (BACKGROUND_ROW_BIAS), an
-+  exact fit for Wheels & Fire's road with no mechanism identified
++- the background is drawn three rows lower than its scroll places it (BACKGROUND_ROW_BIAS), but
++  not across the road/scenery boundary or the plane's wrap: an exact fit for Wheels & Fire's
++  road with no mechanism identified
 +- a background blit covering the whole window is drawn opaque (full_background in do_blit): a
 +  rule fitted to the High Scores photo, which the game asks for transparent with nothing
 +  under it
 +- Radical Enduro's sprite-plane flip, palette and frame scroll differ from the other games
 +  (radendur_state) on the same board; one model for all four is not found yet, and its
 +  palette routing by the plane of each upload stands in for a mechanism not identified
-+- the analogue accelerator is two steps, and the game needs button 1 held to go past the
-+  second gear's ceiling; what the cabinet wired to that button is not known
++- the analogue accelerator is two steps, and the game needs button 1 held to accelerate past a
++  low speed; what the cabinet wired to that button is not known
++- a line-counter request the main has not taken by vblank is withdrawn: fitted to Power Ball's
++  warm boot, whose sound CPU otherwise dies on the block header the held request sends
++- clearing bit 13 of 0x7c0000 also withdraws a pending line-counter request; that the board
++  does so is not established
++- no layer enable is identified: no bit seen written (Wheels & Fire and Power Ball in play, Kong
++  Ball's attract) behaves as one, so both planes are always composed
 +- word 4's low byte, with its bit 8 in word 8, is written by the games and read by nothing
 +- the link between two cabinets (0x7c0000) answers as a cabinet alone
  
@@ -145,7 +153,7 @@ index 1de425fa..bfccd896 100644
  #include "cpu/m68000/m68000.h"
  #include "machine/adc0808.h"
  #include "machine/eepromser.h"
-@@ -101,19 +105,101 @@ BIT N - ( scale < 50% ) ? 1 : 0
+@@ -101,19 +113,101 @@ BIT N - ( scale < 50% ) ? 1 : 0
  #include "machine/timer.h"
  #include "sound/dac.h"
  #include "video/ramdac.h"
@@ -253,7 +261,7 @@ index 1de425fa..bfccd896 100644
  
  class wheelfir_state : public driver_device
  {
-@@ -122,50 +208,122 @@ public:
+@@ -122,50 +216,122 @@ public:
  		driver_device(mconfig, type, tag),
  		m_maincpu(*this, "maincpu"),
  		m_subcpu(*this, "subcpu"),
@@ -391,7 +399,7 @@ index 1de425fa..bfccd896 100644
  
  	int32_t get_scale(int32_t index)
  	{
-@@ -179,64 +337,76 @@ private:
+@@ -179,64 +345,76 @@ private:
  		}
  		return 0;
  	}
@@ -501,7 +509,7 @@ index 1de425fa..bfccd896 100644
  		// wheelfir sets 0xfc0000 and 0xf00000, both of which are out of range of any GFX ROM
  		// kongball sets 0xfc0000 but only on startup
  		m_direct_write_x0 = dst_x0;
-@@ -244,35 +414,42 @@ void wheelfir_state::do_blit()
+@@ -244,35 +422,42 @@ void wheelfir_state::do_blit()
  		m_direct_write_y0 = dst_y0;
  		m_direct_write_y1 = dst_y1;
  		m_direct_write_idx = 0;
@@ -562,7 +570,7 @@ index 1de425fa..bfccd896 100644
  
  	// calculate u zoom (horizontal source scale)
  	const int d1u = ((m_blitter_data[0x0a] & 0x1f00) >> 8) |
-@@ -297,46 +474,96 @@ void wheelfir_state::do_blit()
+@@ -297,46 +482,96 @@ void wheelfir_state::do_blit()
  	const int indexv = d1v | (d2v << 6) | (hflagv << 12) | (dflagv << 13);
  	const float scale_v = get_scale(indexv);
  
@@ -677,7 +685,7 @@ index 1de425fa..bfccd896 100644
  }
  
  void wheelfir_state::do_direct_write(uint8_t sixdat)
-@@ -354,14 +581,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
+@@ -354,14 +589,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
  
  		if (x < 512 && y < 512)
  		{
@@ -694,7 +702,7 @@ index 1de425fa..bfccd896 100644
  {
  	/*
  	Blitter data format ( offset in words, offset in bytes )
-@@ -375,35 +602,45 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -375,35 +610,45 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	3  6    --------
  	   7    YYYYYYYY   Y = dest_y1 bits 0-7
  	4  8    --------
@@ -752,7 +760,7 @@ index 1de425fa..bfccd896 100644
  	if (offset == 0x6)
  	{
  		if (!ACCESSING_BITS_8_15)  //LSB only!
-@@ -413,25 +650,34 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -413,25 +658,34 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  		}
  	}
  
@@ -797,7 +805,7 @@ index 1de425fa..bfccd896 100644
  		else
  		{
  			// writes 0x0000 before filling in some of the other params then sending 0xffff above
-@@ -440,84 +686,99 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -440,84 +694,99 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	}
  }
  
@@ -934,7 +942,7 @@ index 1de425fa..bfccd896 100644
  	}
  
  	return data;
-@@ -530,36 +791,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
+@@ -530,36 +799,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
  	machine().bookkeeping().coin_counter_w(1, data & 0x02);
  }
  
@@ -1006,7 +1014,7 @@ index 1de425fa..bfccd896 100644
  
  static INPUT_PORTS_START( pwball )
  	PORT_START("P1")    /* 16bit */
-@@ -600,69 +887,58 @@ INPUT_PORTS_END
+@@ -600,130 +895,75 @@ INPUT_PORTS_END
  static INPUT_PORTS_START( wheelfir )
  	PORT_INCLUDE(pwball)
  
@@ -1020,29 +1028,31 @@ index 1de425fa..bfccd896 100644
 +	// A field whose condition fails leaves its bits at zero, which on this active-low port reads as
 +	// all four directions held: the wheel cabinet needs the bits declared unused so they read idle.
 +	PORT_BIT( 0x000f, IP_ACTIVE_LOW, IPT_UNUSED ) PORT_CONDITION("CABINET", 0x01, EQUALS, 0x00)
-+	// The car does not go past the second gear's ceiling unless button 1 is held with the pedal, so
-+	// on a keyboard button 1 shares the accelerator's key; the pedal keeps its own key too, as the
-+	// menus accept on the pedal's bit.
-+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) PORT_CODE(KEYCODE_LSHIFT)
++	// The car does not accelerate past a low speed unless button 1 is held with the pedal, so on a
++	// keyboard button 1 shares the accelerator's key; a key code replaces MAME's default, so
++	// the pad's first button is listed too.
++	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) PORT_CODE(KEYCODE_LSHIFT) PORT_CODE(JOYCODE_BUTTON1)
 +
  	PORT_MODIFY("STEERING")
 -	PORT_BIT(0xff, 0x80, IPT_PADDLE) PORT_INVERT PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_NAME("Steering Wheel") PORT_REVERSE
-+	// 12 per frame at 50.08 Hz is about 600 counts per second; the game reads the pedals as two
-+	// steps, so they take 10
++	// 12 per frame at 50.08 Hz is about 600 counts per second
 +	PORT_BIT(0xff, 0x80, IPT_PADDLE) PORT_INVERT PORT_SENSITIVITY(100) PORT_KEYDELTA(12) PORT_NAME("Steering Wheel") PORT_REVERSE
  
  	PORT_MODIFY("ACCELERATOR")
 -	PORT_BIT(0xff, 0x00, IPT_PEDAL)  PORT_INVERT PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_NAME("Accelerator Pedal") PORT_MINMAX(0x00, 0xff) PORT_REVERSE
-+	PORT_BIT(0xff, 0x00, IPT_PEDAL)  PORT_INVERT PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_NAME("Accelerator Pedal") PORT_MINMAX(0x00, 0xff) PORT_REVERSE PORT_CODE_INC(KEYCODE_LSHIFT) PORT_CODE_INC(KEYCODE_LCONTROL)
++	// The game reads each pedal as a switch, pressed above 128, so a key takes a pedal to full travel
++	// at once and a tap registers in the menus.
++	PORT_BIT(0xff, 0x00, IPT_PEDAL)  PORT_INVERT PORT_SENSITIVITY(100) PORT_KEYDELTA(255) PORT_NAME("Accelerator Pedal") PORT_MINMAX(0x00, 0xff) PORT_REVERSE PORT_CODE_INC(KEYCODE_LSHIFT)
  
  	PORT_MODIFY("BRAKE")
- 	PORT_BIT(0xff, 0x00, IPT_PEDAL2) PORT_INVERT PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_NAME("Brake Pedal") PORT_MINMAX(0x00, 0xff) PORT_REVERSE
+-	PORT_BIT(0xff, 0x00, IPT_PEDAL2) PORT_INVERT PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_NAME("Brake Pedal") PORT_MINMAX(0x00, 0xff) PORT_REVERSE
 -INPUT_PORTS_END
 -
 -int wheelfir_state::adc_eoc_r()
 -{
 -	return m_adc_eoc;
 -}
++	PORT_BIT(0xff, 0x00, IPT_PEDAL2) PORT_INVERT PORT_SENSITIVITY(100) PORT_KEYDELTA(255) PORT_NAME("Brake Pedal") PORT_MINMAX(0x00, 0xff) PORT_REVERSE
  
 -void wheelfir_state::adc_eoc_w(int state)
 -{
@@ -1109,9 +1119,11 @@ index 1de425fa..bfccd896 100644
  		}
  	}
  	else
-@@ -670,60 +946,13 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
+ 	{
  		if (param == NUM_SCANLINES) /* vblank */
  		{
++			// a level-5 request still pending at vblank is withdrawn (see the TODO above)
++			m_maincpu->set_input_line(5, CLEAR_LINE);
  			m_maincpu->set_input_line(3, HOLD_LINE);
 +			report_exhausted_source();
  		}
@@ -1171,7 +1183,7 @@ index 1de425fa..bfccd896 100644
  void wheelfir_state::machine_start()
  {
  	m_zoom_table = std::make_unique<int32_t[]>(ZOOM_TABLE_SIZE);
-@@ -734,32 +963,89 @@ void wheelfir_state::machine_start()
+@@ -734,32 +974,89 @@ void wheelfir_state::machine_start()
  	}
  
  	for (int j = 0; j < 400; ++j)
@@ -1280,7 +1292,7 @@ index 1de425fa..bfccd896 100644
  static const uint32_t texlayout_xoffset[512] = { STEP512(0,8) };
  static const uint32_t texlayout_yoffset[512] = { STEP512(0,4096) };
  
-@@ -780,13 +1066,10 @@ static GFXDECODE_START( gfx_wheelfir )
+@@ -780,13 +1077,10 @@ static GFXDECODE_START( gfx_wheelfir )
  	GFXDECODE_ENTRY( "gfx1", 0, wheelfir512x5125x8_texlayout, 0x0, 1 )
  GFXDECODE_END
  
@@ -1297,7 +1309,7 @@ index 1de425fa..bfccd896 100644
  
  	config.set_maximum_quantum(attotime::from_hz(12000));
  
-@@ -799,13 +1082,12 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -799,13 +1093,12 @@ void wheelfir_state::wheelfir(machine_config &config)
  	TIMER(config, "scan_timer").configure_scanline(FUNC(wheelfir_state::scanline_timer_callback), "screen", 0, 1);
  
  	SCREEN(config, m_screen);
@@ -1316,7 +1328,7 @@ index 1de425fa..bfccd896 100644
  	m_screen->set_palette(m_palette);
  
  	GFXDECODE(config, "gfxdecode", m_palette, gfx_wheelfir);
-@@ -816,14 +1098,21 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -816,14 +1109,21 @@ void wheelfir_state::wheelfir(machine_config &config)
  
  	EEPROM_93C46_16BIT(config, "eeprom");
  
@@ -1340,7 +1352,7 @@ index 1de425fa..bfccd896 100644
  
  void wheelfir_state::kongball(machine_config& config)
  {
-@@ -832,16 +1121,205 @@ void wheelfir_state::kongball(machine_config& config)
+@@ -832,16 +1132,205 @@ void wheelfir_state::kongball(machine_config& config)
  }
  
  
@@ -1552,7 +1564,7 @@ index 1de425fa..bfccd896 100644
  }
  
  
-@@ -936,7 +1414,6 @@ ROM_START( kongball )
+@@ -936,7 +1425,6 @@ ROM_START( kongball )
  	// There's no PLD at U73 on Kong Ball
  ROM_END
  
@@ -1560,13 +1572,13 @@ index 1de425fa..bfccd896 100644
  ROM_START( radendur )
  	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
  	ROM_LOAD16_BYTE( "endu.u19", 0x00001, 0x80000, CRC(d24ca61c) SHA1(64d2648959579d35fbf4c8479c0ff75781d28146) )
-@@ -969,14 +1446,49 @@ ROM_START( radendur )
+@@ -969,14 +1457,49 @@ ROM_START( radendur )
  	ROM_LOAD( "4_pal16v8.u73",  0x000, 0x117, NO_DUMP )
  ROM_END
  
-+// The main CPU program is the parent's with the prototype's faults fixed in its code, its sound
-+// blocks started after the drawing and its full scenery drawn (see the header); every other ROM is
-+// the parent's.
++// The main CPU program is the parent's with the prototype's faults fixed in its code, so that its
++// five tracks play, its sound blocks started after the drawing and its scenery drawn further round
++// the view (see the header); every other ROM is the parent's.
 +ROM_START( radendurh )
 +	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
 +	ROM_LOAD16_BYTE( "endu-h.u19", 0x00001, 0x80000, CRC(46de32bb) SHA1(f9aabcba3165459b50aeee5a5fd1f294de98610f) )
@@ -1604,15 +1616,15 @@ index 1de425fa..bfccd896 100644
  
 -GAME( 199?, wheelfir,    0, wheelfir,    wheelfir, wheelfir_state, empty_init,    ROT0,  "TCH", "Wheels & Fire", MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS )
 -GAME( 199?, pwball,      0, wheelfir,    pwball,   wheelfir_state, init_pwball,   ROT0,  "TCH", "Power Ball (prototype)",    MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS ) // mostly complete
-+GAME( 199?, wheelfir,    0, wheelfir,    wheelfir, wheelfir_state, empty_init,    ROT0,  "TCH", "Wheels & Fire", MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
-+GAME( 199?, pwball,      0, wheelfir,    pwball,   wheelfir_state, empty_init,    ROT0,  "TCH", "Power Ball (prototype)",    MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
++GAME( 199?, wheelfir,    0, wheelfir,    wheelfir, wheelfir_state, empty_init,    ROT0,  "TCH", "Wheels & Fire", MACHINE_SUPPORTS_SAVE )
++GAME( 199?, pwball,      0, wheelfir,    pwball,   wheelfir_state, empty_init,    ROT0,  "TCH", "Power Ball (prototype)",    MACHINE_SUPPORTS_SAVE )
  
  // sound ROMs were missing on PCB, so sound emulation is not possible at this point in time
 -GAME( 1997, kongball,    0, kongball,    pwball,   wheelfir_state, init_kongball, ROT0,  "TCH / Digital Dreams Multimedia", "Kong Ball (prototype)",    MACHINE_NOT_WORKING | MACHINE_NO_SOUND | MACHINE_IMPERFECT_GRAPHICS ) // can't get ingame?
-+GAME( 1997, kongball,    0, kongball,    pwball,   wheelfir_state, empty_init,    ROT0,  "TCH / Digital Dreams Multimedia", "Kong Ball (prototype)",    MACHINE_NO_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
++GAME( 1997, kongball,    0, kongball,    pwball,   wheelfir_state, empty_init,    ROT0,  "TCH / Digital Dreams Multimedia", "Kong Ball (prototype)",    MACHINE_NO_SOUND | MACHINE_SUPPORTS_SAVE )
  
 -// crashes (always?) when selecting track on PCB
 -// some courses get to gameplay in MAME right now, but crash quickly, Medium 1 is seems to work better than most others
 -GAME( 199?, radendur,    0, wheelfir,    pwball,   wheelfir_state, init_kongball, ROT0,  "TCH / Sator Videogames", "Radical Enduro (early prototype)",    MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS ) // can get ingame if you overclock CPUs significantly (IRQ problems?)
 +GAME( 199?, radendur,    0,        radendur, pwball,   radendur_state, empty_init, ROT0, "TCH / Sator Videogames", "Radical Enduro (early prototype)", MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
-+GAME( 2026, radendurh,   radendur, radendur, pwball,   radendur_state, empty_init, ROT0, "hack", "Radical Enduro (early prototype, fixed, full-scenery hack)", MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
++GAME( 2026, radendurh,   radendur, radendur, pwball,   radendur_state, empty_init, ROT0, "hack", "Radical Enduro (early prototype, fixed hack, five playable tracks)", MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )

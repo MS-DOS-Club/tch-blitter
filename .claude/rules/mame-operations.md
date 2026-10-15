@@ -46,10 +46,11 @@ is the oracle for the hardware (the real palette, the paint order) and for check
 
 ## Playing
 
-MAME's default map: any key dismisses the red NOT_WORKING warning, `5` is a coin, `1` start. In
-Wheels & Fire `LSHIFT` is full throttle (pedal and button 1), `LCTRL` the pedal alone (what the
-menus accept), `LALT` the brake, `SPACE` the turbo, the arrows the wheel; in Radical Enduro left
-`CTRL` accelerates and the arrows move the bike. `radendurh` carries the crash fixes; `radendur`,
+MAME's default map: any key dismisses the red NOT_WORKING warning, `5` is a coin, `1` start. Wheels
+& Fire's driver maps `LSHIFT` to full throttle (pedal and button 1, a one-tap select in the menus),
+`LALT` to the brake, `SPACE` to the turbo and the arrows to the wheel; a pad takes
+`ctrlr/gamepad.cfg` in a played run. In Radical Enduro left `CTRL` accelerates and the arrows move
+the bike. `radendurh` carries the crash fixes; `radendur`,
 the dump, stops on its faults by design.
 
 ## The Wheels & Fire race is the reference

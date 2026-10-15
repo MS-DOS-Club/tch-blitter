@@ -8,6 +8,12 @@
 # Each set declares its scenes in goldens/<set>/scenes.conf, one "<frame> <name> <why>" per line: the
 # attract is deterministic from a clean NVRAM, so fixed frames reached without touching a control are
 # enough. It runs unthrottled; the throttle only paces the wall clock, the frames are the same.
+#
+# A set whose sound CPU writes its DACs also declares "sound <cpu> <frames> <dac>..." there: the run
+# that captures the scenes takes a CRC-32 of those writes over its first <frames> (lib/sound_crc.lua),
+# and a second boot on the EEPROM the first one left takes it again, because a board that has run
+# before boots that way, and Power Ball's sound once died only there. Both lines are compared with
+# goldens/<set>/sound.crc.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -48,7 +54,22 @@ for SET in $SETS; do
     LAST=$(scenes_of "$CONF" | awk 'END {print $1}')
     REFRESH="$(mame_refresh_for_set "$SET")"
     SECONDS_TO_RUN=$(awk -v f="$LAST" -v r="$REFRESH" 'BEGIN { printf "%d", int(f / r) + 3 }')
-    cat > "$WORK/capture.lua" <<LUA
+    SOUND=$(awk '$1 == "sound" { $1 = ""; print; exit }' "$CONF")
+    : > "$WORK/capture.lua"
+    if [ -n "$SOUND" ]; then
+        read -r SOUND_CPU SOUND_FRAMES SOUND_DACS <<< "$SOUND"
+        if [ "$SOUND_FRAMES" -gt "$LAST" ]; then
+            echo "  $SET: the sound window ($SOUND_FRAMES frames) outlasts the last scene ($LAST)"
+            fail=$((fail + 1)); continue
+        fi
+        # paths relative to the repository, where MAME runs: a Windows MAME reads no MSYS2 path
+        sound_lua() { # sound_lua <out file>
+            printf 'dofile("scripts/lib/sound_crc.lua")\nsound_crc("%s", { %s }, %s, "%s")\n' \
+                "$SOUND_CPU" "$(echo "$SOUND_DACS" | tr ' ' ',')" "$SOUND_FRAMES" "$1"
+        }
+        sound_lua "$WORK/sound-cold.txt" > "$WORK/capture.lua"
+    fi
+    cat >> "$WORK/capture.lua" <<LUA
 local target = {}
 for f in string.gmatch("$FRAMES", "%d+") do target[tonumber(f)] = true end
 local n = 0
@@ -76,6 +97,28 @@ LUA
             cp "$png" "goldens/$SET/$name.actual.png"; fail=$((fail + 1))
         fi
     done < <(scenes_of "$CONF")
+    if [ -n "$SOUND" ]; then
+        sound_lua "$WORK/sound-warm.txt" > "$WORK/warm.lua"
+        WARM_SECONDS=$(awk -v f="$SOUND_FRAMES" -v r="$REFRESH" 'BEGIN { printf "%d", int(f / r) + 3 }')
+        rc=0
+        mame_run "$SET" --seconds "$WARM_SECONDS" --lua "$WORK/warm.lua" \
+            -- -cfg_directory "$WORK/cfg" -nvram_directory "$WORK/nvram" > "$WORK/warm.log" 2>&1 || rc=$?
+        if [ "$rc" != 0 ]; then echo "  $SET: the warm boot exited $rc:"; cat "$WORK/warm.log"; fi
+        actual=""
+        for boot in cold warm; do
+            line=$(cat "$WORK/sound-$boot.txt" 2>/dev/null || echo "no result")
+            case "$line" in crc=*" writes="[1-9]*) ;; *) echo "  $SET: $boot boot's sound NOT examined ($line)"; fail=$((fail + 1)); continue ;; esac
+            actual+="$boot $line"$'\n'
+        done
+        if [ "$MODE" = bless ]; then
+            printf '%s' "$actual" > "goldens/$SET/sound.crc"
+        elif [ "$actual" = "$(cat "goldens/$SET/sound.crc" 2>/dev/null)"$'\n' ]; then
+            ok=$((ok + 1))
+        else
+            echo "  $SET/sound: DIFFERS from goldens/$SET/sound.crc; this run:"; printf '%s' "$actual" | sed 's/^/    /'
+            fail=$((fail + 1))
+        fi
+    fi
     if [ "$MODE" = bless ]; then
         rm -f "goldens/$SET"/*.actual.png
         ( cd "goldens/$SET" && shasum -a 256 ./*.png > checksums.sha256 )

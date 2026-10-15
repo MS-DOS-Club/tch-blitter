@@ -1510,6 +1510,14 @@ blitter:
       name: scale_u_data1
       state: open
       observed:
+        radendur_carries_no_scale_descriptors_and_draws_no_scaled_blit: 'MEASURED on 2026-10-15:
+          the driver''s scale milestone says no descriptor tables for radendur and radendurh, as for
+          pwball, where wheelfir and kongball find them at 0x400 and 0x1d10. A tap on the blit block
+          decoding the u and v scale index at each fire (1:1 is index 0): frames 0 to 2400 of the
+          attract, radendur 0 of 174032 fires not 1:1, radendurh 0 of 174032, pwball 0 of 70018;
+          radendurh in the desert race, coin at 200, START at 320, to frame 2000, 0 of 135317.
+          Control: wheelfir, 6226 of 45407 fires not 1:1 in its attract. So the approximation is
+          not reached in what was run; other races of radendurh were not run'
         pwball_carries_no_scale_descriptors: 'MEASURED on 2026-10-14 at the pin 74b9fae5: the
           search for the two 400-entry descriptor tables by the known answer (scale 100 the
           identity, 200 exactly double) finds both in wheelfir and kongball and none in pwball,
@@ -2757,6 +2765,17 @@ ports:
     from the wheel through 0xa535c with a dead zone of 3, bit 4 from the accelerator above 128 OR
     P1 up, bit 5 from the brake OR P1 down, bit 7 from P1 button 1)'
   observed:
+    wheelfir_both_pedals_switch_above_128: 'MEASURED on 2026-10-15, Wheels & Fire at frame 600: 0xa52fa
+      reads an ADC channel and counts the thresholds of that channel''s RAM table below the value;
+      the latch builder only tests the count for non-zero (0xea234 channel 1, 0xea246 channel 2).
+      The accelerator''s table at 0x20c818 and the brake''s at 0x20c858 both read 128, 30000, so
+      each pedal is pressed from 129. Control: the channel-0 table at 0x20c7d8 read all zeros in
+      the same read'
+    kongball_a_coin_started_game_runs: 'MEASURED on 2026-10-15 on the driver with the vblank
+      withdrawal of the line-counter request: a coin at frame 600 and START at 700, a snapshot every
+      250 frames, each opened: ROUND 1 INICIATION at 1000 and the round in play to 5250, the INSERT
+      COIN on the right being the second player''s slot. The census of 2026-09-16, where the screen
+      still said INSERT COIN 3500 frames after a start, was taken on an earlier driver'
     wheelfir_controls_measured_live: 'MEASURED live on 2026-09-16 at real
       speed, a person at the controls, the latch and the car''s speed read at stops. Keyboard
       LCTRL held: P1 dfef, the accelerator port ff, latch df6f (bit 4 and bit 7 both clear),
@@ -2875,6 +2894,22 @@ ports:
       12 clear and which never writes 11, byte-identical WAVs on both sets. Power Ball''s
       03_demo moved, the demo playing itself to other positions with the main spending 50 level-5
       services a frame instead of 158.'
+    pwball_a_warm_boot_needs_the_pending_level_5_withdrawn_at_vblank: 'MEASURED on 2026-10-15, Power
+      Ball booted on the EEPROM a previous run left, which is how a board that has run before boots.
+      The EEPROM read finishes sooner, the main unmasks at line 125 of frame 2 instead of line 153 of
+      frame 12, and the level-5 request the counter raised at line 99 of frame 1, held through the
+      masked frames, enters with the vblank one: a0a0 and 0xffff on the same line, the handler
+      re-arms with 1, a second a0a0 at line 126, and the boot clears bit 13 at line 127, so the latch
+      holds a block header with no word behind it until line 256. The sub copies those a0a0 words
+      into its code and runs at 0x201062 by frame 302, as in
+      pwball_stale_requests_at_boot_desync_the_sub. Seconds with sound out of 60: 1 warm against 60
+      cold, the same on the build of the day before. A level-5 request still pending at vblank
+      withdrawn: 60 of 60 warm; every other run byte-identical in its WAV (wheelfir, pwball,
+      kongball, radendur and radendurh cold, and the four others warm), the goldens and the save
+      states unchanged. The goldens now keep a CRC-32 of the sub''s DAC writes over 1400 frames,
+      cold and warm (goldens/<set>/sound.crc); without the withdrawal the warm one reads 1764 writes
+      where the run with it reads 873600. A rule fitted to the boot, in the driver''s TODO: the 68000
+      code does not say whether the board drops an untaken request at vblank'
     kongball_armed_every_frame: 'MEASURED live on 2026-09-15 over 600 frames from a cold boot:
       589 arms at 0x28850, the installer 0x288e2 run once, the level-1 handler 3539 times (the
       control). After a soft reset the installer runs BEFORE the first arm, so the handler is in

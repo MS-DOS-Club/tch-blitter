@@ -32,7 +32,7 @@ at a glance whether the page model is right.
 | MAME set | `kongball` |
 | driver in MAME | `tch/wheelfir.cpp` |
 | driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten |
-| status in MAME | `NOT_WORKING`, `NO_SOUND`, `IMPERFECT_GRAPHICS` |
+| status in stock MAME | `NOT_WORKING`, `NO_SOUND`, `IMPERFECT_GRAPHICS` |
 <!-- end of generated block -->
 
 ## Why it has no sound
