@@ -198,7 +198,7 @@ games:
   page:
     board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A"
     driver_here: "the same `tch/wheelfir.cpp`, with the video model rewritten and the game's differences in `radendur_state`"
-    sets_note: " (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs and, as an enhancement that is not the board's behaviour, its full scenery drawn, built from the dump by `make radendurh`"
+    sets_note: " (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs and, as an enhancement that is not the board's behaviour, its scenery drawn further round the view, built from the dump by `make radendurh`"
     status_note: ": a comment in its driver says that some courses reach gameplay but crash quickly"
   manufacturer:
     value: TCH / Sator Videogames
@@ -233,7 +233,7 @@ games:
     evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
   driver_status:
     value: NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurh clone,
-      its maincpu ROM fixed (plus full scenery, not the board's) and built from the dump, finishes a
+      its maincpu ROM fixed (plus more scenery drawn, not the board's) and built from the dump, finishes a
       race with its music (a few silent stretches) at its real 16 MHz
     level: verified
     evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE

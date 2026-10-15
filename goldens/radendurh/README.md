@@ -3,7 +3,7 @@
 The project's correctness gate. No ROM is assembled from source here, so there is no build SHA to
 verify: the gate is the **observed boot state**. `make verify` runs `radendurh`, the clone whose
 maincpu ROM has the prototype's faults fixed, its sound block placed as Power Ball and Kong Ball place
-theirs and its full scenery drawn, and then the dump `radendur` (`../radendur/`). It compares the
+theirs and its scenery drawn further round the view, and then the dump `radendur` (`../radendur/`). It compares the
 SHA-256 of fixed-frame captures against `checksums.sha256`: the boot through the oracle
 (`scripts/radendur/oracle.lua`), the race start through `nav-phase.lua`, and stretches of the
 desert's scenery through `scenery-shot.lua`.
@@ -25,7 +25,7 @@ dump, emulated as it is, stops on its own faults; its baseline is `../radendur/`
 | `01_boot_5s`, `02_boot_10s` | intro |
 | `03_boot_15s` | attract: the globe, the logos and the difficulty selector. It guards the logo colours. |
 | `04_race_start` | **the desert starting line, bike stopped**. It is the gate of the colour IN A RACE: the first four cover intro and attract only. The section is verified in RAM before the picture (`nav-phase.lua`), so the start of another phase cannot slip in. |
-| `05_desert_scenery` | **the stage tent in the desert, mid-race**, driven by `scripts/drive.lua`: the tent, palms and bushes the prototype's own engine leaves out and radendurh's full-scenery layer draws (not the board's behaviour). `scripts/radendur/scenery-shot.lua` writes the game's view origin with it, and the gate refuses a capture taken anywhere else. |
+| `05_desert_scenery` | **the stage tent in the desert, mid-race**, driven by `scripts/drive.lua`: the tent, palms and bushes the prototype's own engine leaves out and radendurh's scenery layer draws (not the board's behaviour). `scripts/radendur/scenery-shot.lua` writes the game's view origin with it, and the gate refuses a capture taken anywhere else. |
 | `06_desert_descent` | **the desert while the view scrolls DOWN the track**, driven the same way: the bottom row the view adds keeps its trees, palm and fence, which radendurh's `scenery_strip_row` draws in the row it belongs to (the prototype's strip drawer leaves it bare). |
 
 If a change to the palette model alters any of those screens, the golden fails on purpose and is re-blessed once

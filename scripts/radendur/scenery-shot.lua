@@ -1,5 +1,5 @@
 -- scenery-shot.lua -- drives the desert race (../drive.lua) and photographs one frame of it, for the
--- goldens that watch radendurh's full-scenery layer: the boot and starting-line goldens never
+-- goldens that watch radendurh's scenery layer: the boot and starting-line goldens never
 -- reach a stretch where that layer draws anything the prototype's own engine would not.
 --
 -- It writes `SHOT f=<frame> view x=<x> y=<y>` to OUT when it takes the picture, so a bless can

@@ -132,7 +132,7 @@ a record lives under `hardware/evidence/`, with the script that re-derives the r
 
 | game | page | the reflex before touching it |
 |------|------|-------------------------------|
-| Radical Enduro | `docs/games/radical-enduro.md` | an isometric sprite track, not raster; five playable sections; the dump hangs, `radendurh` plays (its fixes, its sound block and its full-scenery layer are the patch table `hardware/radendurh.yaml`) |
+| Radical Enduro | `docs/games/radical-enduro.md` | an isometric sprite track, not raster; five playable sections; the dump hangs, `radendurh` plays (its fixes, its sound block and its scenery layer are the patch table `hardware/radendurh.yaml`) |
 | Wheels & Fire | `docs/games/wheels-and-fire.md` | the road by raster; sky and road in the same plane; clips in software against 336x256 |
 | Power Ball | `docs/games/power-ball.md` | the clean reference: it kills the aggressive video hypotheses |
 | Kong Ball | `docs/games/kong-ball.md` | draws the HUD in the upper half, so it shows at once whether the page model is broken |

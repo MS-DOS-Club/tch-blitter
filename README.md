@@ -36,7 +36,7 @@ plus a fixed clone of one of them, one shared video architecture.
 | [Wheels & Fire](docs/games/wheels-and-fire.md) | `wheelfir` | 1997 * | TCH | NOT_WORKING | works; the whole game plays |
 | [Power Ball](docs/games/power-ball.md) | `pwball` | _unknown_ (`199?`) | TCH | NOT_WORKING (prototype), commented "mostly complete" | works; the whole game plays |
 | [Kong Ball](docs/games/kong-ball.md) | `kongball` | 1997 | TCH / Digital Dreams Multimedia | NOT_WORKING (prototype), no sound | works, with no sound; plays to its game over |
-| [Radical Enduro](docs/games/radical-enduro.md) | `radendur` | _unknown_ (`199?`) | TCH / Sator Videogames | NOT_WORKING (early prototype) | NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurh clone, its maincpu ROM fixed (plus full scenery, not the board's) and built from the dump, finishes a race with its music (a few silent stretches) at its real 16 MHz |
+| [Radical Enduro](docs/games/radical-enduro.md) | `radendur` | _unknown_ (`199?`) | TCH / Sator Videogames | NOT_WORKING (early prototype) | NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurh clone, its maincpu ROM fixed (plus more scenery drawn, not the board's) and built from the dump, finishes a race with its music (a few silent stretches) at its real 16 MHz |
 
 `*` from an external source, not verifiable in the binary. `⚠` sources contradict each other: the game's page says which ones and why this value is the published one. `199?` is MAME's own: the year of those games was lost, and is not filled in.
 <!-- end of generated block -->
@@ -236,7 +236,7 @@ files in `run/mame_roms/`, then:
 
 ```sh
 make setup      # clone MAME at the pinned commit, apply the patches, build
-make play       # run it (radendurh: faults fixed, music kept, full scenery)
+make play       # run it (radendurh: faults fixed, music kept, more scenery drawn)
 make doctor     # what a fresh machine is missing
 ```
 

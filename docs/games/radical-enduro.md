@@ -40,7 +40,7 @@ fixed in the ROM it boots, enters a game and its playable tracks finish the race
 |---|---|
 | year | no known date |
 | board | [the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A |
-| MAME set | `radendur` (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs and, as an enhancement that is not the board's behaviour, its full scenery drawn, built from the dump by `make radendurh` |
+| MAME set | `radendur` (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs and, as an enhancement that is not the board's behaviour, its scenery drawn further round the view, built from the dump by `make radendurh` |
 | driver in MAME | `tch/wheelfir.cpp` |
 | driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten and the game's differences in `radendur_state` |
 | status in stock MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: a comment in its driver says that some courses reach gameplay but crash quickly |
