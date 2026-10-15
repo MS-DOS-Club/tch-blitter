@@ -6,6 +6,8 @@ paths:
   - "pyproject.toml"
   - "patches/**"
   - "upstream/src/mame/tch/**"
+  - "docs/**"
+  - "hardware/games.yaml"
   - "CLAUDE.md"
   - "CONTRIBUTING.md"
   - "README.md"

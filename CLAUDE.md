@@ -101,9 +101,11 @@ measurements come from a data file and are projected into the README, `docs/` an
 | registers, bits, symbols | `hardware/*.yaml` | `gen-hw-docs.py` | its own `--check` |
 | links, images, generated blocks | the documents themselves | -- | `verify-docs.py` |
 
-Every fact carries its level: `verified` (read from a binary or MAME's code, re-checkable today),
-`external` (a source, never promoted for sounding plausible) or `unknown` (said, not filled in).
-Refuted facts are kept with their reason, so nobody proposes them again.
+Every fact says how far it can be trusted, in its own file's vocabulary: a game's datum in
+`games.yaml` is `verified` (read from a binary or MAME's code, re-checkable today), `external` (a
+source, never promoted for sounding plausible) or `unknown` (said, not filled in); a register or bit
+carries a `state`, and a symbol says how it was established. The values and what each requires are
+`.claude/rules/hardware.md`. Refuted facts are kept with their reason, so nobody proposes them again.
 
 A published image shows what its caption says, because the caption is derived from measuring it
 (`before-after.py`); and a generator that finds no data fails rather than writing an empty table.

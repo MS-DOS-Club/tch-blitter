@@ -54,7 +54,7 @@ the dump, stops on its faults by design.
 
 ## The Wheels & Fire race is the reference
 
-The race as the driver draws it now is the validated reference, not a starting point to improve.
+The race as its two goldens hold it is the validated reference, not a starting point to improve.
 The displayed page is the bit the game declares, read on line 0 of the frame, and the clearing is
 the game's own (a word-14 fill, and the bit-3 erase that walks its destination in columns); other
 page readings were tried and each broke the race. The driver states the model in its header (THE
