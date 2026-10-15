@@ -12,7 +12,7 @@ machine did something. The paths under `src/` are MAME's, in the checkout `make 
 - **A `MACHINE_NOT_WORKING` set stops on its red warning until a key is pressed.** MAME skips the
   warning for a run bounded to 300 emulated seconds or fewer (`-seconds_to_run`), under `-debug`,
   or with no video output (`src/frontend/mame/ui/ui.cpp`, `display_startup_screens`). This
-  repository's launcher, `scripts/lib/mame_run.sh`, keeps an unattended run below 300.
+  repository's launcher, `scripts/lib/mame_run.sh`, keeps an unattended run at 300 or fewer.
 - **`-video none` on macOS does not mean "no window".** It takes over the whole display instead.
   A small window, `-window -nomaximize -resolution 320x240`, is what an unattended capture uses.
 - **`-nothrottle` changes the wall clock, not the frames.** Throttling only paces the host, and

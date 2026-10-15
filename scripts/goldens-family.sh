@@ -104,13 +104,16 @@ LUA
         mame_run "$SET" --seconds "$WARM_SECONDS" --lua "$WORK/warm.lua" \
             -- -cfg_directory "$WORK/cfg" -nvram_directory "$WORK/nvram" > "$WORK/warm.log" 2>&1 || rc=$?
         if [ "$rc" != 0 ]; then echo "  $SET: the warm boot exited $rc:"; cat "$WORK/warm.log"; fi
-        actual=""
+        actual=""; missing=0
         for boot in cold warm; do
             line=$(cat "$WORK/sound-$boot.txt" 2>/dev/null || echo "no result")
-            case "$line" in crc=*" writes="[1-9]*) ;; *) echo "  $SET: $boot boot's sound NOT examined ($line)"; fail=$((fail + 1)); continue ;; esac
+            case "$line" in crc=*" writes="[1-9]*) ;; *) echo "  $SET: $boot boot's sound NOT examined ($line)"; fail=$((fail + 1)); missing=1; continue ;; esac
             actual+="$boot $line"$'\n'
         done
-        if [ "$MODE" = bless ]; then
+        # a boot not examined is already counted, and neither compared nor blessed half
+        if [ "$missing" = 1 ]; then
+            :
+        elif [ "$MODE" = bless ]; then
             printf '%s' "$actual" > "goldens/$SET/sound.crc"
         elif [ "$actual" = "$(cat "goldens/$SET/sound.crc" 2>/dev/null)"$'\n' ]; then
             ok=$((ok + 1))

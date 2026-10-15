@@ -13,8 +13,8 @@
 #     --resolution <WxH>
 #     --binary <path>  another build of the set's binary
 #
-# A quick run keeps --seconds below 300 because MAME only skips its red NOT_WORKING warning with a
-# bounded run shorter than that (src/frontend/mame/ui/ui.cpp, display_startup_screens): above it the
+# A quick run keeps --seconds at 300 or fewer because MAME only skips its red NOT_WORKING warning
+# with a run bounded that far (src/frontend/mame/ui/ui.cpp, display_startup_screens): above it the
 # machine waits for a key that nobody unattended will press. `-video none` is never used: on macOS it
 # takes over the whole display instead of opening nothing.
 
@@ -76,7 +76,7 @@ mame_cmd() {
     case "$mode" in
         quick)
             case "$seconds" in ''|*[!0-9]*) echo "mame_run: --mode quick needs --seconds" >&2; return 2 ;; esac
-            [ "$seconds" -lt 300 ] || { echo "mame_run: --seconds $seconds would leave MAME on its red warning; keep it under 300" >&2; return 2; }
+            [ "$seconds" -le 300 ] || { echo "mame_run: --seconds $seconds would leave MAME on its red warning; keep it at 300 or fewer" >&2; return 2; }
             args+=(-resolution "${res:-320x240}" -nothrottle -seconds_to_run "$seconds") ;;
         session)
             # the drivers log through logerror, as MAME's C++ guide asks, so a played run keeps its

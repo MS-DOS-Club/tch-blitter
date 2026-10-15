@@ -301,7 +301,7 @@ machine.
 The full credits are in the ROM, at `0x0e3894`: executive producer Francisco Chacon, adviser
 Jose Sanchez, **hardware David Sandoval**, **programming Antonio Carrillo**, auxiliary programming
 Fernando Jimenez, and graphics Javier Martinez, Francisco Bocanegra and **Joaquin Perez**. The
-first two in bold also sign [Reality Tennis](../boards/reality-tennis.md) in 1993, and **one of the
+first two in bold also sign [Reality Tennis](reality-tennis.md) in 1993, and **one of the
 two FPGAs of the Reality Tennis board is labelled "JOAQUIN"**, like the graphic artist. Detail:
 [teams-and-signatures.md](../teams-and-signatures.md).
 

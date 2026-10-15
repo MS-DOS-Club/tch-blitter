@@ -11,7 +11,7 @@ index dc1cace8..6f5c7a56 100644
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa..ab5f191e 100644
+index 1de425fa..856bc244 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,21 @@
@@ -1572,7 +1572,7 @@ index 1de425fa..ab5f191e 100644
  ROM_START( radendur )
  	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
  	ROM_LOAD16_BYTE( "endu.u19", 0x00001, 0x80000, CRC(d24ca61c) SHA1(64d2648959579d35fbf4c8479c0ff75781d28146) )
-@@ -969,14 +1457,49 @@ ROM_START( radendur )
+@@ -969,14 +1457,50 @@ ROM_START( radendur )
  	ROM_LOAD( "4_pal16v8.u73",  0x000, 0x117, NO_DUMP )
  ROM_END
  
@@ -1623,7 +1623,7 @@ index 1de425fa..ab5f191e 100644
 -GAME( 1997, kongball,    0, kongball,    pwball,   wheelfir_state, init_kongball, ROT0,  "TCH / Digital Dreams Multimedia", "Kong Ball (prototype)",    MACHINE_NOT_WORKING | MACHINE_NO_SOUND | MACHINE_IMPERFECT_GRAPHICS ) // can't get ingame?
 +GAME( 1997, kongball,    0, kongball,    pwball,   wheelfir_state, empty_init,    ROT0,  "TCH / Digital Dreams Multimedia", "Kong Ball (prototype)",    MACHINE_NO_SOUND | MACHINE_SUPPORTS_SAVE )
  
--// crashes (always?) when selecting track on PCB
+ // crashes (always?) when selecting track on PCB
 -// some courses get to gameplay in MAME right now, but crash quickly, Medium 1 is seems to work better than most others
 -GAME( 199?, radendur,    0, wheelfir,    pwball,   wheelfir_state, init_kongball, ROT0,  "TCH / Sator Videogames", "Radical Enduro (early prototype)",    MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS ) // can get ingame if you overclock CPUs significantly (IRQ problems?)
 +GAME( 199?, radendur,    0,        radendur, pwball,   radendur_state, empty_init, ROT0, "TCH / Sator Videogames", "Radical Enduro (early prototype)", MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
