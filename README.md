@@ -143,8 +143,9 @@ with the four faults fixed in its code, its sound block moved after the drawing 
 and Kong Ball place theirs, and, as a layer that is **not the board's behaviour**,
 more of the scenery drawn round the view, where it belongs (the prototype's own engine leaves
 some zones out, and puts the props of a row the view scrolls down into its top row). That ROM is
-not distributed: `make radendurh` builds it from the verified dump, refusing any other input and any word
-that is not what it expects.
+built here from the verified dump by `make radendurh`, refusing any other input and any word that is
+not what it expects, and the same two images are published on the
+[Internet Archive](https://archive.org/details/radendurh).
 
 Of its 16 track sections only five are playable: the rest carry data the prototype itself left
 half-finished, and no emulator fixes that.
@@ -249,7 +250,7 @@ names whatever is missing. The binaries are `upstream/*.exe`, built on MAME's na
 rather than SDL, and the scripts call them by the same names.
 
 `make setup` also builds `radendurh`, the fixed clone, from the `radendur` dump: its ROM is made
-here, never shipped. MAME itself checks the romsets, one binary per driver:
+here, and the same two images are on the [Internet Archive](https://archive.org/details/radendurh). MAME itself checks the romsets, one binary per driver:
 
 ```sh
 upstream/wheelfir -rompath run/mame_roms -verifyroms    # wheelfir, pwball, kongball, radendur, radendurh

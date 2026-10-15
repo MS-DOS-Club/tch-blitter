@@ -115,7 +115,9 @@ LUA
             :
         elif [ "$MODE" = bless ]; then
             printf '%s' "$actual" > "goldens/$SET/sound.crc"
-        elif [ "$actual" = "$(cat "goldens/$SET/sound.crc" 2>/dev/null)"$'\n' ]; then
+        elif [ ! -f "goldens/$SET/sound.crc" ]; then
+            echo "  $SET/sound: no goldens/$SET/sound.crc to compare with (bless first)"; fail=$((fail + 1))
+        elif [ "$actual" = "$(cat "goldens/$SET/sound.crc")"$'\n' ]; then
             ok=$((ok + 1))
         else
             echo "  $SET/sound: DIFFERS from goldens/$SET/sound.crc; this run:"; printf '%s' "$actual" | sed 's/^/    /'
