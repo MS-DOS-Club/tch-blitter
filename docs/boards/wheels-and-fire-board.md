@@ -417,7 +417,7 @@ High byte: horizontal scale data. Low byte: horizontal background SCROLL. The ga
 |-----|------|-------|--------------|
 | `0x1f00` | scale_u_data1 | **open** | five bits of the index used to look up the horizontal scale |
 | `0x00ff` | scroll_x_low_byte | confirmed | low byte of the horizontal background scroll |
-| `0x4000` | scale_v_extra | confirmed | bit 4 of the vertical scale data1 |
+| `0x4000` | scale_v_extra | confirmed | bit 4 of the vertical stall counter |
 | `0xa000` | unused_10 | confirmed | bits 0x2000 and 0x8000 are not used |
 
 ### Word 11 (scale_x2_and_scroll_y), at `0x700016` and `0x700017`

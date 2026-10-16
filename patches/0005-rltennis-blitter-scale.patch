@@ -1,5 +1,5 @@
 diff --git a/src/mame/tch/rltennis.cpp b/src/mame/tch/rltennis.cpp
-index d86f2a72..ae7b0f8c 100644
+index d86f2a72..60f86986 100644
 --- a/src/mame/tch/rltennis.cpp
 +++ b/src/mame/tch/rltennis.cpp
 @@ -1,9 +1,12 @@
@@ -258,7 +258,7 @@ index d86f2a72..ae7b0f8c 100644
 -	screen.set_visarea(0, 319, 0, 239);
 +	// the game anchors its full-screen pictures at (1,1) and lets a sprite crossing x=255 spill
 +	// one duplicate pixel onto column 0, so the picture starts at (1,1); the total is the planes'
-+	// size, nominal
++	// size and the refresh 60 Hz, both nominal, since this board's field timing is not known
 +	screen.set_size(512, 256);
 +	screen.set_visarea(1, 320, 1, 240);
  	screen.set_screen_update(FUNC(rltennis_state::screen_update));

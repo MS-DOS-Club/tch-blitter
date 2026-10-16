@@ -374,7 +374,7 @@ def frame_png(frame: int) -> Path:
 
 
 def zoom_index(driver: Path = DRIVER) -> list[int]:
-    declaration = "static constexpr uint16_t ZOOM_INDEX[400] ="
+    declaration = "constexpr uint16_t ZOOM_INDEX[400] ="
     parts = driver.read_text(encoding="utf-8").split(declaration, 1)
     if len(parts) != 2:
         raise InvalidRunError(f"{driver.name} declares no ZOOM_INDEX[400]")

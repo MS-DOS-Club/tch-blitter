@@ -1567,9 +1567,9 @@ blitter:
       state: confirmed
       evidence: '1735 blits carry it and 100% of those are SCALED, against 13% overall: a sweep of
         58430 blits of an attract cycle, comparing the field against what the driver decodes. The
-        driver folds it into the VERTICAL data1 field (bit 4), which is what the register map
-        says: Z = y scale data1 bit 4'
-      meaning: bit 4 of the vertical scale data1
+        driver folds it into the VERTICAL stall counter (bit 4), which is what the register map
+        says: Z = y stall counter bit 4'
+      meaning: bit 4 of the vertical stall counter
     - mask: 40960
       name: unused_10
       state: confirmed
