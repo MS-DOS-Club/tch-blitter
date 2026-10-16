@@ -11,7 +11,7 @@ index dc1cace8..6f5c7a56 100644
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa..8161d03e 100644
+index 1de425fa..fb6f4409 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,21 @@
@@ -96,9 +96,9 @@ index 1de425fa..8161d03e 100644
 +- level 1: the blitter, a level asserted while it is idle and when a blit completes, cleared
 +  by the arming write; the games pace their blit chain with their own interrupt mask
 +- level 3: vblank
-+- level 5: the line counter loaded at 0x7a0000, counting only while bit 13 of 0x7c0000 is
-+  set; it clocks the sound streamer (one word per line to the sub cpu) and, in Wheels & Fire,
-+  the road's per-line scroll
++- level 5: the line counter loaded at 0x7a0000, counting the 256 scanned lines (not the vblank
++  ones) and only while bit 13 of 0x7c0000 is set; it clocks the sound streamer (one word per
++  line to the sub cpu) and, in Wheels & Fire, the road's per-line scroll
 +
 +Sub 68000: level 1 on every line, the 15625 Hz rate the sound mixer counts against.
 +
@@ -261,7 +261,7 @@ index 1de425fa..8161d03e 100644
  
  class wheelfir_state : public driver_device
  {
-@@ -122,50 +216,122 @@ public:
+@@ -122,50 +216,127 @@ public:
  		driver_device(mconfig, type, tag),
  		m_maincpu(*this, "maincpu"),
  		m_subcpu(*this, "subcpu"),
@@ -365,20 +365,24 @@ index 1de425fa..8161d03e 100644
 +	// The scaling law of the routine at 0xe47fe of the Wheels & Fire program: a source offset maps
 +	// to the destination as (2x + tableA[x] - tableB[...]) >> shift, tables and shift from the
 +	// descriptor.
-+	int board_scale(int axis, int j, int x) const
++	struct scale_law
 +	{
-+		return scale_from(uint32_t(m_scale_desc[axis]), j, x);
-+	}
++		int shift;
++		uint32_t table_a;
++		uint32_t table_b;
++	};
 +
-+	int scale_from(uint32_t base, int j, int x) const
++	scale_law law_at(uint32_t base, int j) const
 +	{
 +		const uint32_t d = base + uint32_t(j) * 16;
-+		const int shift = rom_w(d + 6);
-+		const uint32_t table_a = (uint32_t(rom_w(d + 8)) << 16) | rom_w(d + 10);
-+		const uint32_t table_b = (uint32_t(rom_w(d + 12)) << 16) | rom_w(d + 14);
-+		uint16_t v = uint16_t(2 * x + int16_t(rom_w(table_a + 2 * x)));
-+		v = uint16_t(v - int16_t(rom_w(table_b + v)));
-+		return v >> shift;
++		return scale_law{ rom_w(d + 6), (uint32_t(rom_w(d + 8)) << 16) | rom_w(d + 10), (uint32_t(rom_w(d + 12)) << 16) | rom_w(d + 14) };
++	}
++
++	int scale_at(const scale_law &law, int x) const
++	{
++		uint16_t v = uint16_t(2 * x + int16_t(rom_w(law.table_a + 2 * x)));
++		v = uint16_t(v - int16_t(rom_w(law.table_b + v)));
++		return v >> law.shift;
 +	}
 +
 +	// The law maps source to destination and the blit walks the destination, so it is inverted:
@@ -386,12 +390,13 @@ index 1de425fa..8161d03e 100644
 +	// reaches it.
 +	void source_map(int axis, int j, int steps, int *inv)
 +	{
++		const scale_law law = law_at(uint32_t(m_scale_desc[axis]), j);
 +		int x = 0;
 +		for (int d = 0; d <= steps; d++)
 +		{
-+			while (x < 511 && board_scale(axis, j, x) < d)
++			while (x < 511 && scale_at(law, x) < d)
 +				++x;
-+			if (x >= 511 && board_scale(axis, j, x) < d)
++			if (x >= 511 && scale_at(law, x) < d)
 +				++m_source_exhausted;
 +			inv[d] = x;
 +		}
@@ -399,7 +404,7 @@ index 1de425fa..8161d03e 100644
  
  	int32_t get_scale(int32_t index)
  	{
-@@ -179,64 +345,76 @@ private:
+@@ -179,64 +350,76 @@ private:
  		}
  		return 0;
  	}
@@ -509,20 +514,20 @@ index 1de425fa..8161d03e 100644
  		// wheelfir sets 0xfc0000 and 0xf00000, both of which are out of range of any GFX ROM
  		// kongball sets 0xfc0000 but only on startup
  		m_direct_write_x0 = dst_x0;
-@@ -244,35 +422,42 @@ void wheelfir_state::do_blit()
+@@ -244,35 +427,42 @@ void wheelfir_state::do_blit()
  		m_direct_write_y0 = dst_y0;
  		m_direct_write_y1 = dst_y1;
  		m_direct_write_idx = 0;
 -	}
-+		// the channel's plane is the plane bit every blit carries: the game's video reset (0xe8d3c)
-+		// opens it on the sprite plane and the scenery loaders on the background
-+		m_direct_write_layer = (m_blitter_data[0x7] & DST_PLANE_BG) ? LAYER_BG : LAYER_FG;
- 
+-
 -	if (flipy)
 -		dst_y0 -= 1;
 -	else
 -		dst_y0 += 1;
--
++		// the channel's plane is the plane bit every blit carries: the game's video reset (0xe8d3c)
++		// opens it on the sprite plane and the scenery loaders on the background
++		m_direct_write_layer = (m_blitter_data[0x7] & DST_PLANE_BG) ? LAYER_BG : LAYER_FG;
+ 
 -	if (flipy)
 -		dst_y1 += 1;
 -	else
@@ -570,7 +575,7 @@ index 1de425fa..8161d03e 100644
  
  	// calculate u zoom (horizontal source scale)
  	const int d1u = ((m_blitter_data[0x0a] & 0x1f00) >> 8) |
-@@ -297,46 +482,96 @@ void wheelfir_state::do_blit()
+@@ -297,46 +487,96 @@ void wheelfir_state::do_blit()
  	const int indexv = d1v | (d2v << 6) | (hflagv << 12) | (dflagv << 13);
  	const float scale_v = get_scale(indexv);
  
@@ -630,7 +635,7 @@ index 1de425fa..8161d03e 100644
 -		int yy = src_v0 + v_src_step * idx_v;
 +		// at 1:1 the source step is the destination step, in integers; the float accumulator is
 +		// for the approximation only
-+		const int yy = exact_v ? src_v0 + v_src_step * (inv_v[step_y] + int(v_bias))
++		const int yy = exact_v ? src_v0 + v_src_step * inv_v[step_y]
 +				: ident_v ? src_v0 + v_src_step * (step_y + int(v_bias))
 +				: int(src_v0 + v_src_step * (idx_v + v_bias));
 +		const int py = y & 0x1ff;
@@ -666,10 +671,10 @@ index 1de425fa..8161d03e 100644
 -			x &= 0x1ff;
 -			idx_u += scale_u_step;
 +			if (!ident_u) idx_u += scale_u_step;
++
++		} while (true);
  
 -		} while (x != dst_x1);
-+		} while (true);
-+
 +		// and so is the endpoint row, same restriction
 +		if (step_y >= steps_y + (inclusive ? 0 : -1)) break;
 +		step_y++;
@@ -685,7 +690,7 @@ index 1de425fa..8161d03e 100644
  }
  
  void wheelfir_state::do_direct_write(uint8_t sixdat)
-@@ -354,14 +589,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
+@@ -354,14 +594,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
  
  		if (x < 512 && y < 512)
  		{
@@ -702,7 +707,7 @@ index 1de425fa..8161d03e 100644
  {
  	/*
  	Blitter data format ( offset in words, offset in bytes )
-@@ -375,35 +610,45 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -375,35 +615,45 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	3  6    --------
  	   7    YYYYYYYY   Y = dest_y1 bits 0-7
  	4  8    --------
@@ -763,7 +768,7 @@ index 1de425fa..8161d03e 100644
  	if (offset == 0x6)
  	{
  		if (!ACCESSING_BITS_8_15)  //LSB only!
-@@ -413,25 +658,34 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -413,25 +663,34 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  		}
  	}
  
@@ -808,7 +813,7 @@ index 1de425fa..8161d03e 100644
  		else
  		{
  			// writes 0x0000 before filling in some of the other params then sending 0xffff above
-@@ -440,84 +694,99 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -440,84 +699,99 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	}
  }
  
@@ -945,7 +950,7 @@ index 1de425fa..8161d03e 100644
  	}
  
  	return data;
-@@ -530,36 +799,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
+@@ -530,36 +804,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
  	machine().bookkeeping().coin_counter_w(1, data & 0x02);
  }
  
@@ -1017,7 +1022,7 @@ index 1de425fa..8161d03e 100644
  
  static INPUT_PORTS_START( pwball )
  	PORT_START("P1")    /* 16bit */
-@@ -600,130 +895,75 @@ INPUT_PORTS_END
+@@ -600,130 +900,75 @@ INPUT_PORTS_END
  static INPUT_PORTS_START( wheelfir )
  	PORT_INCLUDE(pwball)
  
@@ -1186,7 +1191,7 @@ index 1de425fa..8161d03e 100644
  void wheelfir_state::machine_start()
  {
  	m_zoom_table = std::make_unique<int32_t[]>(ZOOM_TABLE_SIZE);
-@@ -734,32 +974,91 @@ void wheelfir_state::machine_start()
+@@ -734,32 +979,92 @@ void wheelfir_state::machine_start()
  	}
  
  	for (int j = 0; j < 400; ++j)
@@ -1232,9 +1237,10 @@ index 1de425fa..8161d03e 100644
 +		if (a != b || a == 0 || a >= rom_bytes || rom_w(d100 + 6) > 8)
 +			continue;
 +
++		const scale_law law100 = law_at(off, 100), law200 = law_at(off, 200);
 +		bool matches = true;
 +		for (int x = 0; x <= 255 && matches; ++x)
-+			matches = (scale_from(off, 100, x) == x) && (scale_from(off, 200, x) == 2 * x);
++			matches = (scale_at(law100, x) == x) && (scale_at(law200, x) == 2 * x);
 +		if (matches)
 +			m_scale_desc[found++] = int32_t(off);
  	}
@@ -1256,7 +1262,7 @@ index 1de425fa..8161d03e 100644
 +	m_board_scale = table_matches;
 +
 +	// once per start: which scale law this machine runs (Power Ball's program carries no descriptors,
-+	// and none of its blits is scaled)
++	// and none of its blits was seen scaled)
 +	if (m_board_scale)
 +		logerror("scale: the board's law, descriptor tables at x=%06x y=%06x\n", m_scale_desc[0], m_scale_desc[1]);
 +	else if (found == 2)
@@ -1297,7 +1303,7 @@ index 1de425fa..8161d03e 100644
  static const uint32_t texlayout_xoffset[512] = { STEP512(0,8) };
  static const uint32_t texlayout_yoffset[512] = { STEP512(0,4096) };
  
-@@ -780,13 +1079,10 @@ static GFXDECODE_START( gfx_wheelfir )
+@@ -780,13 +1085,10 @@ static GFXDECODE_START( gfx_wheelfir )
  	GFXDECODE_ENTRY( "gfx1", 0, wheelfir512x5125x8_texlayout, 0x0, 1 )
  GFXDECODE_END
  
@@ -1314,7 +1320,7 @@ index 1de425fa..8161d03e 100644
  
  	config.set_maximum_quantum(attotime::from_hz(12000));
  
-@@ -799,13 +1095,13 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -799,13 +1101,13 @@ void wheelfir_state::wheelfir(machine_config &config)
  	TIMER(config, "scan_timer").configure_scanline(FUNC(wheelfir_state::scanline_timer_callback), "screen", 0, 1);
  
  	SCREEN(config, m_screen);
@@ -1334,7 +1340,7 @@ index 1de425fa..8161d03e 100644
  	m_screen->set_palette(m_palette);
  
  	GFXDECODE(config, "gfxdecode", m_palette, gfx_wheelfir);
-@@ -816,14 +1112,21 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -816,14 +1118,21 @@ void wheelfir_state::wheelfir(machine_config &config)
  
  	EEPROM_93C46_16BIT(config, "eeprom");
  
@@ -1358,7 +1364,7 @@ index 1de425fa..8161d03e 100644
  
  void wheelfir_state::kongball(machine_config& config)
  {
-@@ -832,16 +1135,208 @@ void wheelfir_state::kongball(machine_config& config)
+@@ -832,16 +1141,208 @@ void wheelfir_state::kongball(machine_config& config)
  }
  
  
@@ -1368,9 +1374,7 @@ index 1de425fa..8161d03e 100644
 +// game uploads for a page takes effect when that page is shown. Each frame starts from the scroll
 +// the registers hold, and the X scroll is read live. Its two CPUs talk through a plain register.
 +class radendur_state : public wheelfir_state
- {
--	m_force_extra_irq1 = true;
--	//m_disable_raster_irq = true;
++{
 +public:
 +	radendur_state(const machine_config &mconfig, device_type type, const char *tag) :
 +		wheelfir_state(mconfig, type, tag),
@@ -1487,16 +1491,21 @@ index 1de425fa..8161d03e 100644
 +
 +// The latch between the two CPUs: one word, no queue, so a second write before the read drops the
 +// first, and the sub CPU patches each word into its mix loop, so a shifted stream corrupts its code.
-+// TODO: modelled as a plain register, without the synchronisation of generic_latch_16_device,
-+// whose deferred write lets the next word land before the sub CPU has read the last one; how the
-+// board's latch keeps the two CPUs in step is not known.
++// TODO: modelled as a plain register; with generic_latch_16_device, whose write synchronises the
++// scheduler, the sub CPU loses its stream partway into a race. How the board's latch keeps the two
++// CPUs in step is not known.
 +void radendur_state::latch_w(uint16_t data)
-+{
+ {
+-	m_force_extra_irq1 = true;
+-	//m_disable_raster_irq = true;
 +	m_latch_value = data;
-+}
-+
+ }
+ 
+-void wheelfir_state::init_kongball()
 +uint16_t radendur_state::latch_r()
-+{
+ {
+-	m_force_extra_irq1 = true;
+-	m_disable_raster_irq = true; // the raster interrupt points outside of code
 +	return m_latch_value;
 +}
 +
@@ -1527,13 +1536,10 @@ index 1de425fa..8161d03e 100644
 +		m_rd_idx = (m_rd_idx + 1) & 0xff;   // BT478 auto-increments the index
 +		m_rd_sub = 0;
 +	}
- }
- 
--void wheelfir_state::init_kongball()
++}
++
 +void radendur_state::machine_start()
- {
--	m_force_extra_irq1 = true;
--	m_disable_raster_irq = true; // the raster interrupt points outside of code
++{
 +	wheelfir_state::machine_start();
 +
 +	save_item(NAME(m_fg_drawbuf));
@@ -1573,7 +1579,7 @@ index 1de425fa..8161d03e 100644
  }
  
  
-@@ -936,7 +1431,6 @@ ROM_START( kongball )
+@@ -936,7 +1437,6 @@ ROM_START( kongball )
  	// There's no PLD at U73 on Kong Ball
  ROM_END
  
@@ -1581,7 +1587,7 @@ index 1de425fa..8161d03e 100644
  ROM_START( radendur )
  	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
  	ROM_LOAD16_BYTE( "endu.u19", 0x00001, 0x80000, CRC(d24ca61c) SHA1(64d2648959579d35fbf4c8479c0ff75781d28146) )
-@@ -969,14 +1463,50 @@ ROM_START( radendur )
+@@ -969,14 +1469,50 @@ ROM_START( radendur )
  	ROM_LOAD( "4_pal16v8.u73",  0x000, 0x117, NO_DUMP )
  ROM_END
  
