@@ -9,6 +9,11 @@
 # attract is deterministic from a clean NVRAM, so fixed frames reached without touching a control are
 # enough. It runs unthrottled; the throttle only paces the wall clock, the frames are the same.
 #
+# A scene behind a control (the service mode's screens) holds it with "press <frame> <frames> <value>
+# <port> <field>" lines, on the same frame count as the scenes: the field is held at that value from
+# that frame for that many and then given back, so a key is pressed once and a wheel or pedal returns
+# to rest; a field the set lacks fails the run.
+#
 # A set whose sound CPU writes its DACs also declares "sound <cpu> <frames> <dac>..." there: the run
 # that captures the scenes takes a CRC-32 of those writes over its first <frames> (lib/sound_crc.lua),
 # and a second boot on the EEPROM the first one left takes it again, because a board that has run
@@ -68,12 +73,35 @@ for SET in $SETS; do
         }
         sound_lua "$WORK/sound-cold.txt" > "$WORK/capture.lua"
     fi
+    PRESSES=$(awk '$1 == "press" { f = $6; for (i = 7; i <= NF; i++) f = f " " $i
+        printf "{ %d, %d, %d, \"%s\", \"%s\" },\n", $2, $3, $4, $5, f }' "$CONF")
     cat >> "$WORK/capture.lua" <<LUA
 local target = {}
 for f in string.gmatch("$FRAMES", "%d+") do target[tonumber(f)] = true end
+local presses = { $PRESSES }
+-- the presses grouped by field, keyed by name: each lookup of a field returns a new Lua object, so
+-- keyed by the object two presses of one field would each release the other
+local held = {}
+for _, p in ipairs(presses) do
+  local port = manager.machine.ioport.ports[p[4]]
+  local field = port and port.fields[p[5]]
+  if not field then
+    emu.print_error("__GOLDEN INVALID: no field '" .. p[5] .. "' on port " .. p[4])
+    manager.machine:exit()
+    return
+  end
+  local key = p[4] .. " " .. p[5]
+  held[key] = held[key] or { field = field }
+  table.insert(held[key], p)
+end
 local n = 0
 _G._g = emu.add_machine_frame_notifier(function()
   n = n + 1
+  for _, group in pairs(held) do
+    local value
+    for _, p in ipairs(group) do if n >= p[1] and n < p[1] + p[2] then value = p[3] end end
+    if value then group.field:set_value(value) else group.field:clear_value() end
+  end
   if target[n] then manager.machine.video:snapshot() end
 end)
 LUA

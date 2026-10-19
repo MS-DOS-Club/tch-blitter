@@ -41,6 +41,9 @@ A scene is chosen for what it EXERCISES, and the reason is written in each
   model**: if the model fails, the whole HUD disappears.
 - **`wheelfir/02_world_map`**: the horizon, where a wrong scroll model draws the road a second time.
 - **`pwball/01_attract`**: the clean reference. If that moves, the change is suspect by definition.
+- **`wheelfir/07_convergence`**: the service mode's grid, reached with the Test button (the `press`
+  lines of its `scenes.conf`), the one screen whose answer is known in advance: every cell the same
+  height, so an offset in the background's rows shows at once.
 - **`rltennis/00_title`**: the control of the sibling that already worked in MAME.
 
 ## And what a gate of instants does NOT see

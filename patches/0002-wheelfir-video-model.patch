@@ -142,7 +142,7 @@ index dc1cace80a7350a70305a88e4644c44d37500420..6f5c7a567f7ad0f3acfc79fe518e05ae
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79546e1988 100644
+index 1de425fa1e195edfb805ed038426c2a73bff81ec..c753c1c2daf15c5a8b6b43cec80cd510b32ef934 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,21 @@
@@ -184,7 +184,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  ----------------------------------
  Produttore  TCH
  N.revisione E133
-@@ -54,46 +48,68 @@ Note
+@@ -54,46 +48,69 @@ Note
  
  ----
  
@@ -259,9 +259,10 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
 +  counter runs
 +- a zoomed blit stops one step short of its endpoint, and a blit at 1:1 vertically skips its
 +  first source row, a border the art carries: both fitted to the games' output
-+- the background is drawn three rows lower than its scroll places it (BACKGROUND_ROW_BIAS), but
-+  not across the road/scenery boundary or the plane's wrap: an exact fit for Wheels & Fire's
-+  road with no mechanism identified
++- in Wheels & Fire's race the rows above the horizon run three past the end of the scenery art,
++  and the road starts wider than on the board: drawing the background three rows lower fits
++  both, but breaks the service mode's convergence grid, so it is not done; what the board does
++  differently is not known
 +- a background blit covering the whole window is drawn opaque (full_background in do_blit): a
 +  rule fitted to the High Scores photo, which the game asks for transparent with nothing
 +  under it
@@ -288,7 +289,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  #include "cpu/m68000/m68000.h"
  #include "machine/adc0808.h"
  #include "machine/eepromser.h"
-@@ -101,19 +117,56 @@ BIT N - ( scale < 50% ) ? 1 : 0
+@@ -101,19 +118,56 @@ BIT N - ( scale < 50% ) ? 1 : 0
  #include "machine/timer.h"
  #include "sound/dac.h"
  #include "video/ramdac.h"
@@ -351,7 +352,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  
  class wheelfir_state : public driver_device
  {
-@@ -122,121 +175,185 @@ public:
+@@ -122,121 +176,185 @@ public:
  		driver_device(mconfig, type, tag),
  		m_maincpu(*this, "maincpu"),
  		m_subcpu(*this, "subcpu"),
@@ -599,7 +600,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  		// wheelfir sets 0xfc0000 and 0xf00000, both of which are out of range of any GFX ROM
  		// kongball sets 0xfc0000 but only on startup
  		m_direct_write_x0 = dst_x0;
-@@ -244,99 +361,119 @@ void wheelfir_state::do_blit()
+@@ -244,99 +362,119 @@ void wheelfir_state::do_blit()
  		m_direct_write_y0 = dst_y0;
  		m_direct_write_y1 = dst_y1;
  		m_direct_write_idx = 0;
@@ -780,7 +781,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  }
  
  void wheelfir_state::do_direct_write(uint8_t sixdat)
-@@ -354,14 +491,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
+@@ -354,14 +492,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
  
  		if (x < 512 && y < 512)
  		{
@@ -797,7 +798,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  {
  	/*
  	Blitter data format ( offset in words, offset in bytes )
-@@ -375,35 +512,45 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -375,35 +513,45 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	3  6    --------
  	   7    YYYYYYYY   Y = dest_y1 bits 0-7
  	4  8    --------
@@ -858,7 +859,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  	if (offset == 0x6)
  	{
  		if (!ACCESSING_BITS_8_15)  //LSB only!
-@@ -413,111 +560,123 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -413,111 +561,108 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  		}
  	}
  
@@ -909,28 +910,14 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  }
  
 -void wheelfir_state::video_start()
-+uint32_t wheelfir_state::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
- {
+-{
 -	m_tmp_bitmap[0] = std::make_unique<bitmap_ind16>(512, 512);
 -	m_tmp_bitmap[1] = std::make_unique<bitmap_ind16>(512, 512);
 -}
-+	// the background is drawn three rows lower than its scroll places it (fitted, see the TODO),
-+	// except where that would cross the road/scenery boundary (row 256) or the plane's wrap
-+	static constexpr int BACKGROUND_ROW_BIAS = 3;
- 
+-
 -uint32_t wheelfir_state::screen_update_wheelfir(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
--{
-+	auto row_read = [&](int y)
-+	{
-+		const int wanted = (y + m_current_yscroll) & 0x1ff;
-+		const int biased = (y + m_current_yscroll - BACKGROUND_ROW_BIAS) & 0x1ff;
-+
-+		if (wanted >= 256 && biased < 256)      // crosses into the scenery region
-+			return wanted;
-+		if (wanted < BACKGROUND_ROW_BIAS)       // goes round the top of the plane
-+			return wanted;
-+		return biased;
-+	};
++uint32_t wheelfir_state::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+ {
  	bitmap.fill(0, cliprect);
  
  	for (int y = cliprect.top(); y <= cliprect.bottom(); y++)
@@ -938,7 +925,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
 -		int scrolly = y;
 -		scrolly += m_current_yscroll;//
 -		scrolly &= 0x1ff;
-+		const int scrolly = row_read(y);
++		const int scrolly = (y + m_current_yscroll) & 0x1ff;
  		uint16_t const *const source = &m_tmp_bitmap[LAYER_BG]->pix(scrolly);
  		uint16_t *const dest = &bitmap.pix(y);
  
@@ -1033,7 +1020,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  	}
  
  	return data;
-@@ -530,36 +689,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
+@@ -530,36 +675,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
  	machine().bookkeeping().coin_counter_w(1, data & 0x02);
  }
  
@@ -1105,7 +1092,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  
  static INPUT_PORTS_START( pwball )
  	PORT_START("P1")    /* 16bit */
-@@ -600,75 +785,67 @@ INPUT_PORTS_END
+@@ -600,75 +771,67 @@ INPUT_PORTS_END
  static INPUT_PORTS_START( wheelfir )
  	PORT_INCLUDE(pwball)
  
@@ -1218,7 +1205,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  			m_maincpu->set_input_line(3, HOLD_LINE);
  		}
  	}
-@@ -676,90 +853,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
+@@ -676,90 +839,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
  	m_subcpu->set_input_line(1, HOLD_LINE);
  }
  
@@ -1350,7 +1337,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  static const uint32_t texlayout_xoffset[512] = { STEP512(0,8) };
  static const uint32_t texlayout_yoffset[512] = { STEP512(0,4096) };
  
-@@ -780,13 +921,10 @@ static GFXDECODE_START( gfx_wheelfir )
+@@ -780,13 +907,10 @@ static GFXDECODE_START( gfx_wheelfir )
  	GFXDECODE_ENTRY( "gfx1", 0, wheelfir512x5125x8_texlayout, 0x0, 1 )
  GFXDECODE_END
  
@@ -1367,7 +1354,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  
  	config.set_maximum_quantum(attotime::from_hz(12000));
  
-@@ -799,13 +937,13 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -799,13 +923,13 @@ void wheelfir_state::wheelfir(machine_config &config)
  	TIMER(config, "scan_timer").configure_scanline(FUNC(wheelfir_state::scanline_timer_callback), "screen", 0, 1);
  
  	SCREEN(config, m_screen);
@@ -1387,7 +1374,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  	m_screen->set_palette(m_palette);
  
  	GFXDECODE(config, "gfxdecode", m_palette, gfx_wheelfir);
-@@ -816,14 +954,21 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -816,14 +940,21 @@ void wheelfir_state::wheelfir(machine_config &config)
  
  	EEPROM_93C46_16BIT(config, "eeprom");
  
@@ -1411,7 +1398,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  
  void wheelfir_state::kongball(machine_config& config)
  {
-@@ -832,16 +977,227 @@ void wheelfir_state::kongball(machine_config& config)
+@@ -832,16 +963,227 @@ void wheelfir_state::kongball(machine_config& config)
  }
  
  
@@ -1645,7 +1632,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  }
  
  
-@@ -936,7 +1292,6 @@ ROM_START( kongball )
+@@ -936,7 +1278,6 @@ ROM_START( kongball )
  	// There's no PLD at U73 on Kong Ball
  ROM_END
  
@@ -1653,7 +1640,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79
  ROM_START( radendur )
  	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
  	ROM_LOAD16_BYTE( "endu.u19", 0x00001, 0x80000, CRC(d24ca61c) SHA1(64d2648959579d35fbf4c8479c0ff75781d28146) )
-@@ -969,14 +1324,51 @@ ROM_START( radendur )
+@@ -969,14 +1310,51 @@ ROM_START( radendur )
  	ROM_LOAD( "4_pal16v8.u73",  0x000, 0x117, NO_DUMP )
  ROM_END
  

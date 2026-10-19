@@ -411,6 +411,15 @@ blitter:
           LEFT: the grid''s rows fall one line below its columns (0-1 and 16-17 against 0 and
           15-16) because every value is written during the line after the one it names; and the
           race still asks rows 427..429 above its horizon. No reading of the plane puts both right'
+        wheelfir_the_three_rows_withdrawn: 'WITHDRAWN on 2026-10-19 from the model, on the
+          convergence grid (wheelfir_the_convergence_grid_against_the_three_rows): the background is
+          read at its scroll again, row (line + scroll) & 0x1ff, with no exception at the wrap or the
+          scenery boundary. Its symptom in the race comes back and is kept as the open item: three
+          rows of ground fill between the sea and the road, and the road starting wider than on the
+          board. The race''s goldens 03, 05 and 06 and the siblings'' were re-blessed on that decision,
+          every pair looked at first (a clean three-row translation, no garbage), and a series of 600
+          race frames without the bias shows no fault on the road. The convergence grid is a golden
+          of its own (07_convergence), reached with the Test button, red under the old bias'
         wheelfir_artefact_G_fixed_in_the_model: 'FIXED on 2026-07-31 in the VIDEO MODEL, not by
           patching the game (`WFV2_FONDOCRUDO` (switch WITHDRAWN)=1 reverts it): the BACKGROUND plane is read THREE rows
           ahead of the scroll value. Patching the game''s constant (0x1ae -> 0x1ab) was tried first
