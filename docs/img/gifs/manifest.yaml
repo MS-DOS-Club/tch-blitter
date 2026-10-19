@@ -13,10 +13,10 @@ gifs:
   set: kongball
   refresh_hz: 50.08
   gif_frames: 100
-  fps: 16.67
+  fps: 16.69
   width: 672
   height: 504
-  duration_s: 6.0
+  duration_s: 5.99
   emulated_frames: 300
   mb: 0.13
 - file: kongball-play.gif
@@ -28,37 +28,37 @@ gifs:
   height: 252
   duration_s: 5.03
   emulated_frames: 252
-  mb: 0.09
+  mb: 0.1
 - file: kongball-title.gif
   set: kongball
   refresh_hz: 50.08
   gif_frames: 100
-  fps: 16.67
+  fps: 16.69
   width: 672
   height: 504
-  duration_s: 6.0
+  duration_s: 5.99
   emulated_frames: 300
   mb: 0.09
 - file: pwball-demo.gif
   set: pwball
   refresh_hz: 50.08
   gif_frames: 120
-  fps: 16.67
+  fps: 16.69
   width: 672
   height: 504
-  duration_s: 7.2
+  duration_s: 7.19
   emulated_frames: 360
   mb: 0.61
 - file: pwball-logo.gif
   set: pwball
   refresh_hz: 50.08
   gif_frames: 87
-  fps: 16.67
+  fps: 16.7
   width: 672
   height: 504
-  duration_s: 5.22
+  duration_s: 5.21
   emulated_frames: 261
-  mb: 0.85
+  mb: 0.82
 - file: pwball-play.gif
   set: pwball
   refresh_hz: 50.08
@@ -73,10 +73,10 @@ gifs:
   set: pwball
   refresh_hz: 50.08
   gif_frames: 100
-  fps: 16.67
+  fps: 16.69
   width: 672
   height: 504
-  duration_s: 6.0
+  duration_s: 5.99
   emulated_frames: 300
   mb: 1.59
 - file: radendur-play.gif
@@ -143,12 +143,12 @@ gifs:
   set: wheelfir
   refresh_hz: 50.08
   gif_frames: 100
-  fps: 16.67
+  fps: 16.69
   width: 672
   height: 504
-  duration_s: 6.0
+  duration_s: 5.99
   emulated_frames: 300
-  mb: 3.85
+  mb: 3.86
 - file: wheelfir-play.gif
   set: wheelfir
   refresh_hz: 50.08
@@ -163,19 +163,19 @@ gifs:
   set: wheelfir
   refresh_hz: 50.08
   gif_frames: 134
-  fps: 16.67
+  fps: 16.69
   width: 672
   height: 504
-  duration_s: 8.04
+  duration_s: 8.03
   emulated_frames: 402
-  mb: 3.41
+  mb: 3.46
 - file: wheelfir-records.gif
   set: wheelfir
   refresh_hz: 50.08
   gif_frames: 100
-  fps: 16.67
+  fps: 16.69
   width: 672
   height: 504
-  duration_s: 6.0
+  duration_s: 5.99
   emulated_frames: 300
   mb: 0.2

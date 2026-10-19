@@ -44,6 +44,7 @@ Python runs with `uv run scripts/<name>.py`, and every MAME launch goes through 
 |--------|--------------|
 | `frame-series.sh <set> <from> <to> <dir>` | consecutive frames of one set |
 | `gif.sh` | a stretch of frames into a GIF at real time, for the documentation |
+| `remake-media.sh` | the recipe of the Wheels & Fire family's GIFs and before/after "after" images: remakes them from the current binary |
 | `family-captures.py` | the documentation's stills of the seven sets (titles, attract and race frames, as its manifest lists them) |
 | `before-after.py` | measures a before/after pair: how much changes and where |
 | `make-readme-images.py` | the light images of Radical Enduro's page |

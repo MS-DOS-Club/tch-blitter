@@ -4,30 +4,30 @@ pairs:
   frame: 2300
   before: wheelfir-repeated-road-before.png
   after: wheelfir-repeated-road-after.png
-  changes_pct: 82.78
+  changes_pct: 82.41
   box: x 0..335, y 0..247
   caption: 'The original driver''s signature failure: it draws the ROAD A SECOND TIME where the sky belongs,
-    lane markings and all, with the real road below it. 82.8% of the pixels change.'
+    lane markings and all, with the real road below it. 82.4% of the pixels change.'
   alt: 'Wheels & Fire: the road drawn again where the sky should be'
 - id: wheelfir-cars
   game: wheelfir
   frame: 600
   before: wheelfir-cars-before.png
   after: wheelfir-cars-after.png
-  changes_pct: 66.83
+  changes_pct: 64.37
   box: x 0..335, y 0..247
   caption: Of the two Porsches in the presentation the original driver draws only one, surrounded by leftovers
-    of the previous screen. 66.8% of the pixels change.
+    of the previous screen. 64.4% of the pixels change.
   alt: 'Wheels & Fire: the two Porsches of the presentation'
 - id: wheelfir-sky
   game: wheelfir
   frame: 1800
   before: wheelfir-sky-before.png
   after: wheelfir-sky-after.png
-  changes_pct: 76.38
+  changes_pct: 76.27
   box: x 0..335, y 0..247
   caption: 'In-race, the original driver leaves the sky unpainted: no horizon, no mountain, no sea, none
-    of the roadside signs. 76.4% of the pixels change.'
+    of the roadside signs. 76.3% of the pixels change.'
   alt: 'Wheels & Fire: the sky during the race'
 - id: kongball-title
   game: kongball
