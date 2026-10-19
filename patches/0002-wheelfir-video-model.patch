@@ -142,7 +142,7 @@ index dc1cace80a7350a70305a88e4644c44d37500420..6f5c7a567f7ad0f3acfc79fe518e05ae
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c287f170e 100644
+index 1de425fa1e195edfb805ed038426c2a73bff81ec..42345e64b6d9346ad5dde8969c0f41a286537d86 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,21 @@
@@ -184,7 +184,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  ----------------------------------
  Produttore  TCH
  N.revisione E133
-@@ -54,46 +48,69 @@ Note
+@@ -54,46 +48,68 @@ Note
  
  ----
  
@@ -260,9 +260,8 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
 +- a zoomed blit stops one step short of its endpoint, and a blit at 1:1 vertically skips its
 +  first source row, a border the art carries: both fitted to the games' output
 +- in Wheels & Fire's race the rows above the horizon run three past the end of the scenery art,
-+  and the road starts wider than on the board: drawing the background three rows lower fits
-+  both, but breaks the service mode's convergence grid, so it is not done; what the board does
-+  differently is not known
++  and the road starts wider than on the board; drawing the whole background three rows lower
++  fits both but breaks the service mode's convergence grid, and the mechanism is not identified
 +- a background blit covering the whole window is drawn opaque (full_background in do_blit): a
 +  rule fitted to the High Scores photo, which the game asks for transparent with nothing
 +  under it
@@ -289,7 +288,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  #include "cpu/m68000/m68000.h"
  #include "machine/adc0808.h"
  #include "machine/eepromser.h"
-@@ -101,19 +118,56 @@ BIT N - ( scale < 50% ) ? 1 : 0
+@@ -101,19 +117,56 @@ BIT N - ( scale < 50% ) ? 1 : 0
  #include "machine/timer.h"
  #include "sound/dac.h"
  #include "video/ramdac.h"
@@ -352,7 +351,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  
  class wheelfir_state : public driver_device
  {
-@@ -122,121 +176,188 @@ public:
+@@ -122,121 +175,187 @@ public:
  		driver_device(mconfig, type, tag),
  		m_maincpu(*this, "maincpu"),
  		m_subcpu(*this, "subcpu"),
@@ -393,6 +392,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
 +	void board(machine_config &config) ATTR_COLD;
 +	void board_main_map(address_map &map) ATTR_COLD;
 +	void board_sub_map(address_map &map) ATTR_COLD;
++	void draw_background(bitmap_ind16 &bitmap, const rectangle &cliprect);
 +
  	required_device<cpu_device> m_maincpu;
  	required_device<cpu_device> m_subcpu;
@@ -405,8 +405,6 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
 +
 +	std::unique_ptr<bitmap_ind16> m_tmp_bitmap[2];
 +	int32_t m_current_yscroll;
-+
-+	void draw_background(bitmap_ind16 &bitmap, const rectangle &cliprect);
 +
 +private:
 +	required_device<eeprom_serial_93cxx_device> m_eeprom;
@@ -435,19 +433,19 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
 +
 +	int16_t m_scanline_cnt;
 +	bool m_counter_enabled;
-+
-+	uint32_t m_gfx_mask;   // the gfx1 region's length - 1, a power of two
  
 -	int16_t m_scanline_cnt = 0;
++	uint32_t m_gfx_mask;   // the gfx1 region's length - 1, a power of two
+ 
+-	std::unique_ptr<bitmap_ind16> m_tmp_bitmap[2]{};
 +	// The 9-bit background scroll, latched when the game writes the Y byte. Its bit 8s live in
 +	// word 8, which every blit rewrites, so they are captured with the coordinates.
 +	int32_t m_scroll_x_latched;
 +	int32_t m_scroll_y_latched;
  
--	std::unique_ptr<bitmap_ind16> m_tmp_bitmap[2]{};
-+	int32_t m_adc_eoc;
- 
 -	int32_t get_scale(int32_t index)
++	int32_t m_adc_eoc;
++
 +	// The zoom of one axis (see the header): the period of each counter, 0 when it is idle.
 +	struct axis_scale
  	{
@@ -473,15 +471,15 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
 +	{
 +		int x = 0, written = 0, repeat = 0, stall = 0;
 +		const auto move = [&]()
- 		{
--			if (m_zoom_table[index] >= 0)
++		{
 +			if (scale.stall_period && ++stall == scale.stall_period)
 +				stall = 0;
 +			else
 +				++written;
 +		};
 +		for (int d = 0; d <= steps; d++)
-+		{
+ 		{
+-			if (m_zoom_table[index] >= 0)
 +			while ((scale.clock_halve ? written >> 1 : scale.clock_double ? written << 1 : written) < d)
  			{
 -				return m_zoom_table[index];
@@ -603,7 +601,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  		// wheelfir sets 0xfc0000 and 0xf00000, both of which are out of range of any GFX ROM
  		// kongball sets 0xfc0000 but only on startup
  		m_direct_write_x0 = dst_x0;
-@@ -244,99 +365,119 @@ void wheelfir_state::do_blit()
+@@ -244,99 +363,119 @@ void wheelfir_state::do_blit()
  		m_direct_write_y0 = dst_y0;
  		m_direct_write_y1 = dst_y1;
  		m_direct_write_idx = 0;
@@ -784,7 +782,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  }
  
  void wheelfir_state::do_direct_write(uint8_t sixdat)
-@@ -354,14 +495,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
+@@ -354,14 +493,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
  
  		if (x < 512 && y < 512)
  		{
@@ -801,7 +799,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  {
  	/*
  	Blitter data format ( offset in words, offset in bytes )
-@@ -375,35 +516,45 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -375,35 +514,45 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	3  6    --------
  	   7    YYYYYYYY   Y = dest_y1 bits 0-7
  	4  8    --------
@@ -862,7 +860,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  	if (offset == 0x6)
  	{
  		if (!ACCESSING_BITS_8_15)  //LSB only!
-@@ -413,111 +564,109 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -413,111 +562,108 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  		}
  	}
  
@@ -933,8 +931,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  		uint16_t const *const source = &m_tmp_bitmap[LAYER_BG]->pix(scrolly);
  		uint16_t *const dest = &bitmap.pix(y);
  
-+		// the window wraps at the plane's edge: Wheels & Fire's road band lives at scroll 500..511
-+		// and wants the other end of the plane
++		// both planes wrap, so the window reads round the plane's edge
  		for (int x = cliprect.left(); x <= cliprect.right(); x++)
 -		{
 -			int sourcex = x;
@@ -1028,7 +1025,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  	}
  
  	return data;
-@@ -530,36 +679,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
+@@ -530,36 +676,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
  	machine().bookkeeping().coin_counter_w(1, data & 0x02);
  }
  
@@ -1100,7 +1097,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  
  static INPUT_PORTS_START( pwball )
  	PORT_START("P1")    /* 16bit */
-@@ -600,75 +775,67 @@ INPUT_PORTS_END
+@@ -600,75 +772,67 @@ INPUT_PORTS_END
  static INPUT_PORTS_START( wheelfir )
  	PORT_INCLUDE(pwball)
  
@@ -1213,7 +1210,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  			m_maincpu->set_input_line(3, HOLD_LINE);
  		}
  	}
-@@ -676,90 +843,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
+@@ -676,90 +840,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
  	m_subcpu->set_input_line(1, HOLD_LINE);
  }
  
@@ -1345,7 +1342,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  static const uint32_t texlayout_xoffset[512] = { STEP512(0,8) };
  static const uint32_t texlayout_yoffset[512] = { STEP512(0,4096) };
  
-@@ -780,13 +911,10 @@ static GFXDECODE_START( gfx_wheelfir )
+@@ -780,13 +908,10 @@ static GFXDECODE_START( gfx_wheelfir )
  	GFXDECODE_ENTRY( "gfx1", 0, wheelfir512x5125x8_texlayout, 0x0, 1 )
  GFXDECODE_END
  
@@ -1362,7 +1359,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  
  	config.set_maximum_quantum(attotime::from_hz(12000));
  
-@@ -799,13 +927,13 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -799,13 +924,13 @@ void wheelfir_state::wheelfir(machine_config &config)
  	TIMER(config, "scan_timer").configure_scanline(FUNC(wheelfir_state::scanline_timer_callback), "screen", 0, 1);
  
  	SCREEN(config, m_screen);
@@ -1382,7 +1379,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  	m_screen->set_palette(m_palette);
  
  	GFXDECODE(config, "gfxdecode", m_palette, gfx_wheelfir);
-@@ -816,14 +944,21 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -816,14 +941,21 @@ void wheelfir_state::wheelfir(machine_config &config)
  
  	EEPROM_93C46_16BIT(config, "eeprom");
  
@@ -1406,7 +1403,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  
  void wheelfir_state::kongball(machine_config& config)
  {
-@@ -832,16 +967,216 @@ void wheelfir_state::kongball(machine_config& config)
+@@ -832,16 +964,215 @@ void wheelfir_state::kongball(machine_config& config)
  }
  
  
@@ -1487,25 +1484,19 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
 +
 +// the frame starts from the scroll the game's registers hold, bit 8 from word 8
 +int32_t radendur_state::frame_top_yscroll() const
- {
--	m_force_extra_irq1 = true;
--	//m_disable_raster_irq = true;
++{
 +	return (m_blitter_data[0xb] & 0x00ff) | (m_blitter_data[0x8] & SCROLL_Y_BIT8) << 1;
- }
- 
--void wheelfir_state::init_kongball()
++}
++
 +// the X scroll is read live from the registers, never latched
 +int32_t radendur_state::background_xscroll() const
- {
--	m_force_extra_irq1 = true;
--	m_disable_raster_irq = true; // the raster interrupt points outside of code
++{
 +	return (m_blitter_data[0xa] & 0x00ff) | (m_blitter_data[0x8] & SCROLL_X_BIT8) << 2;
 +}
 +
 +uint32_t radendur_state::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 +{
 +	draw_background(bitmap, cliprect);
-+
 +
 +	// The FG is composited unscrolled: given the BG scroll, it would move the attract logos with it.
 +	const int displayed_page = m_fg_dispbuf;
@@ -1551,7 +1542,9 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
 +}
 +
 +void radendur_state::ramdac_pal_w(uint8_t data)
-+{
+ {
+-	m_force_extra_irq1 = true;
+-	//m_disable_raster_irq = true;
 +	m_ramdac->pal_w(data);
 +	m_rd_comp[m_rd_sub] = data;
 +	if (++m_rd_sub == 3) // R, G, B collected -> one pen
@@ -1593,11 +1586,14 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
 +	save_item(NAME(m_rd_sub));
 +	save_item(NAME(m_rd_comp));
 +	save_item(NAME(m_latch_value));
-+}
-+
+ }
+ 
+-void wheelfir_state::init_kongball()
 +// the RAMDAC's reset clears its index and its R, G, B step, so the copy of its protocol follows
 +void radendur_state::machine_reset()
-+{
+ {
+-	m_force_extra_irq1 = true;
+-	m_disable_raster_irq = true; // the raster interrupt points outside of code
 +	wheelfir_state::machine_reset();
 +
 +	m_rd_idx = 0;
@@ -1629,7 +1625,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  }
  
  
-@@ -936,7 +1271,6 @@ ROM_START( kongball )
+@@ -936,7 +1267,6 @@ ROM_START( kongball )
  	// There's no PLD at U73 on Kong Ball
  ROM_END
  
@@ -1637,7 +1633,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..d9a05eb7e006ab1d3f1619d532a8026c
  ROM_START( radendur )
  	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
  	ROM_LOAD16_BYTE( "endu.u19", 0x00001, 0x80000, CRC(d24ca61c) SHA1(64d2648959579d35fbf4c8479c0ff75781d28146) )
-@@ -969,14 +1303,51 @@ ROM_START( radendur )
+@@ -969,14 +1299,51 @@ ROM_START( radendur )
  	ROM_LOAD( "4_pal16v8.u73",  0x000, 0x117, NO_DUMP )
  ROM_END
  
