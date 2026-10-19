@@ -294,3 +294,65 @@ def test_an_optional_layer_before_the_set_is_refused(
     bad.write_text(yaml.safe_dump(t), encoding="utf-8")
     with pytest.raises(rh.InvalidError, match="after an optional layer"):
         rh.load_table(bad)
+
+
+# --- the refusals: each one is seen to bite ------------------------------------------------------
+
+
+def test_a_word_the_image_does_not_hold_is_refused_and_nothing_is_written() -> None:
+    img = bytearray(b"\x46\xfc\x26\x00")
+    with pytest.raises(rh.InvalidError, match="reads 2600, expected 2700"):
+        rh.put(img, {}, 2, b"\x27\x00", b"\x24\x00", "mask")
+    assert img == bytearray(b"\x46\xfc\x26\x00")
+
+
+def test_a_byte_another_entry_wrote_is_refused() -> None:
+    img = bytearray(b"\x46\xfc\x27\x00")
+    with pytest.raises(rh.InvalidError, match="overlaps first"):
+        rh.put(img, {3: "first"}, 2, b"\x27\x00", b"\x24\x00", "mask")
+
+
+def test_a_replacement_of_another_length_is_refused() -> None:
+    with pytest.raises(rh.InvalidError, match="2 bytes expected, 4 written"):
+        rh.put(bytearray(4), {}, 0, b"\x00\x00", b"\x00\x00\x00\x00", "mask")
+
+
+def test_a_matching_word_is_written_and_claimed() -> None:
+    img, claimed = bytearray(b"\x46\xfc\x27\x00"), dict[int, str]()
+    rh.put(img, claimed, 2, b"\x27\x00", b"\x24\x00", "mask")
+    assert img == bytearray(b"\x46\xfc\x24\x00") and claimed == {2: "mask", 3: "mask"}
+
+
+def test_hooks_past_the_limit_are_refused() -> None:
+    fixes = next(layer for layer in table()["layers"] if layer.get("hooks"))
+    layer = {"name": "x", "hooks": fixes["hooks"]}
+    base = table()["hook_base"]
+    with pytest.raises(rh.InvalidError, match="past"):
+        rh.apply_layer(bytearray([rh.HOOK_FILL]) * (base + 0x1000), {}, layer, base, base + 2)
+
+
+@needs_rom
+def test_each_mask_word_is_the_immediate_of_a_move_to_sr() -> None:
+    """The sound layer's words are 0x2700, a common constant: each must follow move #imm,SR."""
+    t = table()
+    dump = bytes(rh.load_image(t))
+    sound = next(layer for layer in t["layers"] if layer["name"] == "sound")
+    assert sound["words"]
+    for w in sound["words"]:
+        assert dump[w["addr"] - 2 : w["addr"]] == b"\x46\xfc", f"{w['addr']:06x}"
+
+
+@needs_rom
+@pytest.mark.skipif(not rh.DRIVER.exists(), reason="no upstream/ checkout: make setup")
+def test_check_answers_by_the_zip_on_disk(tmp_path: Path) -> None:
+    t = table()
+    roms, _ = rh.build(t, None)
+    out = tmp_path / "radendurh.zip"
+    assert rh.check(t, roms, out) == 1
+    out.write_bytes(rh.zipped(roms))
+    assert rh.check(t, roms, out) == 0
+    name = next(iter(roms))
+    flipped = {**roms, name: bytes([roms[name][0] ^ 1]) + roms[name][1:]}
+    out.write_bytes(rh.zipped(flipped))
+    assert rh.check(t, roms, out) == 1
+    assert rh.check(t, flipped, out) == 1

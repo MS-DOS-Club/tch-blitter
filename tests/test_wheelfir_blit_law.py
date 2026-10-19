@@ -43,6 +43,28 @@ def test_the_decode_places_each_field_where_the_driver_reads_it() -> None:
     assert iv == 1 | (2 << 6) | (1 << 12)
 
 
+@pytest.mark.parametrize(
+    "word,value,expected",
+    [
+        (8, 0x0100, (0x20, 0)),  # x stall field bit 5
+        (8, 0x0400, (0x20 << 6, 0)),  # x repeat field bit 5
+        (8, 0x0200, (0, 0x20)),  # y stall field bit 5
+        (8, 0x0800, (0, 0x20 << 6)),  # y repeat field bit 5
+        (0xB, 0x4000, (0, 0x01)),  # y stall field bits 0-1
+        (0xB, 0x8000, (0, 0x02)),
+        (0xC, 0x4000, (0, 0x04)),  # y stall field bits 2-3
+        (0xC, 0x8000, (0, 0x08)),
+        (0xA, 0x4000, (0, 0x10)),  # y stall field bit 4
+    ],
+)
+def test_each_bit_of_the_register_map_lands_in_its_own_field(
+    word: int, value: int, expected: tuple[int, int]
+) -> None:
+    w = [0] * 15
+    w[word] = value
+    assert law.indices(w) == expected
+
+
 def _blit(row: int, iu: int, steps_u: int) -> object:
     return law.Blit(
         row=row,
@@ -97,10 +119,12 @@ def test_the_record_figures_come_out_of_the_tracked_evidence() -> None:
 
 
 def test_the_full_run_reproduces_the_known_answer_and_the_coverage() -> None:
-    missing = [p for p in (law.MAINCPU, law.ROMSET) if not p.exists()]
+    missing = [p for p in (law.MAINCPU, law.KONGBALL_MAINCPU, law.ROMSET) if not p.exists()]
     if missing:
         pytest.skip(f"--full needs {[str(p.relative_to(law.ROOT)) for p in missing]}")
     report = "\n".join(law.full_report(law.load_capture().kept))
+    agree = re.search(r"capture against the tables: (\d+) of (\d+) scaled axis maps", report)
+    assert agree and int(agree.group(2)) > 0 and agree.group(1) == agree.group(2), report
     for figure in (
         "known answer, axis 0: 192 descriptors, worst |model - real| 0.759",
         "known answer, axis 1: 192 descriptors, worst |model - real| 0.759",
