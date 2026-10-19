@@ -293,8 +293,9 @@ Photos by OldComputers ES unless marked, from the
 - **Why layout A's sockets are empty**, and what its wires and its cut fix: nobody has traced the
   nets.
 - **The P6, P100 and P200/P201 headers**, U300, and the DACs, which no photo identifies.
-- **The pedal.** Wheels & Fire will not accelerate past a low speed without Button 1, which is the
-  original driver's "slow throttle": whether the cabinet's pedal closed it at the end of its travel.
+- **The gear lever.** Button 1 is a low/high gear lever, read from the code and measured, which
+  is the original driver's "slow throttle"; what the cabinet had for it, a lever or a button, is
+  not known.
 
 ## Register reference
 

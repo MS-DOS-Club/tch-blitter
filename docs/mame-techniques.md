@@ -117,11 +117,11 @@ A comment containing two consecutive hyphens is invalid XML: MAME prints `Error 
 configuration file` on stderr, loads the defaults and rewrites the file on exit. A `<port>` binds
 only when its `tag`, `type` and `mask` match the driver's `PORT_BIT`, and its `defvalue` too when
 the field's default under that mask is not zero; otherwise it is skipped without a word
-(`src/emu/ioport.cpp`). The shape, with the values of Wheels & Fire's own `PORT_BIT` for button 1
-(mask `0x0010`, active low, so its default under the mask is the mask itself):
+(`src/emu/ioport.cpp`). The shape, with the values of Wheels & Fire's own `PORT_BIT` for its gear
+lever (button 4, mask `0x0010`, active low, so its default under the mask is the mask itself):
 
 ```xml
-<port tag=":P1" type="P1_BUTTON1" mask="16" defvalue="16">
+<port tag=":P1" type="P1_BUTTON4" mask="16" defvalue="16">
     <newseq type="standard">KEYCODE_DOWN</newseq>
 </port>
 ```

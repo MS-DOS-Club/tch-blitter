@@ -2811,6 +2811,27 @@ ports:
       UP; why the wheel runs the letters backwards is the game''s fold, recorded under
       wheelfir_the_high_score_letters_run_against_the_wheel_by_design, not the paddle''s
       PORT_REVERSE'
+    wheelfir_button_1_is_a_low_high_gear_lever: 'MEASURED on 2026-10-19 on the Mac mini M4, read
+      in the 68000 and checked in races from a coin on the driver with the lever as a toggle: the
+      car''s routine at 0xe7140 reads bit 7 of the latch (P1 button 1) beside the accelerator''s
+      bit 4, and the player car''s structure (0x20692e, the routine''s A2 in a race) holds the
+      speed at +0x38 and the gear at +0x3c, which an automatic gearbox steps up from a table at
+      0xe63f6 (per gear the acceleration and the speed that shifts up). In low (bit 7 set) the
+      routine stops accelerating from 0x180000 (0xe714c) and takes the coasting branch at 0xe7276,
+      which subtracts the gear''s deceleration from the table at 0xe6426 and shifts down below
+      its floor: a race in low settles in gear 1 with the speed between 0x17e0xx and 0x189xxx
+      (frames 850 to 3000, high from 400 to 640 then low; the speed''s only writers 0xe7270 and
+      0xe72a8 beside the start''s, control 0xea1f0 2509 hits). In high it climbs to gear 4 and
+      past 0x460000 (a tap at 400 and another at 1800: gears 0 to 4 and 14 of 44 samples above
+      0x320000 from 700 to 1799, gears 0 to 2 and none above it from 1900). The clamp to gear 2
+      and 0x1c0000 that both branches carry for bit 7 set (0xe724a, and 0xe71b8 under the turbo
+      flag) is reached only when one step crosses from below 0x180000 to above 0x1c0000: zero
+      hits over frames 1000 to 1100 in low. The speed held at exactly 0x320000 is not the low
+      gear: FUN_000e700a writes it at 0xe7090, slowing the car by 0x7d00 a frame down to that
+      floor, in frames 609 to 724 of the same race. So button 1 is a low/high gear lever, and the
+      driver makes it a toggle named Gear Shift, declared as button 4 so its default key is free,
+      with a layout that draws it LOW or HIGH. This revises wheelfir_controls_measured_live, which
+      read the same plateau as a pedal of two steps'
     wheelfir_the_high_score_letters_run_against_the_wheel_by_design: 'MEASURED on 2026-10-11,
       read in the 68000 and checked live. The race and the high-score entry read ONE wheel value,
       so no driver setting can make one of them right and the other wrong. The game quantises

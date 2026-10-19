@@ -86,14 +86,14 @@ exactly as it is written:
 
 | author's point | status |
 |----------------|--------|
-| *real gfx zoom, based on the zoom params, not lookup table* | **closed**: the parameter is an index into 16-byte descriptors the program ROM carries, a shift and two tables, one per scale from 1 to 400 on each axis, which the game's own blit setup reads; the driver follows them, so each step's source is the one the game computes. On the board the zoom appears to be a pair of stall counters |
+| *real gfx zoom, based on the zoom params, not lookup table* | **closed**: the parameters are a stall and a repeat counter per axis, with a clock bit that halves or doubles them, and the driver steps the two counters per source pixel with no table; the descriptors the program ROM carries are those counters written out (*The zoom is not a percentage*, below) |
 | *apply double buffering* | **closed**: they are the two pages of the sprite layer and the bit that declares which one is shown |
 | *fix road/sky (extra bits in the scroll reg.)* | **closed**: the scroll is captured when the Y is written, and the background is a 512 torus that wraps |
 | *bitmap layer clearing* | **closed**: the game does it, with one fill per frame declaring the half page it reuses |
 | *fix wrong coords of sprites rendered into the bitmap layer (intro car)* | **closed**: the car comes out whole; its strip is 632 px on a 512 layer and one slice wraps around |
 | *various gfx size/pos glitches* | **closed**: it asked about gaps and extra rows of pixels, and the seam fix and the exact scale law close those |
 | *implement (and find) layer enable/disable bits* | **open** |
-| *analogue accelerator is really slow* | **the cause is the game's, not the driver's**: the game refuses to accelerate past a low speed unless BUTTON 1 is held, which the attract's own controls screen never names. With that button held the car reaches the top gear on the analogue pedal alone. What stays open is the CABINET, not the emulation: whether the pedal had a switch at the end of its travel wired to that button. In MAME the keyboard binds the two to one key (see *How it is driven in MAME*) |
+| *analogue accelerator is really slow* | **closed, it was the gearbox**: button 1 is a low/high gear lever. In low the automatic gearbox stops short of its top gears and the car at a speed ceiling; in high it climbs to the last gear. The driver names it Gear Shift and makes it a toggle, as a lever stays where it is put (see *How it is driven in MAME*) |
 
 **And the 2 px fill columns are not what is left of that point.** The list asks about gaps and rows
 of pixels; the columns are word 14 blits carrying bit 3 **and** bit 2, that is, a clear that does
@@ -122,6 +122,12 @@ one with
 The percentage is only the index used to look up the descriptor. The routine that does it is at
 `0xe47fe`, and the descriptors, one array per axis, are indexed from `0x400` (x) and `0x1d10` (y),
 16 bytes per scale, one for each scale from 1 to 400.
+
+Those tables are the blitter's own arithmetic written out. Each axis of the blitter has two
+counters set by the fields the game writes: a stall counter that drops one write every few
+cycles and a repeat counter that reads one source pixel twice every few, with a clock bit that
+halves or doubles the result. The descriptors are exactly what those counters produce, so the
+driver steps the counters per source pixel and reads no table from the program ROM.
 
 Checking that the reading is correct does not depend on any interpretation: scale 100 has to
 give the identity and 200 the double, and both do for all 256 columns of a graphics page.
@@ -214,23 +220,22 @@ emulated" means for this board.
 
 The board serves two cabinets, a steering-wheel one and a joystick one, and asks which at the door
 of its service menu; the driver models the wheel cabinet by default and offers the other as the
-`Cabinet` setting in MAME's machine configuration. The game needs button 1 held to accelerate past
-a low speed, so on a keyboard that button shares the accelerator's key: one key is
-full throttle; `make ref SET=wheelfir` plays it. The
-game reads each pedal as a switch,
-so a key takes its pedal to full travel at once, and a tap of left Shift also selects in the menus
-and the high-score table, which accept on the accelerator. On a game controller, `make ref
-SET=wheelfir` loads `ctrlr/gamepad.cfg`, which makes the right trigger alone full throttle (MAME
-names that trigger `SLIDER2`) and the first face button the turbo; the stick and the brake are
-MAME's defaults. Without the file, full throttle is the trigger and the first face button together,
-and the turbo is button 3.
+`Cabinet` setting in MAME's machine configuration. The controls are MAME's defaults, but for one:
+button 1 is the gearbox's low/high lever, so it is a toggle (a tap shifts, and the lever stays
+where it is put), declared as button 4, as Out Run declares its lever, so it takes that button's
+default key and leaves left Ctrl to the accelerator. A race starts in low: shift to high to pass
+the low gears' speed ceiling. A layout draws the lever in a corner of the screen, LOW or HIGH, as
+Out Run's does; MAME's Video Options offer it on either side, over the picture or beside it. The game
+reads each pedal as a switch, so a key takes its pedal to full travel at once, and a tap of the
+accelerator also selects in the menus and the high-score table. `make ref SET=wheelfir` plays it.
 
 | control | keyboard | game controller |
 |---------|----------|-----------------|
 | steering wheel | left / right arrows | left stick |
-| accelerator, full throttle (pedal and button 1) | left Shift | right trigger |
+| accelerator | left Ctrl | right trigger |
 | brake | left Alt | left trigger |
-| turbo (button 3) | Space | first face button (Cross, A) |
+| gear shift, low/high (button 1, declared as button 4) | left Shift | button 4 |
+| turbo (button 3) | Space | button 3 |
 | coin, start, test switch | 5, 1, F2 | |
 
 Up on a joystick would be a second, weaker accelerator (the game folds it into the pedal's bit), so

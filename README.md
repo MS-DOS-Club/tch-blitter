@@ -128,8 +128,8 @@ emulation fault: the board its dump came from was missing the sound ROMs.
 driver says that some courses reach gameplay but crash quickly; here, with its faults fixed, it
 boots, enters a race, and **five of its tracks run to the finish**: the whole of Level 0 and the
 opening of the next two. It shares `tch/wheelfir.cpp` with its siblings, as a subclass that keeps
-what the game does differently on the same board: when the sprite plane flips, when its palette
-takes effect, and how its two CPUs talk.
+what its board, the design's earlier layout, and its game do differently: when the sprite plane
+flips, when its palette takes effect, and how its two CPUs talk.
 
 **`radendurh` keeps its music through the race (flagged with imperfect sound because the
 prototype's code never triggers its sound effects), and the game runs at the 16 MHz the board
