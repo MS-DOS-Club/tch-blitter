@@ -392,7 +392,7 @@ blitter:
           COLOR AND CONVERGENCY, the accelerator for the colour bars and START for the grid; the
           states 0x1d and 0x1e of the menu at 0xddb02). WHAT IT DRAWS, read from the blit log: 336
           background-plane blits of one 16x16 tile, source (301,355) of page 14, at destinations
-          x = 16i (i 0..20) and y = 16j (j 0..15), and the same again at y = 256 + 16j; in the ROM
+          x = 16i (i 0..20) and y = 16j (j 0..15), and 336 more at y = 256 + 16j on the next frame; in the ROM
           the tile''s box has its borders on rows 356 and 371 and columns 301 and 316, so with the
           1:1 first-row skip the plane holds border rows 16j and 16j + 15 (the skip itself is
           confirmed here: without it the bottom border would never be drawn). HOW IT IS SCROLLED:
@@ -413,14 +413,16 @@ blitter:
           race still asks rows 427..429 above its horizon. No reading of the plane puts both right'
         wheelfir_the_three_rows_withdrawn: 'WITHDRAWN on 2026-10-19 from the model, on the
           convergence grid (wheelfir_the_convergence_grid_against_the_three_rows): the background is
-          read at its scroll again, row (line + scroll) & 0x1ff, with no exception at the wrap or the
+          read at its scroll again, row (line + scroll - the line the scroll was written on) & 0x1ff,
+          with no exception at the wrap or the
           scenery boundary. Its symptom in the race comes back and is kept as the open item: three
           rows of ground fill between the sea and the road, and the road starting wider than on the
-          board. The race''s goldens 03, 05 and 06 and the siblings'' were re-blessed on that decision,
+          board. Wheels & Fire''s goldens 01, 03, 04, 05 and 06 and the siblings'' were re-blessed on that decision,
           every pair looked at first (a clean three-row translation, no garbage), and a series of 600
           race frames without the bias shows no fault on the road. The convergence grid is a golden
           of its own (07_convergence), reached with the Test button, red under the old bias'
-        wheelfir_artefact_G_fixed_in_the_model: 'FIXED on 2026-07-31 in the VIDEO MODEL, not by
+        wheelfir_artefact_G_fixed_in_the_model: 'WITHDRAWN since (wheelfir_the_three_rows_withdrawn).
+          FIXED on 2026-07-31 in the VIDEO MODEL, not by
           patching the game (`WFV2_FONDOCRUDO` (switch WITHDRAWN)=1 reverts it): the BACKGROUND plane is read THREE rows
           ahead of the scroll value. Patching the game''s constant (0x1ae -> 0x1ab) was tried first
           and gives the same screen, but it was DISCARDED: a ROM patch explains nothing about the
@@ -1944,7 +1946,7 @@ blitter:
           WHAT THIS DOES NOT ESTABLISH: the top edge. No sprite-plane blit draws on page rows 0..3 in
           either pass (the only blits covering rows 0 and 1 are the 2x2 kick of the main loop at
           (0,0), whose source pixels are 0), and the background plane is read through the scroll and
-          its three-row read-ahead. NO DRIVER CHANGE: the visible area already starts at (0,0).'
+          its three-row read-ahead (withdrawn since: wheelfir_the_three_rows_withdrawn). NO DRIVER CHANGE: the visible area already starts at (0,0).'
         radendur_the_picture_starts_at_0_0: 'RADICAL ENDURO DRAWS ITS FULL-SCREEN PICTURE WITH ITS
           FIRST COLUMN AND ROW AT BITMAP (0,0), DECLARING THE SOURCE ONE ROW ABOVE THE ART. MEASURED on
           2026-10-03 over the blit log of radendur_walks_off_the_sprite_plane, against the gfx ROM: the

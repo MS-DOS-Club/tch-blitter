@@ -59,8 +59,8 @@ the dump, stops on its faults by design.
 The race as its two goldens hold it is the validated reference, not a starting point to improve.
 The displayed page is the bit the game declares, read on line 0 of the frame, and the clearing is
 the game's own (a word-14 fill, and the bit-3 erase that walks its destination in columns); other
-page readings were tried and each broke the race. The driver states the model in its header (THE
-PLANES), at the line-0 sampling in `scanline_timer_callback` and above `screen_update`'s compositing
+page readings were tried and each broke the race. The driver states the model in its header (the
+blitter's two planes), at the line-0 sampling in `scanline_timer_callback` and above `screen_update`'s compositing
 loop.
 
 `goldens/wheelfir/05_race_hud.png` and `06_race_hud2.png` hold that state, two frames because one

@@ -7,7 +7,7 @@ change is has to be looked at before anything is re-blessed.
 |------|-----|
 | `radendurh` | `make verify`. It has to navigate: coin, menu, and reach the starting line |
 | `radendur` | `make verify` too: the board's dump, emulated as it is, pinned short of the starting line |
-| `wheelfir` | `make verify-family`. Fixed attract frames, no controls touched |
+| `wheelfir` | `make verify-family`. Fixed attract frames, and the service mode's grid behind the `press` lines of its `scenes.conf` |
 | `kongball` | the same |
 | `pwball` | the same |
 | `rltennis` | the same |
@@ -68,7 +68,8 @@ with no multiplier ([radendurh/README.md](radendurh/README.md)).
 ## The siblings' goldens are not a validated reference
 
 The two from the Wheels & Fire race (`05_race_hud` and `06_race_hud2`) are the FLOOR: they are
-blessed over a state validated by looking at it, and if they go red the change is wrong.
+blessed over a state validated by looking at it, and a change that turns them red is wrong unless
+it is a decision on the race itself, taken by looking at the before and after.
 
 Power Ball's, Kong Ball's and Reality Tennis's do NOT have that status: they are a record of the
 current emulation, not a validated reference. Power Ball and Kong Ball
