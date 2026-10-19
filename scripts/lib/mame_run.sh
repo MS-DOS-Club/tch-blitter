@@ -9,6 +9,7 @@
 #     --lua <file>     an autoboot Lua script
 #     --snapshots <d>  where snapshots go
 #     --expect <n>     fewer than n images under --snapshots is a run that collected nothing: rc 3
+#     --isolate <d>    the run's cfg and NVRAM under <d>/cfg and <d>/nvram, never the shared ones
 #     --resolution <WxH>
 #     --binary <path>  another build of the set's binary
 #
@@ -16,6 +17,10 @@
 # with a run bounded that far (0 means no bound) (src/frontend/mame/ui/ui.cpp, display_startup_screens): above it the
 # machine waits for a key that nobody unattended will press. `-video none` is never used: on macOS it
 # takes over the whole display instead of opening nothing.
+#
+# An unattended run is given --isolate because MAME writes the cfg on exit and reads it back at the
+# next launch: a toggle's position travels in it (Wheels & Fire's gear lever), so a run that shares
+# the cfg starts where the last player left the lever, and the NVRAM decides how the attract boots.
 
 # mame_binary_for_set <set> -- the binary built for that set's driver.
 mame_binary_for_set() {
@@ -49,7 +54,7 @@ _mame_abs() { case "$1" in /*) printf '%s\n' "$1" ;; *) printf '%s\n' "$PWD/$1" 
 
 # mame_cmd <set> [options] [-- args] -- the command line, one argument per line.
 mame_cmd() {
-    local set="${1:?mame_cmd needs a set}" mode=quick seconds="" lua="" snaps="" res="" bin=""
+    local set="${1:?mame_cmd needs a set}" mode=quick seconds="" lua="" snaps="" res="" bin="" iso=""
     shift
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -59,6 +64,7 @@ mame_cmd() {
             --snapshots)  snaps="$(_mame_abs "${2:?}")"; shift 2 ;;
             --resolution) res="${2:?}"; shift 2 ;;
             --binary)     bin="${2:?}"; shift 2 ;;
+            --isolate)    iso="$(_mame_abs "${2:?}")"; shift 2 ;;
             --expect)     shift 2 ;;
             --)           shift; break ;;
             *) echo "mame_run: unknown option $1" >&2; return 2 ;;
@@ -87,23 +93,26 @@ mame_cmd() {
     [ -z "$lua" ] || args+=(-autoboot_script "$lua")
     # a capture is the emulated screen alone, never a layout's artwork
     [ -z "$snaps" ] || args+=(-snapshot_directory "$snaps" -snapview native)
+    [ -z "$iso" ] || args+=(-cfg_directory "$iso/cfg" -nvram_directory "$iso/nvram")
     printf '%s\n' "${args[@]}" "$@"
 }
 
 # mame_run <set> [options] [-- args] -- runs it; MAME's exit code, or 3 when --expect was not met.
 mame_run() {
-    local set="${1:?mame_run needs a set}" expect="" snaps="" a line
+    local set="${1:?mame_run needs a set}" expect="" snaps="" iso="" a line
     local -a cmd=()
     for ((a = 2; a <= $#; a++)); do
         case "${!a}" in
             --) break ;;
             --expect) a=$((a + 1)); expect="${!a}" ;;
             --snapshots) a=$((a + 1)); snaps="${!a}" ;;
+            --isolate) a=$((a + 1)); iso="${!a}" ;;
         esac
     done
     while IFS= read -r line; do cmd+=("$line"); done < <(mame_cmd "$@")
     [ "${#cmd[@]}" -gt 0 ] || return 2
     [ -z "$snaps" ] || mkdir -p "$snaps"
+    [ -z "$iso" ] || mkdir -p "$iso/cfg" "$iso/nvram"
     local rc=0
     "${cmd[@]}" || rc=$?
     if [ -n "$expect" ]; then

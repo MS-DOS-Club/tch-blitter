@@ -33,7 +33,9 @@ machine did something. The paths under `src/` are MAME's, in the checkout `make 
 - **A clean NVRAM and cfg per run is what makes a run reproducible.** The attract is deterministic
   from a clean start; an EEPROM left by an earlier run changes it. So does a soft reset: RAM the
   game never initialises carries over, and a demo scene seen after resets is reached again only by
-  replaying the same resets from a cold start, not by its frame number.
+  replaying the same resets from a cold start, not by its frame number. The cfg carries a
+  toggle's position too (Wheels & Fire's gear lever), so a run on a shared one starts in whatever
+  gear the last player left. `mame_run.sh`'s `--isolate <dir>` gives a run its own pair.
 - **The SDL build (macOS, Linux) does nothing on SIGTERM**, and a clean exit is what writes `cfg/`
   and `nvram/` (`src/emu/machine.cpp`), so a run stopped with `kill -9` loses them. Under a
   debugger module that blocks while the machine is stopped (the gdbstub), the console's `quit`

@@ -35,9 +35,8 @@ rm -rf "$T"; mkdir -p "$T/a" "$T/b" "$T/states"
 # both passes share the state directory (one saves, the other loads); each starts from a clean
 # cfg and NVRAM of its own
 launch() {
-    mkdir -p "$T/$1/cfg" "$T/$1/nvram"
-    mame_run "$SET" --seconds "$3" --lua "$2" --snapshots "$T/$1" -- -state_directory "$T/states" \
-        -cfg_directory "$T/$1/cfg" -nvram_directory "$T/$1/nvram" > "$T/$1/mame.log" 2>&1 \
+    mame_run "$SET" --seconds "$3" --lua "$2" --snapshots "$T/$1" --isolate "$T/$1" \
+        -- -state_directory "$T/states" > "$T/$1/mame.log" 2>&1 \
         || echo "  pass $1 exited $? ($T/$1/mame.log)"
 }
 

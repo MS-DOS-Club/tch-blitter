@@ -27,7 +27,7 @@ case "$FROM:$TO" in *[!0-9:]*|:*|*:) usage ;; esac
 [ "$TO" -ge "$FROM" ] || usage
 BIN="$(mame_binary_for_set "$SET")" || usage
 case "$DEST" in /*) WORK="$DEST" ;; *) WORK="$PROJECT_DIR/$DEST" ;; esac
-rm -rf "$WORK"; mkdir -p "$WORK/cfg" "$WORK/nvram"
+rm -rf "$WORK"; mkdir -p "$WORK"
 
 echo "  series $SET $FROM..$TO -> $DEST"
 binary_identity "$BIN" "$(source_of_binary "$BIN")"
@@ -47,8 +47,8 @@ SECONDS_TO_RUN=$(awk -v f="$TO" -v r="$REFRESH" 'BEGIN { printf "%d", int(f / r)
 expected=$((TO - FROM + 1))
 rc=0
 mame_run "$SET" --seconds "$SECONDS_TO_RUN" --lua "$WORK/capture.lua" --snapshots "$WORK" \
-    --expect "$expected" --resolution "${SERIES_RESOLUTION:-320x240}" \
-    -- -cfg_directory "$WORK/cfg" -nvram_directory "$WORK/nvram" > "$WORK/mame.log" 2>&1 || rc=$?
+    --expect "$expected" --resolution "${SERIES_RESOLUTION:-320x240}" --isolate "$WORK" \
+    > "$WORK/mame.log" 2>&1 || rc=$?
 [ "$rc" = 0 ] || { echo "FAIL: the run exited $rc ($WORK/mame.log)" >&2; exit "$rc"; }
 
 # MAME adds one snapshot of its own when -seconds_to_run ends; the requested frames are the first ones

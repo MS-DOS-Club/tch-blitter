@@ -4,7 +4,7 @@
 -- name the family gives them, plus the analogue accelerator where a board has one (Wheels & Fire,
 -- whose wheel is analogue too and is left centred, so the car goes straight). Where the set has a
 -- gear lever (Wheels & Fire's Gear Shift, a toggle), the pedal is the throttle and the lever is
--- tapped once into high as the driving starts.
+-- pressed once into high as the driving starts.
 --
 -- It deliberately does not leave the machine (unlike nav-phase.lua, which calls machine:exit()
 -- when its work is done): who decides when to stop is whoever is capturing, with -seconds_to_run.
@@ -35,26 +35,29 @@ end
 
 local coin = field("Coin 1", "Coin")
 local start = field("1 Player Start", "P1 Start", "Start 1")
-local lever = p1.fields["Gear Shift"]
-local throttle = (not lever) and field("P1 Button 1", "P1 Button 1 A", "Button 1") or nil
 local left = field("P1 Left")
 local right = field("P1 Right")
--- An analogue accelerator lives on a port of its own (Wheels & Fire's); where the machine has one,
--- it is pressed to the floor.
-local pedal
-for _, port in pairs(manager.machine.ioport.ports) do
-    pedal = pedal or port.fields["Accelerator Pedal"]
+
+-- The driving model, resolved once: what is floored to accelerate, and whether there is a gear to
+-- shift. Where the set has a lever, the pedal is the accelerator (an analogue port of its own,
+-- pressed to its maximum); elsewhere a button is, pressed.
+local lever = p1.fields["Gear Shift"]
+local accel, floor, accel_name
+if lever then
+    for _, port in pairs(manager.machine.ioport.ports) do
+        accel = accel or port.fields["Accelerator Pedal"]
+    end
+    floor = accel and accel.maxvalue
+    accel_name = "accelerator pedal"
+else
+    accel = field("P1 Button 1", "P1 Button 1 A", "Button 1")
+    floor = 1
+    accel_name = "throttle"
 end
 
 -- A list and not a table keyed by name: a nil value leaves its key out of a table constructor, so
 -- `pairs` would never visit the very control that is missing.
-local needed = { { "coin", coin }, { "start", start } }
-if lever then
-    table.insert(needed, { "accelerator pedal", pedal })
-else
-    table.insert(needed, { "throttle", throttle })
-end
-for _, c in ipairs(needed) do
+for _, c in ipairs({ { "coin", coin }, { "start", start }, { accel_name, accel } }) do
     if not c[2] then
         emu.print_error(string.format("__DRIVE INVALID: control '%s' is missing", c[1]))
         manager.machine:exit()
@@ -64,17 +67,20 @@ end
 
 -- A 40-frame press: plenty for the game to read it, and not so long that it counts twice.
 local HOLD = 40
+local DRIVE_FRAME = START_FRAME + HOLD
+
+-- held over a window rather than for one frame, so a frame the game or a MAME menu misses cannot
+-- lose it; a toggle flips once per press, so the lever goes to high once and stays there
+local function held(f, from) return (f >= from and f < from + HOLD) and 1 or 0 end
 
 _G._drive = emu.add_machine_frame_notifier(function()
     local f = screen:frame_number()
-    coin:set_value((f >= COIN_FRAME and f < COIN_FRAME + HOLD) and 1 or 0)
-    start:set_value((f >= START_FRAME and f < START_FRAME + HOLD) and 1 or 0)
-    if f < START_FRAME + HOLD then return end
+    coin:set_value(held(f, COIN_FRAME))
+    start:set_value(held(f, START_FRAME))
+    if f < DRIVE_FRAME then return end
 
-    if throttle then throttle:set_value(1) end
-    if pedal then pedal:set_value(pedal.maxvalue) end
-    -- the lever stays where a press leaves it, so one frame shifts to high for the rest of the run
-    if lever then lever:set_value((f == START_FRAME + HOLD) and 1 or 0) end
+    accel:set_value(floor)
+    if lever then lever:set_value(held(f, DRIVE_FRAME)) end
     -- A slow weave: going straight leaves the track almost at once, and a full turn every frame
     -- gives a trajectory no player makes, which leads to odd corners of the track.
     if STEER and left and right then

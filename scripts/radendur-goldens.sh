@@ -30,16 +30,15 @@ REFRESH="$(mame_refresh_for_set "$MACHINE")"
 binary_identity "$(mame_binary_for_set "$MACHINE")" "$(source_of_binary "$(mame_binary_for_set "$MACHINE")")"
 WORK="tmp/goldens-$GMODE-$MACHINE"
 LABELED="$WORK/labeled"
-# the passes share cfg and nvram: the race and scenery scenes are reached by navigating after boot
-CFG="$WORK/cfg"; NVRAM="$WORK/nvram"
-rm -rf "$WORK"; mkdir -p "$LABELED" "$CFG" "$NVRAM"
+rm -rf "$WORK"; mkdir -p "$LABELED"
 
 # pass <tag> <seconds> <lua> <expected images>, with the harness's environment before the call
 pass() {
     local rc=0
     mkdir -p "$WORK/$1"
-    mame_run "$MACHINE" --seconds "$2" --lua "$3" --snapshots "$WORK/$1" --expect "$4" \
-        -- -snapname '%i' -cfg_directory "$CFG" -nvram_directory "$NVRAM" > "$WORK/$1.log" 2>&1 || rc=$?
+    # the passes share cfg and nvram: the race and scenery scenes are reached by navigating after boot
+    mame_run "$MACHINE" --seconds "$2" --lua "$3" --snapshots "$WORK/$1" --expect "$4" --isolate "$WORK" \
+        -- -snapname '%i' > "$WORK/$1.log" 2>&1 || rc=$?
     if [ "$rc" != 0 ]; then
         echo "FAIL: the $1 pass exited $rc; nothing is blessed or compared ($WORK/$1.log):"
         cat "$WORK/$1.log"; exit 1

@@ -20,7 +20,21 @@ cd "$PROJECT_DIR"
 
 MACHINE="${MACHINE:-radendurh}"
 GDB_PORT="${GDB_PORT:-23946}"
-MARK="-snapshot_directory $PROJECT_DIR/tmp/snap"
+SNAPS=tmp/snap
+
+# session_mark -- the snapshot pair of the command line mame_cmd builds for this session, which is
+# what tells our instance apart in ps; read from that line, so a change in how it is spelt there
+# cannot leave stop and launch looking for an argument the process no longer carries.
+session_mark() {
+    local line prev=""
+    while IFS= read -r line; do
+        [ "$prev" != -snapshot_directory ] || { printf '%s %s\n' "$prev" "$line"; return 0; }
+        prev="$line"
+    done < <(mame_cmd "$MACHINE" --mode session --snapshots "$SNAPS")
+    echo "radendur-session: no -snapshot_directory in the command line of $MACHINE" >&2
+    return 1
+}
+MARK="$(session_mark)"
 
 # ps and not pgrep -f, which on macOS fails outright when any process holds a non-UTF-8 argument.
 # MSYS2's ps takes no -o and shows no arguments, so on Windows the instance is the pid and the binary
@@ -74,9 +88,9 @@ launch() {
     local log="tmp/$1" res="$2" cmd=() line
     shift 2
     stop
-    mkdir -p tmp/snap
+    mkdir -p "$SNAPS"
     while IFS= read -r line; do cmd+=("$line"); done < <(mame_cmd "$MACHINE" \
-        --mode session --resolution "$res" --snapshots tmp/snap -- -prescale 3 "$@")
+        --mode session --resolution "$res" --snapshots "$SNAPS" -- -prescale 3 "$@")
     [ "${#cmd[@]}" -gt 0 ] || exit 1
     echo "==> $MACHINE ($log)"
     nohup "${cmd[@]}" > "$log" 2>&1 &

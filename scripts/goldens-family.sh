@@ -49,7 +49,6 @@ for SET in $SETS; do
     fi
     binary_identity "$BIN" "$(source_of_binary "$BIN")"
     WORK=$(mktemp -d "tmp/goldens-$SET.XXXXXX"); WORKS+=("$WORK")
-    mkdir -p "$WORK/cfg" "$WORK/nvram"
     FRAMES=$(scenes_of "$CONF" | awk '{print $1}' | tr '\n' ' ')
     LAST=$(scenes_of "$CONF" | awk 'END {print $1}')
     REFRESH="$(mame_refresh_for_set "$SET")"
@@ -80,7 +79,7 @@ end)
 LUA
     rc=0
     mame_run "$SET" --seconds "$SECONDS_TO_RUN" --lua "$WORK/capture.lua" --snapshots "$WORK" \
-        -- -cfg_directory "$WORK/cfg" -nvram_directory "$WORK/nvram" > "$WORK/mame.log" 2>&1 || rc=$?
+        --isolate "$WORK" > "$WORK/mame.log" 2>&1 || rc=$?
     if [ "$rc" != 0 ]; then echo "  $SET: the run exited $rc:"; cat "$WORK/mame.log"; fi
 
     i=0; blessed=0
@@ -101,8 +100,8 @@ LUA
         sound_lua "$WORK/sound-warm.txt" > "$WORK/warm.lua"
         WARM_SECONDS=$(awk -v f="$SOUND_FRAMES" -v r="$REFRESH" 'BEGIN { printf "%d", int(f / r) + 3 }')
         rc=0
-        mame_run "$SET" --seconds "$WARM_SECONDS" --lua "$WORK/warm.lua" \
-            -- -cfg_directory "$WORK/cfg" -nvram_directory "$WORK/nvram" > "$WORK/warm.log" 2>&1 || rc=$?
+        mame_run "$SET" --seconds "$WARM_SECONDS" --lua "$WORK/warm.lua" --isolate "$WORK" \
+            > "$WORK/warm.log" 2>&1 || rc=$?
         if [ "$rc" != 0 ]; then echo "  $SET: the warm boot exited $rc:"; cat "$WORK/warm.log"; fi
         actual=""; missing=0
         for boot in cold warm; do
