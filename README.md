@@ -140,7 +140,7 @@ a fixed scanline.
 **It is the exception on ROMs**: the faults are the prototype's own, so the driver emulates the
 dump as it is (`radendur`, which hangs on them), and a clone set, `radendurh`, loads a maincpu ROM
 with five faults fixed in its code (the fifth puts the props of a row the view scrolls down into
-its top row) and its sound block moved after the drawing as Power Ball and Kong Ball place theirs.
+its top row) and its blitter interrupt handlers opened to the sound's interrupt, as Power Ball's are.
 It fixes the prototype and does not finish it: the zones the prototype's own engine leaves out of
 the view stay out. A layer that draws them, **not the board's behaviour**, stays in the patch table
 as an option of the builder and outside the set. That ROM is built here from the verified dump by

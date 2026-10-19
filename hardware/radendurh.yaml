@@ -1,9 +1,9 @@
 # Radical Enduro, fixed: the maincpu ROM the clone set radendurh loads in place of the dump, in two
-# layers: `fixes`, the prototype's five faults, and `sound`, the sound block placed where Power Ball
-# and Kong Ball place theirs. A third, `scenery`, is optional and not in the set: NOT the board's
-# behaviour, an enhancement (its doc says what it does), built only with `--with scenery --out <zip>`. Not the
-# board's dump: `scripts/radendurh.py` builds it from the verified dump and refuses any other input;
-# `--stage fixes` stops after the first layer.
+# layers: `fixes`, the prototype's five faults, and `sound`, the blitter interrupt handlers opened to
+# the sound's interrupt. A third, `scenery`, is optional and not in the set: NOT the board's
+# behaviour, an enhancement (its doc says what it does), built only with `--with scenery --out
+# <zip>`. Not the board's dump: `scripts/radendurh.py` builds it from the verified dump and refuses
+# any other input; `--stage fixes` stops after the first layer.
 #
 # Every entry carries the words it expects to find; a word that is not there refuses the build.
 # Addresses are in the 68000's program space (the interleaved u21/u19 image).
@@ -154,34 +154,24 @@ layers:
       - {hook: strip_row, at: [0x0e1b76], old: [0x4eb9, 0x000e, 0x0646]}
   - name: sound
     doc: >
-      The prototype starts each sound block at line 0, under the drawing chain the frame opens
-      with, whose handlers hold the 68000 at mask 7 past a line; the level-5 word then comes late
-      and the sound CPU, which takes one word per line with no handshake, reads one twice and
-      runs garbage for good. Power Ball and Kong Ball start the block at line 99, after the
-      chain: their vblank handler loads the line counter with 100 where this one loads 1
-      (registers.yaml: radendurh_the_block_at_line_99_keeps_the_sound). Loading 100 makes the
-      first block after the masked boot start 100 lines after the vblank request the boot left
-      pending, which the next vblank cuts; Power Ball closes the counter's enable right after its
-      own first unmask for the same reason, and radendurh does as it does.
+      The sound CPU takes one word per line from the main, through the line counter's level-5
+      request, with no handshake; a word that comes a line late is read twice and the sound CPU
+      runs garbage for good (registers.yaml: radendur_a_duplicated_word_parks_the_sub_cpu). The
+      prototype's four blitter interrupt handlers open with move #$2700,SR, so while one runs the
+      level-5 request waits, and the slower the blitter, the more of the frame the chain covers.
+      Power Ball's blitter handler leaves the mask where the interrupt set it. Each of the four
+      opens at mask 4 instead: the vblank still cannot interrupt them and the sound's level 5 can,
+      and the streamer shares no state with them
+      (registers.yaml: radendurh_the_blitter_handlers_hold_off_the_sound).
     words:
-      - {addr: 0x00053a, old: [0x0001], new: [0x0064], why: "vblank arms the counter with 100, as the siblings do"}
-    hooks:
-      - label: boot_close
-        doc: >
-          Right after the boot lowers the mask (0xf2106), where the pending vblank request has
-          just been served and opened the block: clear bit 13 of the control port (set bit 12,
-          as the game's own block end writes it), so the line counter stops until the next real
-          vblank, then the instruction it replaces.
-        words: [0x0279, 0xcfff, 0x0020, 0x351c, 0x0079, 0x1000, 0x0020, 0x351c,
-                0x13f9, 0x0020, 0x351c, 0x007c, 0x0000, 0x33fc, 0x0001, 0x0020, 0x1020, 0x4e75]
-        source:
-          - "andi.w  #$cfff,($20351c).l"
-          - "ori.w   #$1000,($20351c).l"
-          - "move.b  ($20351c).l,($7c0000).l"
-          - "move.w  #1,($201020).l"
-          - "rts"
-    sites:
-      - {hook: boot_close, at: [0x0f210a], old: [0x33fc, 0x0001, 0x0020, 0x1020]}
+      - &mask4
+        addr: 0x001f2c
+        old: [0x2700]
+        new: [0x2400]
+        why: "blitter IRQ1 handler opens at mask 4, not 7"
+      - {<<: *mask4, addr: 0x001f44}
+      - {<<: *mask4, addr: 0x001f96}
+      - {<<: *mask4, addr: 0x001fe8}
   - name: scenery
     optional: true
     doc: >

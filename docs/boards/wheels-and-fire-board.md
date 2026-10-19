@@ -134,8 +134,10 @@ volume table, its read opcode and its step, the last four straight into the mixe
 zero meaning "keep what you have". Power Ball
 and Kong Ball start the block at line 99, after the frame's drawing; Wheels & Fire keeps the line
 counter running from line 0 while a game runs; the Radical Enduro dump starts it at line 0, under
-the drawing chain, where one late word desynchronises the sound CPU for good, and `radendurh`
-starts it at line 99 like Power Ball and Kong Ball. There is no way back: the sound CPU never answers,
+the drawing chain, whose blitter interrupt handlers raise the main CPU's mask to 7, so one word comes
+late and desynchronises the sound CPU for good; `radendurh` keeps the line and opens those handlers
+at mask 4, so the sound's interrupt gets through them as it gets through Power Ball's. There is no
+way back: the sound CPU never answers,
 never acknowledges and cannot ask for a word again.
 
 The music is not on the sound CPU at all. The main CPU runs a **ProTracker-style module player**:

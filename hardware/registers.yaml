@@ -3152,6 +3152,28 @@ memory:
       peaked, read every race frame, at 20 with the layer and 18 without (section 4). Taken before
       scenery_strip_row existed: that routine adds a dozen instructions to each row the view adds
       vertically and moves the strip''s stamps from the top row to the row drawn; not re-measured.'
+    radendurh_the_blitter_handlers_hold_off_the_sound: 'MEASURED with a blitter that takes time: an
+      experiment build of the driver, never committed, re-asserting IRQ1 when a modelled duration
+      elapses (pixels walked, per axis the larger of source and destination steps, times a number
+      of clocks of 32 MHz read from the environment, each run stating it in its own log; zero is
+      the instant blit and gave the same frames and the same WAV as the repository binary), under
+      the pixel times of rltennis_the_blit_duration_is_not_established and the fitted one of
+      rltennis_a_fitted_blit_duration_does_not_save_radendurs_sound, the five playable sections
+      raced to the end from a cold boot and an attract from a cold boot. The fixes hold under
+      every law: every race finishes on every ROM tried (a freeze the harness reported was the
+      bike stuck against the scenery, the race clock still stepping and the race finishing when
+      let run). The sound does not: with the block moved to line 99 (radendurh_the_block_at_line_99_keeps_the_sound)
+      it sounds with instant blits and loses sections as the pixel time grows, to silence in every
+      section and in the attract at the fitted one, as the fixes-only ROM is silent under all. The
+      cause is the four blitter interrupt handlers (0x1f2a, 0x1f42, 0x1f94, 0x1fe6), which open
+      with move #$2700,SR (radendur_a_duplicated_word_parks_the_sub_cpu): Power Ball''s handler
+      (0xeabe) leaves the mask where the interrupt set it. Opening the four at mask 4, which keeps
+      the vblank out and lets the level 5 in, keeps the sound on every section and in the attract
+      under every law, with the block at line 0 as the prototype has it or at line 99, and the
+      races finish as before; read before applying, the streamer the level 5 runs (copied to
+      0x203164) touches the line counter, the latch, its own variables and the control shadow
+      0x20351c, none of which the blitter handlers and their callees touch. So the set carries the
+      mask and not the move to line 99.'
     radendurh_scenery_kills_the_sound: 'MEASURED with the scenery layer built on top of the set
       (scripts/radendurh.py --with scenery) against the set alone and against the fixes-only ROM,
       each racing the five playable sections to the end from a cold boot through a navigation harness

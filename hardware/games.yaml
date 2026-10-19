@@ -198,7 +198,7 @@ games:
   page:
     board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A"
     driver_here: "the same `tch/wheelfir.cpp`, with the video model rewritten and the game's differences in `radendur_state`"
-    sets_note: " (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs, built from the dump by `make radendurh` and published on the [Internet Archive](https://archive.org/details/radendurh)"
+    sets_note: " (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its blitter interrupt handlers opened to the sound's interrupt as Power Ball's are, built from the dump by `make radendurh` and published on the [Internet Archive](https://archive.org/details/radendurh)"
     status_note: ": a comment in its driver says that some courses reach gameplay but crash quickly"
   manufacturer:
     value: TCH / Sator Videogames

@@ -2,8 +2,8 @@
 
 The project's correctness gate. No ROM is assembled from source here, so there is no build SHA to
 verify: the gate is the **observed boot state**. `make verify` runs `radendurh`, the clone whose
-maincpu ROM has the prototype's faults fixed and its sound block placed as Power Ball and Kong Ball
-place theirs, and then the dump `radendur` (`../radendur/`). It compares the
+maincpu ROM has the prototype's faults fixed and its blitter interrupt handlers opened to the
+sound's interrupt, and then the dump `radendur` (`../radendur/`). It compares the
 SHA-256 of fixed-frame captures against `checksums.sha256`: the boot through the oracle
 (`scripts/radendur/oracle.lua`), the race start through `nav-phase.lua`, and stretches of the
 desert race through `scenery-shot.lua`.

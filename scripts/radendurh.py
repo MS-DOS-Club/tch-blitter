@@ -1,7 +1,7 @@
 """Builds radendurh, the clone of Radical Enduro whose maincpu ROM has the prototype's faults fixed.
 
-Its table has two layers, the five faults and the sound block moved after the drawing chain as
-Power Ball and Kong Ball place theirs, and an optional third, scenery drawn further round the view
+Its table has two layers, the five faults and the blitter interrupt handlers opened to the sound's
+interrupt as Power Ball's are, and an optional third, scenery drawn further round the view
 (not the board's behaviour), which the set does not carry and `--with scenery` adds.
 
 The board's dump has five faults, four that stop the game and one that draws a scrolled row's props

@@ -40,7 +40,7 @@ fixed in the ROM it boots, enters a game and its playable tracks finish the race
 |---|---|
 | year | no known date |
 | board | [the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A |
-| MAME set | `radendur` (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs, built from the dump by `make radendurh` and published on the [Internet Archive](https://archive.org/details/radendurh) |
+| MAME set | `radendur` (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its blitter interrupt handlers opened to the sound's interrupt as Power Ball's are, built from the dump by `make radendurh` and published on the [Internet Archive](https://archive.org/details/radendurh) |
 | driver in MAME | `tch/wheelfir.cpp` |
 | driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten and the game's differences in `radendur_state` |
 | status in stock MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: a comment in its driver says that some courses reach gameplay but crash quickly |
@@ -50,8 +50,8 @@ fixed in the ROM it boots, enters a game and its playable tracks finish the race
 
 With its faults fixed it boots, enters a game and **five tracks finish the race** with no grey
 screen. The faults that are the prototype's own are fixed in the code of the `radendurh` ROM, never
-by the driver, which emulates the dump as it is. The same ROM starts each sound block after the
-drawing, as Power Ball and Kong Ball do, so the music lasts the race. And there it stops: the set
+by the driver, which emulates the dump as it is. The same ROM lets the sound's interrupt through
+the blitter's interrupt handlers, as Power Ball's handler does, so the music lasts the race. And there it stops: the set
 fixes the prototype, it does not finish it, so the zones of scenery the prototype's engine leaves
 out of the view stay out. A layer that draws them, an enhancement and not the board, is kept in the
 patch table as an option of the builder (`scripts/radendurh.py --with scenery --out <zip>`, a ROM
@@ -223,12 +223,14 @@ sample streamer clocked by SCANLINES. The line counter at `0x7a0000` drives it t
 level-5 IRQ, one word per line to the sound 68000, and bit 13 of the control port enables the
 counter while a block streams.
 
-**Where the block starts decides whether the music lasts.** The sound 68000 takes one word per
-scanline with no handshake, so a word that arrives a line late is a word read twice, and from there
-it runs garbage. The prototype starts each block at the top of the frame, exactly where its drawing
-chain holds the main 68000 with interrupts masked, and on the dump the music dies a few seconds in.
-Power Ball and Kong Ball start the block a hundred lines down, after the drawing; `radendurh` does the
-same, and keeps its music through the race.
+**The blitter's interrupt handlers decide whether the music lasts.** The sound 68000 takes one word
+per scanline with no handshake, so a word that arrives a line late is a word read twice, and from
+there it runs garbage. The prototype starts each block at the top of the frame, where its drawing
+chain runs, and each of the chain's blitter interrupt handlers raises the main 68000's mask to 7, so
+the sound's interrupt waits behind it; on the dump the music dies a few seconds in. Power Ball's
+blitter handler leaves the mask low. `radendurh` opens those handlers at mask 4, which still keeps
+the vblank out and lets the sound in, and keeps its music through the race however long the blitter
+takes to draw.
 
 **Not fixable is the missing per-event triggering.** The game code calls the sound API once, where
 its sibling Power Ball calls it for every event, so the per-event EFFECT call sites were never
