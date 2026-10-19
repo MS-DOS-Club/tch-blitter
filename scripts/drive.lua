@@ -12,7 +12,11 @@
 -- Env: COIN_FRAME (200), START_FRAME (320), STEER=0 to go straight.
 --      The frames are screen:frame_number()'s, the same ones that name the captures.
 
-dofile((debug.getinfo(1, "S").source:match("^@(.*)/[^/]*$") or ".") .. "/lib/analog.lua")
+-- beside this file, or from the repository's root, where MAME runs when a harness inlines this text
+local analog = (debug.getinfo(1, "S").source:match("^@(.*)/[^/]*$") or ".") .. "/lib/analog.lua"
+local probe = io.open(analog)
+if probe then probe:close() else analog = "scripts/lib/analog.lua" end
+dofile(analog)
 
 local COIN_FRAME = tonumber(os.getenv("COIN_FRAME") or "200")
 local START_FRAME = tonumber(os.getenv("START_FRAME") or "320")
