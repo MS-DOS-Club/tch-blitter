@@ -387,6 +387,30 @@ blitter:
           record: the three rows are the game''s own constant (0x1ae = 430) and not a margin that
           moves with the environment. Nothing measured reads a hardware mechanism; the header line
           says what was measured'
+        wheelfir_the_convergence_grid_against_the_three_rows: 'MEASURED on 2026-10-19, the known
+          answer the fit never had: the service mode''s convergence grid (Test, then the wheel to
+          COLOR AND CONVERGENCY, the accelerator for the colour bars and START for the grid; the
+          states 0x1d and 0x1e of the menu at 0xddb02). WHAT IT DRAWS, read from the blit log: 336
+          background-plane blits of one 16x16 tile, source (301,355) of page 14, at destinations
+          x = 16i (i 0..20) and y = 16j (j 0..15), and the same again at y = 256 + 16j; in the ROM
+          the tile''s box has its borders on rows 356 and 371 and columns 301 and 316, so with the
+          1:1 first-row skip the plane holds border rows 16j and 16j + 15 (the skip itself is
+          confirmed here: without it the bottom border would never be drawn). HOW IT IS SCROLLED:
+          the raster handler writes word 11 on every line from 1 to 255 with the value line - 1
+          (255 of 255 writes), at beam x 93..97, and the frame-start writer 0 on line 257. THE
+          SCREEN, rows lit across more than 60% of their width, X untouched as the control: columns
+          0, 15-16, 31-32 .. 319-320, 335 at bias 3 and at bias 0 alike; rows at bias 3: 1, 4, then
+          19-20, 35-36 .. 243-244 (a lone line at 4 and a short first cell, the odd top seen by
+          eye); rows at bias 0 (a temporary build, restored byte for byte and rebuilt): 0-1,
+          16-17, 32-33 .. 240-241, every cell the same height, on both of the frames that alternate
+          the plane''s two copies. So the three rows break a pattern that is regular without them,
+          and the exceptions at the wrap and the scenery boundary are what put the lone line at 4.
+          WHAT DOES NOT DISCRIMINATE: the beam position, since the race''s writes land at the same
+          place in their lines (raster x 93..97, the scenery write on line 0 at x 109); and a move
+          of the picture''s first line, which moves the sky band and the road together. WHAT IS
+          LEFT: the grid''s rows fall one line below its columns (0-1 and 16-17 against 0 and
+          15-16) because every value is written during the line after the one it names; and the
+          race still asks rows 427..429 above its horizon. No reading of the plane puts both right'
         wheelfir_artefact_G_fixed_in_the_model: 'FIXED on 2026-07-31 in the VIDEO MODEL, not by
           patching the game (`WFV2_FONDOCRUDO` (switch WITHDRAWN)=1 reverts it): the BACKGROUND plane is read THREE rows
           ahead of the scroll value. Patching the game''s constant (0x1ae -> 0x1ab) was tried first

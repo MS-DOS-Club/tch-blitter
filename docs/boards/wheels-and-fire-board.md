@@ -285,8 +285,10 @@ Photos by OldComputers ES unless marked, from the
   a real board is unknown.
 - **The vertical source direction** of word 8, taken by symmetry with the horizontal one, and the
   scale index bits of word 10.
-- **The three-row offset**: the driver reads the background three rows ahead of its scroll because
-  that fits every game's picture exactly, and nobody has read why.
+- **The three-row offset**: the driver reads the background three rows ahead of its scroll, fitted
+  to Wheels & Fire's race, where it matches the art and the board's road exactly. The service mode's
+  convergence grid comes out regular without it and not with it, and nobody has read what
+  reconciles the two.
 - **The top edge of the picture.** The left edge is pinned at column 0 by Wheels & Fire's title.
 - **The main RAM decode.** Kong Ball reaches its RAM as `0x21xxxx`, and both a mirror and a second
   bank fit it; the two 32K chips of each layout B board leave no room for a second bank.
