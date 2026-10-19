@@ -24,15 +24,14 @@ SNAPS=tmp/snap
 
 # session_mark -- the snapshot pair of the command line mame_cmd builds for this session, which is
 # what tells our instance apart in ps; read from that line, so a change in how it is spelt there
-# cannot leave stop and launch looking for an argument the process no longer carries.
+# cannot leave stop and launch looking for an argument the process no longer carries. With no binary
+# there is no line, and no instance of ours can be running: the mark is empty and matches nothing.
 session_mark() {
     local line prev=""
     while IFS= read -r line; do
         [ "$prev" != -snapshot_directory ] || { printf '%s %s\n' "$prev" "$line"; return 0; }
         prev="$line"
-    done < <(mame_cmd "$MACHINE" --mode session --snapshots "$SNAPS")
-    echo "radendur-session: no -snapshot_directory in the command line of $MACHINE" >&2
-    return 1
+    done < <(mame_cmd "$MACHINE" --mode session --snapshots "$SNAPS" 2>/dev/null)
 }
 MARK="$(session_mark)"
 
@@ -44,6 +43,7 @@ case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) PID_KEPT=1 ;; *) PID_KEPT=0 ;; esac
 
 own_pids() {
     if [ "$PID_KEPT" = 0 ]; then
+        [ -n "$MARK" ] || return 0
         ps -Ao pid=,args= | awk -v m="$MARK " 'index($0, m) && $2 != "awk" {print $1}'
         return
     fi

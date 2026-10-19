@@ -12,6 +12,8 @@
 -- Env: COIN_FRAME (200), START_FRAME (320), STEER=0 to go straight.
 --      The frames are screen:frame_number()'s, the same ones that name the captures.
 
+dofile((debug.getinfo(1, "S").source:match("^@(.*)/[^/]*$") or ".") .. "/lib/analog.lua")
+
 local COIN_FRAME = tonumber(os.getenv("COIN_FRAME") or "200")
 local START_FRAME = tonumber(os.getenv("START_FRAME") or "320")
 local STEER = os.getenv("STEER") ~= "0"
@@ -79,7 +81,7 @@ _G._drive = emu.add_machine_frame_notifier(function()
     start:set_value(held(f, START_FRAME))
     if f < DRIVE_FRAME then return end
 
-    accel:set_value(floor)
+    if accel.is_analog then analog_hold(accel, floor) else accel:set_value(floor) end
     if lever then lever:set_value(held(f, DRIVE_FRAME)) end
     -- A slow weave: going straight leaves the track almost at once, and a full turn every frame
     -- gives a trajectory no player makes, which leads to odd corners of the track.

@@ -19,6 +19,7 @@ Python runs with `uv run scripts/<name>.py`, and every MAME launch goes through 
 | `savestate-gate.sh` | `make savestate`: a state saved and loaded in a fresh process gives the same frames |
 | `lib/mame_run.sh` | which binary runs each set, and the MAME command line every script launches (a quick unattended window, or a session to play) |
 | `lib/sound_crc.lua` | the goldens' sound check: a CRC-32 of the words the sound CPU writes to its DACs |
+| `lib/analog.lua` | holds an analog input at the value its port reads, for the goldens' `press` lines and `drive.lua` |
 | `lib/mame_src.sh` | where the MAME checkout is, and the commit it is pinned to |
 | `lib/patch_table.sh` | the patches and the MAME files each one owns |
 | `lib/binary.sh` | prints the binary a run uses, and warns when its driver source is newer |

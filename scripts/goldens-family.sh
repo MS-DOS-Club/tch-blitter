@@ -12,7 +12,8 @@
 # A scene behind a control (the service mode's screens) holds it with "press <frame> <frames> <value>
 # <port> <field>" lines, on the same frame count as the scenes: the field is held at that value from
 # that frame for that many and then given back, so a key is pressed once and a wheel or pedal returns
-# to rest; a field the set lacks fails the run.
+# to rest; a field the set lacks fails the run. An analog value is the one the port reads
+# (lib/analog.lua).
 #
 # A set whose sound CPU writes its DACs also declares "sound <cpu> <frames> <dac>..." there: the run
 # that captures the scenes takes a CRC-32 of those writes over its first <frames> (lib/sound_crc.lua),
@@ -73,6 +74,13 @@ for SET in $SETS; do
         }
         sound_lua "$WORK/sound-cold.txt" > "$WORK/capture.lua"
     fi
+    # a press is refused here when a number is not one or it would end after the run does
+    BAD_PRESS=$(awk -v last="$LAST" '$1 == "press" && ($2 !~ /^[0-9]+$/ || $3 !~ /^[0-9]+$/ ||
+        $4 !~ /^[0-9]+$/ || NF < 6 || $2 + $3 > last) { print; exit }' "$CONF")
+    if [ -n "$BAD_PRESS" ]; then
+        echo "  $SET: a press line is malformed or outlasts the last scene ($LAST): $BAD_PRESS"
+        fail=$((fail + 1)); continue
+    fi
     PRESSES=$(awk '$1 == "press" { f = $6; for (i = 7; i <= NF; i++) f = f " " $i
         printf "{ %d, %d, %d, \"%s\", \"%s\" },\n", $2, $3, $4, $5, f }' "$CONF")
     cat >> "$WORK/capture.lua" <<LUA
@@ -85,8 +93,10 @@ local held = {}
 for _, p in ipairs(presses) do
   local port = manager.machine.ioport.ports[p[4]]
   local field = port and port.fields[p[5]]
-  if not field then
-    emu.print_error("__GOLDEN INVALID: no field '" .. p[5] .. "' on port " .. p[4])
+  local why = not field and "no such field"
+      or (field.is_analog and (p[3] < field.minvalue or p[3] > field.maxvalue) and "value out of range")
+  if why then
+    emu.print_error("__GOLDEN INVALID: " .. why .. ": " .. p[4] .. " " .. p[5] .. " " .. p[3])
     manager.machine:exit()
     return
   end
@@ -94,13 +104,17 @@ for _, p in ipairs(presses) do
   held[key] = held[key] or { field = field }
   table.insert(held[key], p)
 end
+dofile("scripts/lib/analog.lua")
+local function hold(field, value)
+  if field.is_analog then analog_hold(field, value) else field:set_value(value) end
+end
 local n = 0
 _G._g = emu.add_machine_frame_notifier(function()
   n = n + 1
   for _, group in pairs(held) do
     local value
     for _, p in ipairs(group) do if n >= p[1] and n < p[1] + p[2] then value = p[3] end end
-    if value then group.field:set_value(value) else group.field:clear_value() end
+    if value then hold(group.field, value) else group.field:clear_value() end
   end
   if target[n] then manager.machine.video:snapshot() end
 end)
@@ -110,11 +124,11 @@ LUA
         --isolate "$WORK" > "$WORK/mame.log" 2>&1 || rc=$?
     if [ "$rc" != 0 ]; then echo "  $SET: the run exited $rc:"; cat "$WORK/mame.log"; fi
 
-    i=0; blessed=0
+    i=0; blessed=0; missing=0
     while read -r frame name _; do
         png=$(printf "%s/%s/%04d.png" "$WORK" "$SET" "$i"); i=$((i + 1))
         if [ ! -f "$png" ]; then
-            echo "  $SET: no capture of frame $frame"; fail=$((fail + 1))
+            echo "  $SET: no capture of frame $frame"; fail=$((fail + 1)); missing=1
         elif [ "$MODE" = bless ]; then
             cp "$png" "goldens/$SET/$name.png"; blessed=$((blessed + 1)); ok=$((ok + 1))
         elif cmp -s "$png" "goldens/$SET/$name.png"; then
@@ -124,6 +138,8 @@ LUA
             cp "$png" "goldens/$SET/$name.actual.png"; fail=$((fail + 1))
         fi
     done < <(scenes_of "$CONF")
+    # the harness says why it stopped the run, and the log goes with the work directory
+    [ "$missing" = 0 ] || grep -E 'INVALID|LUA ERROR' "$WORK/mame.log" | sed 's/^/    /' || true
     if [ -n "$SOUND" ]; then
         sound_lua "$WORK/sound-warm.txt" > "$WORK/warm.lua"
         WARM_SECONDS=$(awk -v f="$SOUND_FRAMES" -v r="$REFRESH" 'BEGIN { printf "%d", int(f / r) + 3 }')
