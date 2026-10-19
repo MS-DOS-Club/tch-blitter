@@ -142,7 +142,7 @@ index dc1cace80a7350a70305a88e4644c44d37500420..6f5c7a567f7ad0f3acfc79fe518e05ae
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1b0b7fe5e 100644
+index 1de425fa1e195edfb805ed038426c2a73bff81ec..2dd4323ad3ffeb33316e698836601f79546e1988 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,21 @@
@@ -265,10 +265,10 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
 +- a background blit covering the whole window is drawn opaque (full_background in do_blit): a
 +  rule fitted to the High Scores photo, which the game asks for transparent with nothing
 +  under it
-+- Radical Enduro's board is the design's earlier layout (A), with hand-made changes nobody
-+  has traced, so its sprite-plane flip, palette and frame scroll are modelled apart
-+  (radendur_state); its palette routing by the plane of each upload stands in for a mechanism
-+  not identified
++- Radical Enduro's sprite-plane flip, palette and frame scroll are modelled apart
++  (radendur_state): its board is the earlier layout (A), hand-modified and untraced, and its
++  game draws inside vblank; which of the two the differences follow is not settled, and its
++  palette routing by the plane of each upload stands in for a mechanism not identified
 +- a line-counter request the main has not taken by vblank is withdrawn: fitted to Power Ball's
 +  warm boot, whose sound CPU otherwise dies on the block header the held request sends
 +- clearing bit 13 of 0x7c0000 also withdraws a pending line-counter request; that the board
@@ -288,7 +288,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  #include "cpu/m68000/m68000.h"
  #include "machine/adc0808.h"
  #include "machine/eepromser.h"
-@@ -101,19 +117,55 @@ BIT N - ( scale < 50% ) ? 1 : 0
+@@ -101,19 +117,56 @@ BIT N - ( scale < 50% ) ? 1 : 0
  #include "machine/timer.h"
  #include "sound/dac.h"
  #include "video/ramdac.h"
@@ -301,6 +301,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
 +
 +#include <algorithm>
 +#include <cstring>
++#include <iterator>
 +
 +#define LOG_DIRECT (1U << 1)
 +
@@ -350,7 +351,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  
  class wheelfir_state : public driver_device
  {
-@@ -122,121 +174,185 @@ public:
+@@ -122,121 +175,185 @@ public:
  		driver_device(mconfig, type, tag),
  		m_maincpu(*this, "maincpu"),
  		m_subcpu(*this, "subcpu"),
@@ -598,7 +599,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  		// wheelfir sets 0xfc0000 and 0xf00000, both of which are out of range of any GFX ROM
  		// kongball sets 0xfc0000 but only on startup
  		m_direct_write_x0 = dst_x0;
-@@ -244,99 +360,119 @@ void wheelfir_state::do_blit()
+@@ -244,99 +361,119 @@ void wheelfir_state::do_blit()
  		m_direct_write_y0 = dst_y0;
  		m_direct_write_y1 = dst_y1;
  		m_direct_write_idx = 0;
@@ -779,7 +780,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  }
  
  void wheelfir_state::do_direct_write(uint8_t sixdat)
-@@ -354,14 +490,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
+@@ -354,14 +491,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
  
  		if (x < 512 && y < 512)
  		{
@@ -796,7 +797,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  {
  	/*
  	Blitter data format ( offset in words, offset in bytes )
-@@ -375,35 +511,45 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -375,35 +512,45 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	3  6    --------
  	   7    YYYYYYYY   Y = dest_y1 bits 0-7
  	4  8    --------
@@ -857,7 +858,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  	if (offset == 0x6)
  	{
  		if (!ACCESSING_BITS_8_15)  //LSB only!
-@@ -413,111 +559,123 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -413,111 +560,123 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  		}
  	}
  
@@ -1032,7 +1033,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  	}
  
  	return data;
-@@ -530,36 +688,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
+@@ -530,36 +689,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
  	machine().bookkeeping().coin_counter_w(1, data & 0x02);
  }
  
@@ -1104,7 +1105,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  
  static INPUT_PORTS_START( pwball )
  	PORT_START("P1")    /* 16bit */
-@@ -600,75 +784,67 @@ INPUT_PORTS_END
+@@ -600,75 +785,67 @@ INPUT_PORTS_END
  static INPUT_PORTS_START( wheelfir )
  	PORT_INCLUDE(pwball)
  
@@ -1217,7 +1218,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  			m_maincpu->set_input_line(3, HOLD_LINE);
  		}
  	}
-@@ -676,90 +852,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
+@@ -676,90 +853,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
  	m_subcpu->set_input_line(1, HOLD_LINE);
  }
  
@@ -1349,7 +1350,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  static const uint32_t texlayout_xoffset[512] = { STEP512(0,8) };
  static const uint32_t texlayout_yoffset[512] = { STEP512(0,4096) };
  
-@@ -780,13 +920,10 @@ static GFXDECODE_START( gfx_wheelfir )
+@@ -780,13 +921,10 @@ static GFXDECODE_START( gfx_wheelfir )
  	GFXDECODE_ENTRY( "gfx1", 0, wheelfir512x5125x8_texlayout, 0x0, 1 )
  GFXDECODE_END
  
@@ -1366,7 +1367,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  
  	config.set_maximum_quantum(attotime::from_hz(12000));
  
-@@ -799,13 +936,13 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -799,13 +937,13 @@ void wheelfir_state::wheelfir(machine_config &config)
  	TIMER(config, "scan_timer").configure_scanline(FUNC(wheelfir_state::scanline_timer_callback), "screen", 0, 1);
  
  	SCREEN(config, m_screen);
@@ -1386,7 +1387,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  	m_screen->set_palette(m_palette);
  
  	GFXDECODE(config, "gfxdecode", m_palette, gfx_wheelfir);
-@@ -816,14 +953,21 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -816,14 +954,21 @@ void wheelfir_state::wheelfir(machine_config &config)
  
  	EEPROM_93C46_16BIT(config, "eeprom");
  
@@ -1410,7 +1411,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  
  void wheelfir_state::kongball(machine_config& config)
  {
-@@ -832,16 +976,227 @@ void wheelfir_state::kongball(machine_config& config)
+@@ -832,16 +977,227 @@ void wheelfir_state::kongball(machine_config& config)
  }
  
  
@@ -1644,7 +1645,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  }
  
  
-@@ -936,7 +1291,6 @@ ROM_START( kongball )
+@@ -936,7 +1292,6 @@ ROM_START( kongball )
  	// There's no PLD at U73 on Kong Ball
  ROM_END
  
@@ -1652,7 +1653,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c21afa452a2b0cf277824d3c9d3383e1
  ROM_START( radendur )
  	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
  	ROM_LOAD16_BYTE( "endu.u19", 0x00001, 0x80000, CRC(d24ca61c) SHA1(64d2648959579d35fbf4c8479c0ff75781d28146) )
-@@ -969,14 +1323,51 @@ ROM_START( radendur )
+@@ -969,14 +1324,51 @@ ROM_START( radendur )
  	ROM_LOAD( "4_pal16v8.u73",  0x000, 0x117, NO_DUMP )
  ROM_END
  
