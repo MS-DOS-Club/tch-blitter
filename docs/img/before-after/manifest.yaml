@@ -34,10 +34,10 @@ pairs:
   frame: 200
   before: kongball-title-before.png
   after: kongball-title-after.png
-  changes_pct: 76.67
+  changes_pct: 60.13
   box: x 16..335, y 20..247
   caption: Kong Ball's title, which the original driver paints over the leftovers of the previous screen
-    instead of over the gorilla. 76.7% of the pixels change.
+    instead of over the gorilla. 60.1% of the pixels change.
   alt: 'Kong Ball: the title screen'
 visible_area_note: 'The original driver declares 248 visible lines and this one 252. The four rows of
   difference carry content in the three pairs, so they are not a margin: they are image the original

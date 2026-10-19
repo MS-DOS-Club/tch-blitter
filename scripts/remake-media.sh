@@ -31,14 +31,15 @@ gif kongball 197  300 2 kongball-title.gif
 gif kongball 897  300 2 kongball-match.gif
 gif kongball 999  252 1 kongball-play.gif scripts/drive.lua
 
-# after <frame> <id>: one frame of the attract, at the screen's native size
+# after <set> <frame> <id>: one frame of the attract, at the screen's native size
 WORK=tmp/remake-media
 after() {
-    ./scripts/frame-series.sh wheelfir "$1" "$1" "$WORK" > /dev/null
-    cp "$(printf '%s/wheelfir/f%05d.png' "$WORK" "$1")" "docs/img/before-after/$2-after.png"
+    ./scripts/frame-series.sh "$1" "$2" "$2" "$WORK" > /dev/null
+    cp "$(printf '%s/%s/f%05d.png' "$WORK" "$1" "$2")" "docs/img/before-after/$3-after.png"
 }
-after 474  wheelfir-cars
-after 1767 wheelfir-sky
-after 2266 wheelfir-repeated-road
+after wheelfir 474  wheelfir-cars
+after wheelfir 1767 wheelfir-sky
+after wheelfir 2266 wheelfir-repeated-road
+after kongball 196  kongball-title
 rm -rf "$WORK"
 echo "==> remade; then: uv run scripts/gen-gif-manifest.py, and the before/after manifest's figures"

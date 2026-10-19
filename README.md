@@ -90,7 +90,7 @@ In-race, the original driver leaves the sky unpainted: no horizon, no mountain, 
 <td align="center"><b>here</b></td>
 </tr></table>
 
-Kong Ball's title, which the original driver paints over the leftovers of the previous screen instead of over the gorilla. 76.7% of the pixels change. (`kongball`, frame 200)
+Kong Ball's title, which the original driver paints over the leftovers of the previous screen instead of over the gorilla. 60.1% of the pixels change. (`kongball`, frame 200)
 
 <!-- end of generated block -->
 
