@@ -4,8 +4,7 @@
 #
 #   mame_run <set> [options] [-- extra MAME arguments]
 #     --mode quick     a small unthrottled window for unattended runs (the default); needs --seconds
-#     --mode session   a window at real speed for somebody to play, with -log; Wheels & Fire also
-#                      loads its game-controller map, ctrlr/gamepad.cfg
+#     --mode session   a window at real speed for somebody to play, with -log
 #     --seconds <n>    emulated seconds to run (-seconds_to_run)
 #     --lua <file>     an autoboot Lua script
 #     --snapshots <d>  where snapshots go
@@ -82,9 +81,6 @@ mame_cmd() {
             # the drivers log through logerror, as MAME's C++ guide asks, so a played run keeps its
             # log: error.log in the working directory says, among other things, which scale law ran
             args+=(-resolution "${res:-960x720}" -log)
-            # MAME stops on a controller file with no section for the set, so only the set it maps
-            # loads it
-            [ "$set" != wheelfir ] || args+=(-ctrlrpath "$PROJECT_DIR/ctrlr" -ctrlr gamepad)
             [ -z "$seconds" ] || args+=(-seconds_to_run "$seconds") ;;
         *) echo "mame_run: unknown mode $mode (quick or session)" >&2; return 2 ;;
     esac
