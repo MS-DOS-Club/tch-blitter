@@ -175,7 +175,7 @@ layers:
   - name: scenery
     optional: true
     doc: >
-      NOT THE BOARD'S BEHAVIOUR, an enhancement of radendurh. The prototype's sweeps hand each drawer
+      NOT THE BOARD'S BEHAVIOUR, an enhancement over the set. The prototype's sweeps hand each drawer
       the entry range of the zone records their cursors accepted (a record: box x0, y0, x1, y1 in
       cells at +0..+6, its entries from index `c` at +12 up to `a` at +10, 44 bytes each), and a
       strip of the background is drawn from that range alone; a prop of a record the sweep did not

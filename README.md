@@ -36,7 +36,7 @@ plus a fixed clone of one of them, one shared video architecture.
 | [Wheels & Fire](docs/games/wheels-and-fire.md) | `wheelfir` | 1997 * | TCH | NOT_WORKING | works; the whole game plays |
 | [Power Ball](docs/games/power-ball.md) | `pwball` | _unknown_ (`199?`) | TCH | NOT_WORKING (prototype), commented "mostly complete" | works; the whole game plays |
 | [Kong Ball](docs/games/kong-ball.md) | `kongball` | 1997 | TCH / Digital Dreams Multimedia | NOT_WORKING (prototype), no sound | works, with no sound; plays to its game over |
-| [Radical Enduro](docs/games/radical-enduro.md) | `radendur` | _unknown_ (`199?`) | TCH / Sator Videogames | NOT_WORKING (early prototype) | NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurh clone, its maincpu ROM fixed and built from the dump, finishes a race with its music (a few silent stretches) at its real 16 MHz |
+| [Radical Enduro](docs/games/radical-enduro.md) | `radendur` | _unknown_ (`199?`) | TCH / Sator Videogames | NOT_WORKING (early prototype) | NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurh clone, its maincpu ROM fixed and built from the dump, finishes a race with its music at its real 16 MHz |
 
 `*` from an external source, not verifiable in the binary. `⚠` sources contradict each other: the game's page says which ones and why this value is the published one. `199?` is MAME's own: the year of those games was lost, and is not filled in.
 <!-- end of generated block -->
@@ -131,16 +131,16 @@ opening of the next two. It shares `tch/wheelfir.cpp` with its siblings, as a su
 what the game does differently on the same board: when the sprite plane flips, when its palette
 takes effect, and how its two CPUs talk.
 
-**`radendurh` keeps its music through the race (with a few silent stretches, so it is flagged with
-imperfect sound), and the game runs at the 16 MHz the board
+**`radendurh` keeps its music through the race (flagged with imperfect sound because the
+prototype's code never triggers its sound effects), and the game runs at the 16 MHz the board
 specifies** with no clock multiplier. Both come from reading the 68000 rather than guessing: the sound is a sample streamer clocked by scanlines,
 and the blitter interrupt is a **held level** timed by the game's own interrupt mask, not a pulse on
 a fixed scanline.
 
 **It is the exception on ROMs**: the faults are the prototype's own, so the driver emulates the
 dump as it is (`radendur`, which hangs on them), and a clone set, `radendurh`, loads a maincpu ROM
-with five faults fixed in its code (the fifth puts the props of a row the view scrolls down into
-its top row) and its blitter interrupt handlers opened to the sound's interrupt, as Power Ball's are.
+with five faults fixed in its code (the fifth stamped the props of the row the view scrolls down into
+on its top row) and its blitter interrupt handlers opened to the sound's interrupt, as Power Ball's are.
 It fixes the prototype and does not finish it: the zones the prototype's own engine leaves out of
 the view stay out. A layer that draws them, **not the board's behaviour**, stays in the patch table
 as an option of the builder and outside the set. That ROM is built here from the verified dump by

@@ -56,7 +56,7 @@ fixes the prototype, it does not finish it, so the zones of scenery the prototyp
 out of the view stay out. A layer that draws them, an enhancement and not the board, is kept in the
 patch table as an option of the builder (`scripts/radendurh.py --with scenery --out <zip>`, a ROM
 other than the set's), and besides drawing what the prototype never drew it slows the race clock,
-and on the first jungle track, where its frames run latest, the sound dies.
+and on the first jungle track, where its frames run latest, the sound dies with it.
 
 The root causes, all read from the code rather than guessed:
 
@@ -241,9 +241,8 @@ them, which is the prototype being unfinished rather than an emulation gap.
 **What is open**, said plainly rather than left out:
 
 - The bike's engine sound is not heard, although its samples are in the ROMs.
-- On `radendurh` the sound CPU still reads a word twice now and then, which is why the clone is
-  flagged with imperfect sound, and a few silent stretches repeat at the same places of the attract
-  and the race.
+- `radendurh` is flagged with imperfect sound for the point above: the prototype's code never
+  triggers its sound effects.
 - The two attract screens right after a race keep part of the race's background. That is what the
   game draws: this board does not clear on its own, and the game's own plane fills
   are modelled.

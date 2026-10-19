@@ -51,7 +51,7 @@ Python runs with `uv run scripts/<name>.py`, and every MAME launch goes through 
 | `wheelfir-blit-law.py` | re-derives the zoom law record's figures from `hardware/evidence/wheelfir-blit-law/`; `--full` adds the ROM's descriptor tables |
 | `signatures.py` | the teams' signatures in the ROMs |
 | `drive.lua` | inserts a coin, starts and drives, on any set |
-| `radendur/oracle.lua`, `radendur/nav-phase.lua`, `radendur/scenery-shot.lua` | the harnesses of Radical Enduro's goldens |
+| `radendur/oracle.lua`, `radendur/nav-phase.lua`, `radendur/race-shot.lua` | the harnesses of Radical Enduro's goldens |
 
 ## The disassembly
 

@@ -2023,7 +2023,7 @@ blitter:
           the game declares per blit, not that the FPGAs count that way.
           NO DRIVER CHANGE and no change of level: the fields were already confirmed.'
         wheelfir_the_scale_tables_are_the_counters: 'THE GAME''S SCALE TABLES ARE THE TWO COUNTERS
-          WRITTEN OUT, which is what lets the driver scale from the register fields alone. A
+          WRITTEN OUT, READ on 2026-10-19 from the program ROMs, which is what lets the driver scale from the register fields alone. A
           descriptor of wf_zoom_desc_x maps a source offset x as (2x + A[x] - B[2x + A[x]]) >> shift,
           and with r and s the five low bits of its repeat and stall fields its tables are
           A[x] = 2 * floor(x / (r - 1)) and, as words, B[u] = 2 * floor(u / (s + 1)), a field of 0
@@ -2896,7 +2896,8 @@ ports:
       5987 blocks; the boot''s close lands on line 138. The silent seconds repeat at the same
       places in attract and in a race with the sub idle. The dump keeps its 1 and its goldens 5/5;
       radendurh''s 05_desert_scenery moved in its speedometer needle only, the view and the
-      scenery identical.'
+      scenery identical. Superseded for the set by radendurh_the_blitter_handlers_hold_off_the_sound:
+      the set no longer carries this layer, and the counts above are the instrument that record reuses.'
     pwball_bit_13_of_0x7c0000_enables_the_counter: 'MEASURED on 2026-10-12, every write to 0x7c0000''s high byte
       logged with its frame and line beside the latch and the counter, each set from a cold boot
       through a coin and START. Bits 13:12 in the steady state: Power Ball and Kong Ball 10 at
@@ -3150,9 +3151,9 @@ memory:
       goldens pass unchanged with the layer (radendur-goldens.sh verify radendurh, rc 0). The
       per-cell lists the drawers append to (a 0x40-byte cell from 0x203522, room for 29 entries)
       peaked, read every race frame, at 20 with the layer and 18 without (section 4). Taken before
-      scenery_strip_row existed: that routine adds a dozen instructions to each row the view adds
+      the strip-row routine existed (strip_row, in the fixes layer): that routine adds a dozen instructions to each row the view adds
       vertically and moves the strip''s stamps from the top row to the row drawn; not re-measured.'
-    radendurh_the_blitter_handlers_hold_off_the_sound: 'MEASURED with a blitter that takes time: an
+    radendurh_the_blitter_handlers_hold_off_the_sound: 'MEASURED on 2026-10-19 with a blitter that takes time: an
       experiment build of the driver, never committed, re-asserting IRQ1 when a modelled duration
       elapses (pixels walked, per axis the larger of source and destination steps, times a number
       of clocks of 32 MHz read from the environment, each run stating it in its own log; zero is
@@ -3174,8 +3175,8 @@ memory:
       0x203164) touches the line counter, the latch, its own variables and the control shadow
       0x20351c, none of which the blitter handlers and their callees touch. So the set carries the
       mask and not the move to line 99.'
-    radendurh_scenery_kills_the_sound: 'MEASURED with the scenery layer built on top of the set
-      (scripts/radendurh.py --with scenery) against the set alone and against the fixes-only ROM,
+    radendurh_scenery_kills_the_sound: 'MEASURED on 2026-10-19 with the scenery layer built on top of the set
+      (scripts/radendurh.py --with scenery --out) against the set alone and against the fixes-only ROM,
       each racing the five playable sections to the end from a cold boot through a navigation harness
       not kept in this tree (the section chosen by RIGHT presses in the menu and read back in RAM,
       throttle held, steering swept), the seconds with sound counted from a -wavwrite recording as in

@@ -6,7 +6,7 @@ maincpu ROM has the prototype's faults fixed and its blitter interrupt handlers 
 sound's interrupt, and then the dump `radendur` (`../radendur/`). It compares the
 SHA-256 of fixed-frame captures against `checksums.sha256`: the boot through the oracle
 (`scripts/radendur/oracle.lua`), the race start through `nav-phase.lua`, and stretches of the
-desert race through `scenery-shot.lua`.
+desert race through `race-shot.lua`.
 
 A **FAIL is never cosmetic**: it is either a regression, or an advance of the boot that has to be
 re-blessed on purpose with `make goldens` (`SET=radendur` for the dump's).
@@ -25,7 +25,7 @@ dump, emulated as it is, stops on its own faults; its baseline is `../radendur/`
 | `01_boot_5s`, `02_boot_10s` | intro |
 | `03_boot_15s` | attract: the globe, the logos and the difficulty selector. It guards the logo colours. |
 | `04_race_start` | **the desert starting line, bike stopped**. It is the gate of the colour IN A RACE: the first four cover intro and attract only. The section is verified in RAM before the picture (`nav-phase.lua`), so the start of another phase cannot slip in. |
-| `05_desert_scenery` | **the desert mid-race, at the stage tent's view**, driven by `scripts/drive.lua`: the tent is one of the zones the prototype's own engine leaves out, and the set leaves it so (the builder's optional scenery layer, outside the set, draws it). `scripts/radendur/scenery-shot.lua` writes the game's view origin with it, and the gate refuses a capture taken anywhere else. |
+| `05_desert_tent` | **the desert mid-race, at the stage tent's view**, driven by `scripts/drive.lua`: the tent is one of the zones the prototype's own engine leaves out, and the set leaves it so (the builder's optional scenery layer, outside the set, draws it). `scripts/radendur/race-shot.lua` writes the game's view origin with it, and the gate refuses a capture taken anywhere else. |
 | `06_desert_descent` | **the desert while the view scrolls DOWN the track**, driven the same way: the bottom row the view adds keeps its trees, palm and fence, which radendurh's fifth fix, `strip_row`, draws in the row it belongs to (the prototype's strip drawer leaves it bare). |
 
 If a change to the palette model alters any of those screens, the golden fails on purpose and is re-blessed once

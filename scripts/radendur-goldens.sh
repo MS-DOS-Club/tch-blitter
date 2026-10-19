@@ -66,14 +66,14 @@ OUT="$PROJECT_DIR/$WORK/race.harness.log" shot race 60 scripts/radendur/nav-phas
 # Mid-race, radendurh only (the dump stops on its faults): a frame of the desert race, accepted
 # only where the game's view origin says it is; drive.lua's inputs are pinned because they decide
 # where the bike is at that frame.
-scenery() {
+race_shot() {
     SHOT_FRAME="$2" COIN_FRAME=200 START_FRAME=320 STEER=1 OUT="$PROJECT_DIR/$WORK/$1.harness.log" \
         shot "$1" "$(awk -v f="$2" -v r="$REFRESH" 'BEGIN { printf "%d", int(f / r) + 5 }')" \
-            scripts/radendur/scenery-shot.lua "^SHOT f=$2 view $3\$" "$4"
+            scripts/radendur/race-shot.lua "^SHOT f=$2 view $3\$" "$4"
 }
 if [ "$MACHINE" = radendurh ]; then
-    scenery scenery 2025 "x=27 y=860" 05_desert_scenery
-    scenery descent 1800 "x=5 y=869" 06_desert_descent
+    race_shot tent 2025 "x=27 y=860" 05_desert_tent
+    race_shot descent 1800 "x=5 y=869" 06_desert_descent
 fi
 
 if [ "$GMODE" = bless ]; then

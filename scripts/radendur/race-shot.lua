@@ -1,4 +1,4 @@
--- scenery-shot.lua -- drives the desert race (../drive.lua) and photographs one frame of it, for the
+-- race-shot.lua -- drives the desert race (../drive.lua) and photographs one frame of it, for the
 -- mid-race goldens: the boot and starting-line goldens never reach a stretch where the view scrolls
 -- or where the prototype's engine leaves a zone out.
 --
