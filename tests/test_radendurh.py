@@ -45,11 +45,14 @@ def image(roms: dict[str, bytes], t: dict[str, Any]) -> bytes:
     return bytes(img)
 
 
-def hooks_laid_out(t: dict[str, Any]) -> list[tuple[dict[str, Any], int, dict[str, int]]]:
-    """(layer, its block's base, its labels), laid out by the generator's own function."""
+def hooks_laid_out(
+    t: dict[str, Any], extra: tuple[str, ...] = ("scenery",)
+) -> list[tuple[dict[str, Any], int, dict[str, int]]]:
+    """(layer, its block's base, its labels) for the layers a build with `extra` applies, laid out
+    by the generator's own function; the default lays out every layer."""
     out = []
     base = t["hook_base"]
-    for layer in t["layers"]:
+    for layer in rh.selected(t, extra):
         labels, block = rh.layout(layer, base)
         out.append((layer, base, labels))
         base += len(block)
@@ -153,11 +156,12 @@ def test_another_dump_is_refused(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 
 
 @needs_rom
-def test_the_image_holds_what_the_table_says() -> None:
+@pytest.mark.parametrize("extra", [(), ("scenery",)])
+def test_the_image_holds_what_the_table_says(extra: tuple[str, ...]) -> None:
     t = table()
-    img = image(rh.build(t, None)[0], t)
+    img = image(rh.build(t, None, extra)[0], t)
     checked = 0
-    for layer, base, labels in hooks_laid_out(t):
+    for layer, base, labels in hooks_laid_out(t, extra):
         _, block = rh.layout(layer, base)
         assert img[base : base + len(block)] == block, layer["name"]
         for w in layer.get("words", []):
@@ -225,7 +229,7 @@ def test_a_stage_differs_from_the_full_build_only_where_later_layers_write() -> 
     first = image(rh.build(t, t["layers"][0]["name"])[0], t)
     full = image(rh.build(t, None)[0], t)
     later: set[int] = set()
-    for layer, base, _ in hooks_laid_out(t)[1:]:
+    for layer, base, _ in hooks_laid_out(t, ())[1:]:
         later.update(range(base, base + len(rh.layout(layer, base)[1])))
         for site in layer.get("sites", []):
             for at in site["at"]:
@@ -241,3 +245,52 @@ def test_the_build_is_reproducible() -> None:
     a, _ = rh.build(table(), None)
     b, _ = rh.build(table(), None)
     assert a and rh.zipped(a) == rh.zipped(b)
+
+
+def test_the_set_leaves_the_optional_layer_out() -> None:
+    names = [layer["name"] for layer in rh.selected(table())]
+    assert "scenery" not in names and names == ["fixes", "sound"]
+    assert [layer["name"] for layer in rh.selected(table(), ("scenery",))][-1] == "scenery"
+
+
+@needs_rom
+def test_the_default_build_is_what_the_driver_declares_and_carries_no_scenery() -> None:
+    t = table()
+    roms, done = rh.build(t, None)
+    assert done == ["fixes", "sound"]
+    assert {n: rh.sums(d) for n, d in roms.items()} == rh.declared(t["clone"])
+    img, dump = image(roms, t), bytes(rh.load_image(t))
+    scenery = next(layer for layer in t["layers"] if layer["name"] == "scenery")
+    for site in scenery["sites"]:
+        for at in site["at"]:
+            n = 2 * len(site["old"])
+            assert img[at : at + n] == dump[at : at + n], f"scenery site {at:06x} written"
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["--with", "nope", "--out", "x.zip"],
+        ["--with", "fixes", "--out", "x.zip"],
+        ["--with", "scenery"],
+        ["--with", "scenery", "--check"],
+        ["--stage", "fixes"],
+        ["--stage", "nope", "--out", "x.zip"],
+        ["--stage", "fixes", "--with", "scenery", "--out", "x.zip"],
+    ],
+)
+def test_a_command_line_without_meaning_is_refused(argv: list[str]) -> None:
+    assert rh.main(argv) == 2
+
+
+def test_an_optional_layer_before_the_set_is_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    t = table()
+    t["layers"] = [t["layers"][-1], *t["layers"][:-1]]
+    import yaml
+
+    bad = tmp_path / "t.yaml"
+    bad.write_text(yaml.safe_dump(t), encoding="utf-8")
+    with pytest.raises(rh.InvalidError, match="after an optional layer"):
+        rh.load_table(bad)

@@ -1,6 +1,6 @@
 -- scenery-shot.lua -- drives the desert race (../drive.lua) and photographs one frame of it, for the
--- goldens that watch radendurh's scenery layer: the boot and starting-line goldens never
--- reach a stretch where that layer draws anything the prototype's own engine would not.
+-- mid-race goldens: the boot and starting-line goldens never reach a stretch where the view scrolls
+-- or where the prototype's engine leaves a zone out.
 --
 -- It writes `SHOT f=<frame> view x=<x> y=<y>` to OUT when it takes the picture, so a bless can
 -- refuse a capture of the wrong place: the view origin is the game's own (0x201736, 0x201738).

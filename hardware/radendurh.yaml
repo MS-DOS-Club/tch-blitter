@@ -1,8 +1,9 @@
-# Radical Enduro, fixed: the maincpu ROM the clone set radendurh loads in place of the dump, in three
-# layers: `fixes`, the prototype's four faults; `scenery`, NOT the board's behaviour, an enhancement
-# (its doc says what it does); `sound`, the sound block placed where Power Ball and Kong Ball
-# place theirs. Not the board's dump: `scripts/radendurh.py` builds it from the
-# verified dump and refuses any other input; `--stage fixes` stops after the first layer.
+# Radical Enduro, fixed: the maincpu ROM the clone set radendurh loads in place of the dump, in two
+# layers: `fixes`, the prototype's five faults, and `sound`, the sound block placed where Power Ball
+# and Kong Ball place theirs. A third, `scenery`, is optional and not in the set: NOT the board's
+# behaviour, an enhancement (its doc says what it does), built only with `--with scenery --out <zip>`. Not the
+# board's dump: `scripts/radendurh.py` builds it from the verified dump and refuses any other input;
+# `--stage fixes` stops after the first layer.
 #
 # Every entry carries the words it expects to find; a word that is not there refuses the build.
 # Addresses are in the 68000's program space (the interleaved u21/u19 image).
@@ -11,8 +12,9 @@
 # affected access becomes a `jsr` to a routine in `hooks`, which applies the correction and returns;
 # an 8-byte site gets the 6-byte `jsr` plus a `nop`. A site marked `sets_flags` is followed by an
 # instruction that reads the condition codes, and its routine leaves them as the replaced
-# instruction would; after every other site the next instruction sets its own. The scenery sites
-# replace a drawer call with a call that ends in that same drawer, or that calls it and returns.
+# instruction would; after every other site the next instruction sets its own. strip_row and the
+# scenery sites replace a drawer call with a call that ends in that same drawer, or that calls it
+# and returns.
 
 target:
   set: radendur
@@ -28,7 +30,7 @@ hook_limit: 0x0f5a00
 
 layers:
   - name: fixes
-    doc: The prototype's four faults.
+    doc: The prototype's five faults.
     words:
       # FAULT 1: the BT478 uploader at 0x7b6 (called from the vblank handler) returns with A0
       # moved, and the object drawer at 0xe03c8 uses A0 as a live cursor with interrupts on. Both
@@ -107,6 +109,34 @@ layers:
           - "move.w  d0,($20173a).l"
           - ".out: move.w (a7)+,d0"
           - "rts"
+      - label: strip_row
+        doc: >
+          FAULT 5: the vertical scroll's strip. The strip drawer 0xe0646 stamps its row into the
+          grid row that 0x207922 points at, the view's top, while its caller hands it the new row,
+          the top one when the view moves up and the grid's last (the origin plus 8: the grid holds
+          9 rows) when it moves down. Moving down, the drawer leaves that row at its base tiles and
+          stamps its props into the top row (registers.yaml: radendurh_reverse_scroll_cut). This
+          points 0x207922 at the row being drawn for the call, the same addressing the row reset
+          0xe059a uses, and puts it back; moving up the offset is 0 and nothing changes. D0 is left
+          as the drawer leaves it.
+        words: [0x2f39, 0x0020, 0x7922, 0x2f00, 0x302f, 0x000c, 0x9079, 0x0020, 0x1738, 0xeb48,
+                0x48c0, 0xd1b9, 0x0020, 0x7922, 0x201f, 0x554f, 0x3f2f, 0x000a, 0x4eb9, 0x000e,
+                0x0646, 0x584f, 0x23df, 0x0020, 0x7922, 0x4e75]
+        source:
+          - "move.l  ($207922).l,-(a7)"
+          - "move.l  d0,-(a7)"
+          - "move.w  $c(a7),d0"
+          - "sub.w   ($201738).l,d0"
+          - "lsl.w   #5,d0"
+          - "ext.l   d0"
+          - "add.l   d0,($207922).l"
+          - "move.l  (a7)+,d0"
+          - "subq.w  #2,a7"
+          - "move.w  $a(a7),-(a7)"
+          - "jsr     ($e0646).l"
+          - "addq.w  #4,a7"
+          - "move.l  (a7)+,($207922).l"
+          - "rts"
     sites:
       - {hook: env_count, sets_flags: true, at: [0x0e15f0], old: [0x3839, 0x0020, 0x1730]}
       - hook: drawer_max
@@ -121,20 +151,53 @@ layers:
       - hook: min_indexed
         old: [0x33f0, 0x000a, 0x0020, 0x173a]
         at: [0x0e19bc, 0x0e1b60, 0x0e1cf0, 0x0e1e80, 0x0e1ff4, 0x0e2188, 0x0e2388]
+      - {hook: strip_row, at: [0x0e1b76], old: [0x4eb9, 0x000e, 0x0646]}
+  - name: sound
+    doc: >
+      The prototype starts each sound block at line 0, under the drawing chain the frame opens
+      with, whose handlers hold the 68000 at mask 7 past a line; the level-5 word then comes late
+      and the sound CPU, which takes one word per line with no handshake, reads one twice and
+      runs garbage for good. Power Ball and Kong Ball start the block at line 99, after the
+      chain: their vblank handler loads the line counter with 100 where this one loads 1
+      (registers.yaml: radendurh_the_block_at_line_99_keeps_the_sound). Loading 100 makes the
+      first block after the masked boot start 100 lines after the vblank request the boot left
+      pending, which the next vblank cuts; Power Ball closes the counter's enable right after its
+      own first unmask for the same reason, and radendurh does as it does.
+    words:
+      - {addr: 0x00053a, old: [0x0001], new: [0x0064], why: "vblank arms the counter with 100, as the siblings do"}
+    hooks:
+      - label: boot_close
+        doc: >
+          Right after the boot lowers the mask (0xf2106), where the pending vblank request has
+          just been served and opened the block: clear bit 13 of the control port (set bit 12,
+          as the game's own block end writes it), so the line counter stops until the next real
+          vblank, then the instruction it replaces.
+        words: [0x0279, 0xcfff, 0x0020, 0x351c, 0x0079, 0x1000, 0x0020, 0x351c,
+                0x13f9, 0x0020, 0x351c, 0x007c, 0x0000, 0x33fc, 0x0001, 0x0020, 0x1020, 0x4e75]
+        source:
+          - "andi.w  #$cfff,($20351c).l"
+          - "ori.w   #$1000,($20351c).l"
+          - "move.b  ($20351c).l,($7c0000).l"
+          - "move.w  #1,($201020).l"
+          - "rts"
+    sites:
+      - {hook: boot_close, at: [0x0f210a], old: [0x33fc, 0x0001, 0x0020, 0x1020]}
   - name: scenery
+    optional: true
     doc: >
       NOT THE BOARD'S BEHAVIOUR, an enhancement of radendurh. The prototype's sweeps hand each drawer
       the entry range of the zone records their cursors accepted (a record: box x0, y0, x1, y1 in
       cells at +0..+6, its entries from index `c` at +12 up to `a` at +10, 44 bytes each), and a
       strip of the background is drawn from that range alone; a prop of a record the sweep did not
       accept never reaches its strip, and a record's box does not bound its props. Before each of
-      the seven drawer calls the range is widened to every record whose box overlaps the sweep's
+      the six drawer calls the range is widened to every record whose box overlaps the sweep's
       12 x 10 window grown by the margins the routine's immediates hold (left and above subtracted
       from the window's origin; right and below added to its far edge, 11 and 9 cells from the
       origin). The margins are the largest any visible prop needed over the five playable sections,
       not a bound (registers.yaml: radendurh_scenery_margins); the layer costs game speed
-      (radendurh_scenery_cost). The vertical scroll's strip drawer, which stamps a row the view
-      adds below it into the top row, is pointed at the right row (scenery_strip_row).
+      (radendurh_scenery_cost), and in section 4, where its frames run latest, the sound dies with
+      it (radendurh_scenery_kills_the_sound). The vertical scroll's strip is fixes' strip_row, and
+      its range is not widened.
     hooks:
       - label: scenery_widen
         doc: >
@@ -211,68 +274,10 @@ layers:
       - label: scenery_e0082
         words: [0x6100, 0xff1e, 0x4ef9, 0x000e, 0x0082]
         source: ["bsr.w   scenery_widen", "jmp     ($e0082).l"]
-      - label: scenery_strip_row
-        doc: >
-          The vertical scroll's strip: the strip drawer 0xe0646 stamps its row into the grid row
-          that 0x207922 points at, the view's top, while its caller hands it the new row, the top
-          one when the view moves up and the grid's last (the origin plus 8: the grid holds 9 rows)
-          when it moves down. Moving down, the drawer leaves that row at its base tiles and stamps
-          its props into the top row (registers.yaml: radendurh_reverse_scroll_cut). This points
-          0x207922 at the row being drawn for the call, the same addressing the row reset 0xe059a
-          uses, and puts it back; moving up the offset is 0 and nothing changes. D0 is left as the
-          drawer leaves it.
-        words: [0x6100, 0xff14, 0x2f39, 0x0020, 0x7922, 0x2f00, 0x302f, 0x000c, 0x9079, 0x0020, 0x1738, 0xeb48, 0x48c0, 0xd1b9, 0x0020, 0x7922, 0x201f, 0x554f, 0x3f2f, 0x000a, 0x4eb9, 0x000e, 0x0646, 0x584f, 0x23df, 0x0020, 0x7922, 0x4e75]
-        source:
-          - "bsr.w   scenery_widen"
-          - "move.l  ($207922).l,-(a7)"
-          - "move.l  d0,-(a7)"
-          - "move.w  $c(a7),d0"
-          - "sub.w   ($201738).l,d0"
-          - "lsl.w   #5,d0"
-          - "ext.l   d0"
-          - "add.l   d0,($207922).l"
-          - "move.l  (a7)+,d0"
-          - "subq.w  #2,a7"
-          - "move.w  $a(a7),-(a7)"
-          - "jsr     ($e0646).l"
-          - "addq.w  #4,a7"
-          - "move.l  (a7)+,($207922).l"
-          - "rts"
     sites:
       - {hook: scenery_e03c8, at: [0x0e19d2], old: [0x4eb9, 0x000e, 0x03c8]}
-      - {hook: scenery_strip_row, at: [0x0e1b76], old: [0x4eb9, 0x000e, 0x0646]}
       - {hook: scenery_e08ba, at: [0x0e1d02], old: [0x4eb9, 0x000e, 0x08ba]}
       - {hook: scenery_e0bc0, at: [0x0e1e92], old: [0x4eb9, 0x000e, 0x0bc0]}
       - {hook: scenery_e0ec6, at: [0x0e2006], old: [0x4eb9, 0x000e, 0x0ec6]}
       - {hook: scenery_e11e8, at: [0x0e219a], old: [0x4eb9, 0x000e, 0x11e8]}
       - {hook: scenery_e0082, at: [0x0e239a], old: [0x4eb9, 0x000e, 0x0082]}
-  - name: sound
-    doc: >
-      The prototype starts each sound block at line 0, under the drawing chain the frame opens
-      with, whose handlers hold the 68000 at mask 7 past a line; the level-5 word then comes late
-      and the sound CPU, which takes one word per line with no handshake, reads one twice and
-      runs garbage for good. Power Ball and Kong Ball start the block at line 99, after the
-      chain: their vblank handler loads the line counter with 100 where this one loads 1
-      (registers.yaml: radendurh_the_block_at_line_99_keeps_the_sound). Loading 100 makes the
-      first block after the masked boot start 100 lines after the vblank request the boot left
-      pending, which the next vblank cuts; Power Ball closes the counter's enable right after its
-      own first unmask for the same reason, and radendurh does as it does.
-    words:
-      - {addr: 0x00053a, old: [0x0001], new: [0x0064], why: "vblank arms the counter with 100, as the siblings do"}
-    hooks:
-      - label: boot_close
-        doc: >
-          Right after the boot lowers the mask (0xf2106), where the pending vblank request has
-          just been served and opened the block: clear bit 13 of the control port (set bit 12,
-          as the game's own block end writes it), so the line counter stops until the next real
-          vblank, then the instruction it replaces.
-        words: [0x0279, 0xcfff, 0x0020, 0x351c, 0x0079, 0x1000, 0x0020, 0x351c,
-                0x13f9, 0x0020, 0x351c, 0x007c, 0x0000, 0x33fc, 0x0001, 0x0020, 0x1020, 0x4e75]
-        source:
-          - "andi.w  #$cfff,($20351c).l"
-          - "ori.w   #$1000,($20351c).l"
-          - "move.b  ($20351c).l,($7c0000).l"
-          - "move.w  #1,($201020).l"
-          - "rts"
-    sites:
-      - {hook: boot_close, at: [0x0f210a], old: [0x33fc, 0x0001, 0x0020, 0x1020]}

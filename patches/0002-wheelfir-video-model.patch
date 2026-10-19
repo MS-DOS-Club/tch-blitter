@@ -11,7 +11,7 @@ index dc1cace8..6f5c7a56 100644
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa..b4ff67e7 100644
+index 1de425fa..1e7c3f4a 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,21 @@
@@ -40,8 +40,8 @@ index 1de425fa..b4ff67e7 100644
 +Power Ball (prototype)
 +Kong Ball (prototype, TCH / Digital Dreams Multimedia)
 +Radical Enduro (early prototype, TCH / Sator Videogames)
-+Radical Enduro, fixed (hack): the prototype's program with its faults fixed in code, its
-+sound blocks started after the drawing and the scenery drawn further round the view
++Radical Enduro, fixed (hack): the prototype's program with its faults fixed in code and its
++sound blocks started after the drawing
  
 +Original driver by Tomasz Slanina.
 +The video model, the blitter and their confirmation against the machine by Marcos
@@ -1481,12 +1481,12 @@ index 1de425fa..b4ff67e7 100644
  ROM_END
  
 +// The main CPU program is the parent's with the prototype's faults fixed in its code, so that its
-+// five tracks play, its sound blocks started after the drawing and its scenery drawn further round
-+// the view (see the header); every other ROM is the parent's.
++// five tracks play, and its sound blocks started after the drawing (see the header); every other
++// ROM is the parent's.
 +ROM_START( radendurh )
 +	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
-+	ROM_LOAD16_BYTE( "endu-h.u19", 0x00001, 0x80000, CRC(46de32bb) SHA1(f9aabcba3165459b50aeee5a5fd1f294de98610f) )
-+	ROM_LOAD16_BYTE( "endu-h.u21", 0x00000, 0x80000, CRC(f5bfc09f) SHA1(ad7f8b57e0b41d982c468e9a73402204b064cc1c) )
++	ROM_LOAD16_BYTE( "endu-h.u19", 0x00001, 0x80000, CRC(8917a386) SHA1(b3831c96a79da01716209d9e66d4542b52f4777e) )
++	ROM_LOAD16_BYTE( "endu-h.u21", 0x00000, 0x80000, CRC(ce43d75b) SHA1(29d32330d0b14b60713342ded60077e7fe20013a) )
 +
 +	ROM_REGION( 0x100000, "subcpu", 0 ) // 68000 Code + sound samples
 +	ROM_LOAD16_BYTE( "endu.u63", 0x00001, 0x80000, CRC(43c35368) SHA1(62167a434bfe00825f2f97ecadd0af3e2d2b63f2) )

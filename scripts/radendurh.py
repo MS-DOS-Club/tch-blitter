@@ -1,13 +1,14 @@
 """Builds radendurh, the clone of Radical Enduro whose maincpu ROM has the prototype's faults fixed.
 
-Its table has three layers: the four faults, scenery drawn further round the view (not the board's
-behaviour), and the sound block moved after the drawing chain as Power Ball and Kong Ball place
-theirs.
+Its table has two layers, the five faults and the sound block moved after the drawing chain as
+Power Ball and Kong Ball place theirs, and an optional third, scenery drawn further round the view
+(not the board's behaviour), which the set does not carry and `--with scenery` adds.
 
-The board's dump has four faults that stop the game (`hardware/radendurh.yaml` says which and
-why). MAME's driver emulates that dump as it is, and the clone loads a corrected maincpu ROM
-instead. That ROM is somebody else's work with our changes on it, so what travels is this recipe
-and its table, never the bytes: anybody holding the verified dump builds the same ROM.
+The board's dump has five faults, four that stop the game and one that draws a scrolled row's props
+in the wrong row (`hardware/radendurh.yaml` says which and why). MAME's driver emulates that dump
+as it is, and the clone loads a corrected maincpu ROM instead. That ROM is somebody else's work
+with our changes on it, so what travels is this recipe and its table, never the bytes: anybody
+holding the verified dump builds the same ROM.
 
 What it refuses, as INVALID (exit 3), because a radendurh built from the wrong thing would boot and
 look plausible: an input that is not the dump the parent's `ROM_LOAD` declares; a table that does
@@ -22,6 +23,7 @@ USE:
     uv run scripts/radendurh.py                          # build run/mame_roms/<clone>.zip
     uv run scripts/radendurh.py --check                  # 0 up to date, 1 stale or missing
     uv run scripts/radendurh.py --stage fixes --out F    # stop after a layer, write elsewhere
+    uv run scripts/radendurh.py --with scenery --out F   # add an optional layer, write elsewhere
 """
 
 from __future__ import annotations
@@ -60,7 +62,7 @@ ZIP_UNIX = 3
 KEYS = {
     "table": ({"target", "clone", "hook_base", "hook_limit", "layers"}, set()),
     "romset": ({"set", "roms"}, set()),
-    "layer": ({"name"}, {"doc", "words", "hooks", "sites"}),
+    "layer": ({"name"}, {"doc", "optional", "words", "hooks", "sites"}),
     "word": ({"addr", "old", "new", "why"}, set()),
     "hook": ({"label", "words", "source"}, {"doc", "falls_into"}),
     "site": ({"hook", "at", "old"}, {"sets_flags"}),
@@ -92,8 +94,16 @@ def load_table(path: Path) -> dict[str, Any]:
         keys(table[k], "romset", k)
     if not table["layers"]:
         raise InvalidError("the table has no layer")
+    seen_optional = False
     for layer in table["layers"]:
         keys(layer, "layer", "layer")
+        # an optional layer goes last, so the set's hooks keep their addresses with or without it
+        if not isinstance(layer.get("optional", False), bool):
+            raise InvalidError(f"layer {layer['name']}: optional is true or false")
+        if layer.get("optional"):
+            seen_optional = True
+        elif seen_optional:
+            raise InvalidError(f"layer {layer['name']} comes after an optional layer")
         if not any(layer.get(k) for k in ("words", "hooks", "sites")):
             raise InvalidError(f"layer {layer['name']} changes nothing")
         for w in layer.get("words", []):
@@ -236,13 +246,24 @@ def apply_layer(
     return base + len(block)
 
 
-def build(table: dict[str, Any], stage: str | None) -> tuple[dict[str, bytes], list[str]]:
-    """The clone's two ROMs built up to `stage` (every layer when None), and the layers applied."""
+def selected(table: dict[str, Any], extra: tuple[str, ...] = ()) -> list[dict[str, Any]]:
+    """The layers a build applies, in table order: every one not optional, and the optional ones
+    named in `extra`."""
+    return [
+        layer for layer in table["layers"] if not layer.get("optional") or layer["name"] in extra
+    ]
+
+
+def build(
+    table: dict[str, Any], stage: str | None, extra: tuple[str, ...] = ()
+) -> tuple[dict[str, bytes], list[str]]:
+    """The clone's two ROMs built up to `stage` (every selected layer when None), and the layers
+    applied."""
     image = load_image(table)
     claimed: dict[int, str] = {}
     base = table["hook_base"]
     done = []
-    for layer in table["layers"]:
+    for layer in selected(table, extra):
         base = apply_layer(image, claimed, layer, base, table["hook_limit"])
         done.append(layer["name"])
         if layer["name"] == stage:
@@ -293,16 +314,30 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--stage", help="stop after this layer; needs --out")
     ap.add_argument("--out", type=Path, help="zip to write (default: run/mame_roms/<clone>.zip)")
     ap.add_argument("--check", action="store_true", help="compare with the clone's ROM_LOAD")
+    ap.add_argument(
+        "--with",
+        dest="extra",
+        action="append",
+        default=[],
+        help="add an optional layer; needs --out",
+    )
     a = ap.parse_args(argv)
     try:
         table = load_table(TABLE)
-        names = [layer["name"] for layer in table["layers"]]
+        extra = tuple(a.extra)
+        optional = [layer["name"] for layer in table["layers"] if layer.get("optional")]
+        for name in extra:
+            if name not in optional:
+                raise UsageError(f"--with {name!r}: the optional layers are {optional}")
+        names = [layer["name"] for layer in selected(table, extra)]
         if a.stage is not None and a.stage not in names:
             raise UsageError(f"--stage {a.stage!r}: the layers are {names}")
-        if a.stage is not None and (a.check or a.out is None):
-            raise UsageError("--stage builds a partial ROM: give it --out, and never --check")
+        if a.stage is not None and extra and names.index(a.stage) < names.index(extra[-1]):
+            raise UsageError(f"--stage {a.stage!r} stops before --with {extra[-1]!r}")
+        if (a.stage is not None or extra) and (a.check or a.out is None):
+            raise UsageError("--stage and --with build another ROM: give them --out, never --check")
         out = a.out or ROMS / f"{table['clone']['set']}.zip"
-        roms, done = build(table, a.stage)
+        roms, done = build(table, a.stage, extra)
         if a.check:
             return check(table, roms, out)
         write_atomically(out, zipped(roms))

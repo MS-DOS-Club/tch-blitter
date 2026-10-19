@@ -14,7 +14,7 @@ Python runs with `uv run scripts/<name>.py`, and every MAME launch goes through 
 | `export-patch.sh` | `make patch`: writes the driver changes in `upstream/` into `patches/`; `--check` says whether they still match |
 | `verify-patches.sh` | the patches rebuild `upstream/`'s changes on a clean tree at the pin |
 | `verify-romset.sh <set>` | a romset against its driver's `ROM_START` |
-| `radendur-goldens.sh` | `make verify` / `make goldens`: Radical Enduro's goldens (boot, race start, desert scenery) |
+| `radendur-goldens.sh` | `make verify` / `make goldens`: Radical Enduro's goldens (boot, race start, desert race) |
 | `goldens-family.sh` | `make verify-family` / `make bless-family`: the siblings' goldens, the frames in each `goldens/<set>/scenes.conf`, and the sound CRC where a set declares a `sound` line |
 | `savestate-gate.sh` | `make savestate`: a state saved and loaded in a fresh process gives the same frames |
 | `lib/mame_run.sh` | which binary runs each set, and the MAME command line every script launches (a quick unattended window, or a session to play, which for Wheels & Fire loads `ctrlr/gamepad.cfg`) |

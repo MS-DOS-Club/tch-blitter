@@ -40,7 +40,7 @@ fixed in the ROM it boots, enters a game and its playable tracks finish the race
 |---|---|
 | year | no known date |
 | board | [the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A |
-| MAME set | `radendur` (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs and, as an enhancement that is not the board's behaviour, its scenery drawn further round the view, built from the dump by `make radendurh` and published on the [Internet Archive](https://archive.org/details/radendurh) |
+| MAME set | `radendur` (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its sound block placed where Power Ball and Kong Ball place theirs, built from the dump by `make radendurh` and published on the [Internet Archive](https://archive.org/details/radendurh) |
 | driver in MAME | `tch/wheelfir.cpp` |
 | driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten and the game's differences in `radendur_state` |
 | status in stock MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: a comment in its driver says that some courses reach gameplay but crash quickly |
@@ -51,10 +51,12 @@ fixed in the ROM it boots, enters a game and its playable tracks finish the race
 With its faults fixed it boots, enters a game and **five tracks finish the race** with no grey
 screen. The faults that are the prototype's own are fixed in the code of the `radendurh` ROM, never
 by the driver, which emulates the dump as it is. The same ROM starts each sound block after the
-drawing, as Power Ball and Kong Ball do, so the music lasts the race; and it draws more of the
-scenery round the view, where it belongs, which the prototype's engine does not: an enhancement,
-not the board, which costs game speed: on some tracks steps of the race clock take more frames
-than without it (measured on an earlier build of that layer).
+drawing, as Power Ball and Kong Ball do, so the music lasts the race. And there it stops: the set
+fixes the prototype, it does not finish it, so the zones of scenery the prototype's engine leaves
+out of the view stay out. A layer that draws them, an enhancement and not the board, is kept in the
+patch table as an option of the builder (`scripts/radendurh.py --with scenery --out <zip>`, a ROM
+other than the set's), and besides drawing what the prototype never drew it slows the race clock,
+and on the first jungle track, where its frames run latest, the sound dies.
 
 The root causes, all read from the code rather than guessed:
 
@@ -65,6 +67,8 @@ The root causes, all read from the code rather than guessed:
 - Three independent causes of an in-race hang: a register clobbered by the vblank handler, an
   uninitialised search window in five copies of the same block, and an object drawer whose entry
   count wraps round when a cell is busy.
+- A drawing fault of the vertical scroll: moving down the track, the strip drawer stamps the props
+  of the new bottom row into the top row and leaves the new row bare.
 - The difficulty menu, which is in fact wired up: four levels and twelve legs.
 
 ## The tracks: what is there, what plays and what was left unfinished

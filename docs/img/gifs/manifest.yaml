@@ -98,7 +98,7 @@ gifs:
   height: 252
   duration_s: 4.73
   emulated_frames: 237
-  mb: 3.27
+  mb: 3.26
 - file: rltennis-demo.gif
   set: rltennis
   refresh_hz: 60.0

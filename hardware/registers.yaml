@@ -3141,7 +3141,8 @@ memory:
       which steps every 54 frames while a frame''s draw chain fits (radendur_the_race_clock_is_timed_in_loop_turns),
       logged per frame over the five playable sections raced to the end by scripts/radendur/nav-phase.lua.
       Counted: clock steps that took other than 54 frames (the worst step, in frames, in brackets),
-      control = the fixes-only ROM (scripts/radendurh.py --stage fixes) / the full radendurh: section 0:
+      control = the fixes-only ROM of that day, four faults (scripts/radendurh.py --stage fixes) / the
+      full radendurh of that day: section 0:
       0 / 0; 1: 0 / 2 (59); 2: 0 / 2 (55); 4: 4 (56) / 22 (68); 8: 0 / 9 (59). Section 4 already
       misses in the control. Every race finishes in both. The span of entries that holds every
       visible prop, computed from the reference for every view, reaches 1482 in section 4. Inference,
@@ -3151,6 +3152,17 @@ memory:
       peaked, read every race frame, at 20 with the layer and 18 without (section 4). Taken before
       scenery_strip_row existed: that routine adds a dozen instructions to each row the view adds
       vertically and moves the strip''s stamps from the top row to the row drawn; not re-measured.'
+    radendurh_scenery_kills_the_sound: 'MEASURED with the scenery layer built on top of the set
+      (scripts/radendurh.py --with scenery) against the set alone and against the fixes-only ROM,
+      each racing the five playable sections to the end from a cold boot through a navigation harness
+      not kept in this tree (the section chosen by RIGHT presses in the menu and read back in RAM,
+      throttle held, steering swept), the seconds with sound counted from a -wavwrite recording as in
+      radendurh_the_block_at_line_99_keeps_the_sound. With the layer, on section 4 (the first jungle
+      track), where it makes the most race-clock steps run late, the sound CPU dies part way through
+      the race and stays silent to its end; on the other four sections it keeps sounding. The set
+      alone keeps it on all five. The fixes-only ROM is silent for most of every race. Every race
+      finishes on all three. That the late frames are what kills the sound is the inference the
+      coincidence suggests, not measured.'
     radendurh_reverse_scroll_cut: 'EXPLAINED AND FIXED in radendurh, MEASURED on 2026-10-12, section 0
       driven by scripts/drive.lua. The symptom: a band of bare sand at the bottom of frame
       1800, where the reference draws trees, a palm and a fence, with the fixes-only ROM and with the
@@ -3165,10 +3177,10 @@ memory:
       base tile in all 12 cells while the top row gains the entries (one cell 3 to 14); control,
       frame 1895, view y 869, row 869 (origin + 0): the freshly reset top row gains its own. So
       moving down, the new bottom row keeps only its base tiles and its props are appended to the
-      top row: the game''s own code, which radendurh''s fixes layer leaves untouched (the dump hangs
-      before a race can show it). Fixed in hardware/radendurh.yaml''s scenery layer
-      (scenery_strip_row), not the board''s behaviour: the call points 0x207922 at the row being drawn and puts it
-      back. With it, frame 1800 draws the band''s trees, palm and fence as the reference crop shows
+      top row: the game''s own code (the dump hangs before a race can show it). Fixed first in the
+      scenery layer, and now the fifth fault of hardware/radendurh.yaml''s fixes layer (strip_row, the
+      same routine without the scenery widening): the call points 0x207922 at the row being drawn and
+      puts it back. With it, frame 1800 draws the band''s trees, palm and fence as the reference crop shows
       them (captures of frames 1800 and 1806 opened against scripts/radendur_track_render.py 0
       --crop 5 868 17 879); radendur-goldens.sh verify radendurh is 6/6 with the same baseline; the
       five playable sections (nav-phase.lua MODE=capture, PRESSES 0, 1, 2, 3 and 6, the section read
@@ -3177,7 +3189,7 @@ memory:
       (0xe2d5a, 0xe2e18, 0xe3064, every instruction that names it listed from the disassembly)
       carried a stop conditioned on the pointer differing from the one the game computes from the
       origin, over frames 1780..1830, and none fired, while the same three counted 8, 49 and 92
-      passes in that window and the same condition at the routine''s own jsr (0xf5970) fired at
+      passes in that window and the same condition at the routine''s own jsr (0xf5970 in the layout of that day) fired at
       frame 1787 with the pointer at the origin''s plus 0x100. Watched by the golden
       goldens/radendurh/06_desert_descent (frame 1800, view x 5, y 869), which goes red alone when
       the routine''s offset is neutralised (sub.w d0,d0) and the band comes back bare.'

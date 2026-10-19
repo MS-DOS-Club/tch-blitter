@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # radendur-goldens.sh -- Radical Enduro's goldens: the boot, the race start and, on radendurh, two
-# frames of the desert's scenery, against goldens/<set>/checksums.sha256.
+# frames of the desert race, against goldens/<set>/checksums.sha256.
 #
 #   ./scripts/radendur-goldens.sh verify [set]   exit 1 if any capture differs
 #   ./scripts/radendur-goldens.sh bless [set]    rewrites the baseline
@@ -63,7 +63,7 @@ shot() {
 # The race: the desert's starting line, bike stopped; nav-phase.lua checks the section in RAM.
 OUT="$PROJECT_DIR/$WORK/race.harness.log" shot race 60 scripts/radendur/nav-phase.lua "^START ok" 04_race_start
 
-# The scenery, radendurh only (the dump has no scenery layer): a frame of the desert race, accepted
+# Mid-race, radendurh only (the dump stops on its faults): a frame of the desert race, accepted
 # only where the game's view origin says it is; drive.lua's inputs are pinned because they decide
 # where the bike is at that frame.
 scenery() {
