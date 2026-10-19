@@ -398,8 +398,9 @@ images:
   - addr: 1024
     name: wf_zoom_desc_x
     description: '400 horizontal scale descriptors, 16 bytes each: +0..+4 five bytes the sprite builder
-      ORs into the register (0xe4940..0xe4948), +6 the shift, +8 and +0xc pointers to the two tables. It
-      is the source of the ZOOM_INDEX[400] the driver carries by hand, and it agrees on all 400'
+      ORs into the register (0xe4940..0xe4948), +6 the shift, +8 and +0xc pointers to the two tables,
+      which are the blitter''s repeat and stall counters written out (registers.yaml:
+      wheelfir_the_scale_tables_are_the_counters)'
     type: data
   - addr: 7440
     name: wf_zoom_desc_y
@@ -1273,8 +1274,9 @@ images:
   - addr: 1024
     name: kongball_zoom_desc_x
     description: '400 horizontal scale descriptors, 16 bytes each: +0..+4 five bytes the sprite builder
-      ORs into the register, +6 the shift, +8 and +0xc pointers to the two tables. It is the source of the
-      ZOOM_INDEX[400] the driver carries by hand, and it agrees on all 400'
+      ORs into the register, +6 the shift, +8 and +0xc pointers to the two tables, which are the
+      blitter''s repeat and stall counters written out (registers.yaml:
+      wheelfir_the_scale_tables_are_the_counters)'
     level: identical
     evidence: 256 bytes identical to wheelfir_maincpu 0x000400 (wf_zoom_desc_x)
     type: data

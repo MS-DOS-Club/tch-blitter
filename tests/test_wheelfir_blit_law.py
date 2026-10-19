@@ -7,6 +7,8 @@ fails before the record and the script can disagree.
 
 from __future__ import annotations
 
+import re
+
 import pytest
 from script_loader import load_script
 
@@ -95,7 +97,7 @@ def test_the_record_figures_come_out_of_the_tracked_evidence() -> None:
 
 
 def test_the_full_run_reproduces_the_known_answer_and_the_coverage() -> None:
-    missing = [p for p in (law.DRIVER, law.MAINCPU, law.ROMSET) if not p.exists()]
+    missing = [p for p in (law.MAINCPU, law.ROMSET) if not p.exists()]
     if missing:
         pytest.skip(f"--full needs {[str(p.relative_to(law.ROOT)) for p in missing]}")
     report = "\n".join(law.full_report(law.load_capture().kept))
@@ -110,3 +112,40 @@ def test_the_full_run_reproduces_the_known_answer_and_the_coverage() -> None:
         "the cut row 34, the cut row on the other page 33, a page bottom 7, elsewhere 15, of 89",
     ):
         assert figure in report, f"{figure!r} is not in the report:\n{report}"
+
+
+def test_the_rom_scale_tables_are_the_counters_and_a_moved_phase_is_not() -> None:
+    missing = [p for p in (law.MAINCPU, law.KONGBALL_MAINCPU) if not p.exists()]
+    if missing:
+        pytest.skip(f"--full needs {[str(p.relative_to(law.ROOT)) for p in missing]}")
+    for name, image in (("wheelfir", law.MAINCPU), ("kongball", law.KONGBALL_MAINCPU)):
+        lines = law.tables_are_counters(name, law.Rom(image.read_bytes()))
+        shared = re.search(r"shift: (\d+) of 400$", lines[0])
+        tables = re.search(r"(\d+) reachable descriptors: A (\d+), B (\d+), shift (\d+)$", lines[1])
+        control = re.search(r"repeat agrees on (\d+) of the \d+ .* stall on (\d+) of", lines[2])
+        assert shared and tables and control, lines
+        assert shared.group(1) == "400", lines
+        n, *oks = (int(g) for g in tables.groups())
+        assert oks == [n, n, n] and control.groups() == ("0", "0"), lines
+
+
+def test_the_counters_at_75_percent_drop_one_source_column_in_four() -> None:
+    """75% is stall 1 with repeat 3: of every four source columns, two land on one column."""
+    index = 0x21 | (0x23 << 6)
+    assert [law.counter_dest(index, x) for x in range(8)] == [0, 1, 2, 2, 3, 4, 5, 5]
+    assert law.identity(0) and law.identity(0x20 | (0x20 << 6))
+    assert not law.identity(0x1000) and not law.identity(0x2000)
+
+
+def test_the_stepped_walk_is_the_first_source_to_reach_each_step_of_the_closed_form() -> None:
+    """Every stall and repeat field with every clock bit: the walk inverts the tables' law."""
+    for clocks in (0, 0x1000, 0x2000):
+        for stall in range(32):
+            for repeat in range(32):
+                index = stall | (repeat << 6) | clocks
+                inverse, x = [], 0
+                for d in range(300):
+                    while law.counter_dest(index, x) < d:
+                        x += 1
+                    inverse.append(x)
+                assert law.source_walk(index, 299) == inverse, hex(index)

@@ -26,7 +26,7 @@
 
 @image kongball_maincpu
 
-0x00000400  kongball_zoom_desc_x  400 horizontal scale descriptors, 16 bytes each: +0..+4 five bytes the sprite builder ORs into the register, +6 the shift, +8 and +0xc pointers to the two tables. It is the source of the ZOOM_INDEX[400] the driver carries by hand, and it agrees on all 400
+0x00000400  kongball_zoom_desc_x  400 horizontal scale descriptors, 16 bytes each: +0..+4 five bytes the sprite builder ORs into the register, +6 the shift, +8 and +0xc pointers to the two tables, which are the blitter's repeat and stall counters written out (registers.yaml: wheelfir_the_scale_tables_are_the_counters)
 0x00001d10  kongball_zoom_desc_y  The same 400 descriptors for the vertical axis
 0x000289be  kongball_pal_blast    THE palette uploader that actually runs: 219 of the 222 uploads to the RAMDAC, MEASURED with a breakpoint. An UNROLLED loop with a computed jump: it enters at 256-count, so it uploads ANY stretch (index in wf_pal_idx, count in wf_pal_count) from wf_pal_buffer. That is the palette composition by stretches
 0x00029986  kongball_pal_accumulate  Composes the palette by ACCUMULATION: it walks wf_pal_delta and ADDS each increment to the buffer's colour, wf_pal_count colours, and takes one step off wf_pal_steps. It is the fade, and it is the reason each colour takes SIX bytes: they are words, so they can accumulate without clipping, and the upload keeps the low byte. Located with a write watchpoint on the buffer, not by reading the disassembly
@@ -188,7 +188,7 @@
 
 @image wheelfir_maincpu
 
-0x00000400  wf_zoom_desc_x        400 horizontal scale descriptors, 16 bytes each: +0..+4 five bytes the sprite builder ORs into the register (0xe4940..0xe4948), +6 the shift, +8 and +0xc pointers to the two tables. It is the source of the ZOOM_INDEX[400] the driver carries by hand, and it agrees on all 400
+0x00000400  wf_zoom_desc_x        400 horizontal scale descriptors, 16 bytes each: +0..+4 five bytes the sprite builder ORs into the register (0xe4940..0xe4948), +6 the shift, +8 and +0xc pointers to the two tables, which are the blitter's repeat and stall counters written out (registers.yaml: wheelfir_the_scale_tables_are_the_counters)
 0x00001d10  wf_zoom_desc_y        The same 400 descriptors for the vertical axis
 0x00011832  wf_curtain_desc       ROM descriptor of the erasing curtain: 256x16 of page 2 at (1,0), which read from ROM is index 0 across its 4096 pixels
 0x0002105e  wf_pal_highscores     Palette of the High Scores engine screen, in the 68000 ROM: 256 colours of THREE RGB bytes. It is the fade's destination, and the whole chain is PROVEN byte for byte: the 768 bytes here are identical to the palette live on screen on frame 2788, and the sequence appears exactly once in the whole ROM. So nothing of ours touches that screen's colour, and the badly-composed-palette hypothesis is refuted

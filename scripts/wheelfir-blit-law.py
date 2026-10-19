@@ -4,7 +4,7 @@
 WHAT IT ANSWERS. The board author's model of the zoom says each axis is a pair of counters: a stall
 field of n gives n/(n+1), a repeat field of n gives n/(n-1), a field of 0 or 32 is idle,
 `clock_halve` halves, `clock_double` doubles, and the scale is the product. Nothing here goes
-through the driver's percentage table: the scale comes from the fields alone. The question is
+through a percentage table: the scale comes from the fields alone. The question is
 whether the destination each blit declares follows that law, and the answer is measured on what
 the game really handed the blitter in a 1500-frame attract pass, not on what its tables say it
 should hand it.
@@ -24,18 +24,20 @@ other set (every blit, most of them at 100%) would have another denominator and 
 this one.
 
 THE RESIDUE. The misses are clipped sprites, and the ones strictly inside the window are a cut the
-game declares: with `--full`, the source rows each blit reads are walked through the driver's own
-inverse of the ROM descriptor and set against the opaque rows of its graphic, which separates "the
-law is wrong" from "the game asked for fewer rows". A planted truncation is the control that shows
-the instrument can see one.
+game declares: with `--full`, the source rows each blit reads are walked through the driver's
+counters and set against the opaque rows of its graphic, which separates "the law is wrong" from
+"the game asked for fewer rows". A planted truncation is the control that shows the instrument can
+see one.
 
 WHAT IT DOES NOT ESTABLISH. MAME is a model, and the game computes each destination in software
 from the ROM tables, so this proves what the blitter receives and what the game declares per
 blit, not that the FPGAs count that way.
 
-`--full` adds the known answer (the model over the driver's `ZOOM_INDEX` against the real scale of
-each ROM descriptor) and the source-row coverage; both need the MAME clone, `make disasm` and the
-wheelfir romset, and a missing one is INVALID.
+`--full` reads the programs' own scale descriptors and adds: the known answer (the law over each
+descriptor's fields against the real scale of its tables); the tables against the counters entry
+by entry, in Wheels & Fire and Kong Ball, with a moved phase as the control that has to disagree;
+every scaled axis of the capture walked through both; and the source-row coverage. It needs `make
+disasm` and the wheelfir romset; a missing one is INVALID.
 
 USAGE:
     uv run scripts/wheelfir-blit-law.py [--full]
@@ -49,7 +51,6 @@ from __future__ import annotations
 import argparse
 import lzma
 import random
-import re
 import statistics
 import struct
 import sys
@@ -64,8 +65,9 @@ EVIDENCE = ROOT / "hardware" / "evidence" / "wheelfir-blit-law"
 BLOCK = EVIDENCE / "block.rows.xz"
 CLIPRECT = EVIDENCE / "cliprect.rows.xz"
 FRAMES = (1331, 1339, 1389)
-DRIVER = ROOT / "upstream" / "src" / "mame" / "tch" / "wheelfir.cpp"
 MAINCPU = ROOT / "disasm" / "img" / "wheelfir_maincpu.bin"
+# the other program that carries the same descriptor tables
+KONGBALL_MAINCPU = ROOT / "disasm" / "img" / "kongball_maincpu.bin"
 ROMSET = ROOT / "run" / "mame_roms" / "wheelfir.zip"
 # gfx1 as the driver loads it: eight 512 KB ROMs, two 512x512 8bpp pages each, in a 16 MB region
 # erased to zero beyond them.
@@ -105,6 +107,51 @@ def factor_repeat(field: int) -> float:
     return n / (n - 1) if n > 1 else float("inf")
 
 
+def counter_periods(index: int) -> tuple[int, int]:
+    """An index's repeat and stall periods, 0 when idle, as the driver's decode_scale."""
+    stall, repeat = index & 0x1F, (index >> 6) & 0x1F
+    return (repeat - 1 if repeat > 1 else 0), (stall + 1 if stall else 0)
+
+
+def counter_dest(index: int, x: int, repeat_phase: int = 0) -> int:
+    """The destination offset source offset x lands on: the closed form of the tables' law."""
+    rp, sp = counter_periods(index)
+    u = x + ((x + repeat_phase) // rp if rp else 0)
+    w = u - (u // sp if sp else 0)
+    if index & 0x1000:
+        return w >> 1
+    return w << 1 if index & 0x2000 else w
+
+
+def source_walk(index: int, steps: int) -> list[int]:
+    """Each destination step's source pixel, stepped by the counters as the driver's source_map."""
+    repeat_period, stall_period = counter_periods(index)
+    x = written = repeat = stall = 0
+    src = []
+
+    def move() -> None:
+        nonlocal written, stall
+        stall += 1
+        if stall_period and stall == stall_period:
+            stall = 0
+        else:
+            written += 1
+
+    def position() -> int:
+        return written >> 1 if index & 0x1000 else written << 1 if index & 0x2000 else written
+
+    for d in range(steps + 1):
+        while position() < d:
+            x += 1
+            move()
+            repeat += 1
+            if repeat_period and repeat == repeat_period:
+                repeat = 0
+                move()
+        src.append(x)
+    return src
+
+
 def model_scale(index: int) -> float:
     """The scale, in percent, an index's fields give by the law alone (no table)."""
     stall, repeat = index & 0x3F, (index >> 6) & 0x3F
@@ -117,7 +164,7 @@ def model_scale(index: int) -> float:
 
 
 def indices(w: list[int]) -> tuple[int, int]:
-    """The zoom index of each axis, decoded from words 8..0xc exactly as the driver's do_blit."""
+    """The zoom index of each axis, from the bits of words 8..0xc the register map names."""
     stall_u = ((w[0xA] & 0x1F00) >> 8) | ((w[8] & 0x0100) >> 3)
     repeat_u = ((w[0xB] & 0x1F00) >> 8) | ((w[8] & 0x0400) >> 5)
     iu = stall_u | (repeat_u << 6) | ((w[9] & 1) << 12) | ((1 if w[8] & 0x1000 else 0) << 13)
@@ -370,19 +417,7 @@ def frame_png(frame: int) -> Path:
     return EVIDENCE / f"f{frame}.png"
 
 
-# ---- --full: the driver's table, the ROM descriptors and the graphics
-
-
-def zoom_index(driver: Path = DRIVER) -> list[int]:
-    declaration = "constexpr uint16_t ZOOM_INDEX[400] ="
-    parts = driver.read_text(encoding="utf-8").split(declaration, 1)
-    if len(parts) != 2:
-        raise InvalidRunError(f"{driver.name} declares no ZOOM_INDEX[400]")
-    body = parts[1]
-    vals = [int(v, 16) for v in re.findall(r"0x[0-9a-fA-F]{4}", body.split("};", 1)[0])]
-    if len(vals) != 400:
-        raise InvalidRunError(f"ZOOM_INDEX holds {len(vals)} values, not 400")
-    return vals
+# ---- --full: the ROM descriptors and the graphics
 
 
 def descriptors(zi: list[int]) -> dict[int, list[int]]:
@@ -408,8 +443,17 @@ class Rom:
         v = self.w(a)
         return v - 0x10000 if v & 0x8000 else v
 
+    def law(self, base: int, j: int) -> tuple[int, int, int]:
+        """Descriptor j's shift and the addresses of its two tables."""
+        d = base + j * 16
+        return (
+            self.w(d + 6),
+            (self.w(d + 8) << 16) | self.w(d + 10),
+            (self.w(d + 12) << 16) | self.w(d + 14),
+        )
+
     def scale_from(self, base: int, j: int, x: int) -> int:
-        """The driver's scale_from: destination x through descriptor j of the table at base."""
+        """The program's map (0xe47fe): x through descriptor j of the table at base."""
         d = base + j * 16
         shift = self.w(d + 6)
         ta = (self.w(d + 8) << 16) | self.w(d + 10)
@@ -418,8 +462,21 @@ class Rom:
         v = (v - self.s16(tb + v)) & 0xFFFF
         return v >> shift
 
+    def fields(self, base: int, j: int) -> int:
+        """Descriptor j's scale fields as one index, from the bytes the sprite builder ORs in."""
+        d = base + j * 16
+        w0, w1, w2 = self.w(d), self.w(d + 2), self.w(d + 4)
+        stall = ((w0 >> 8) & 0x1F) | (0x20 if w1 & 1 else 0)
+        repeat = (w0 & 0x1F) | (0x20 if w1 & 4 else 0)
+        clocks = (0x1000 if w2 & 0x100 else 0) | (0x2000 if w1 & 0x10 else 0)
+        return stall | (repeat << 6) | clocks
+
+    def zoom_index(self, base: int) -> list[int]:
+        """The index of each of the 400 descriptors of the table at base, by percentage."""
+        return [self.fields(base, j) for j in range(400)]
+
     def descriptor_tables(self) -> list[int]:
-        """The two tables, found the driver's way: descriptor 100 is the identity, 200 doubles."""
+        """The two tables, by their known answers: descriptor 100 is the identity, 200 doubles."""
         found = []
         for off in range(0, len(self.data) - 6400 + 1, 2):
             d = off + 1600
@@ -455,43 +512,109 @@ def known_answer(zi: list[int], rom: Rom, bases: list[int]) -> list[str]:
     return lines
 
 
+def tables_are_counters(name: str, rom: Rom) -> list[str]:
+    """Each reachable descriptor's two tables and shift against the counters, entry by entry.
+
+    The fields come from the horizontal descriptor, whose bytes are laid out for the horizontal
+    register bits; the vertical descriptor of the same percentage has to point at the same tables.
+    A table's length is the room the program leaves it: the smallest gap between two of them. The
+    control moves each counter's phase by one, on the descriptors that run that counter.
+    """
+    bases = rom.descriptor_tables()
+    zi = rom.zoom_index(bases[0])
+    shared = sum(rom.law(bases[0], j) == rom.law(bases[1], j) for j in range(400))
+    starts = sorted({a for j in range(400) for a in rom.law(bases[0], j)[1:]})
+    entries = min(q - p for p, q in zip(starts, starts[1:], strict=False)) // 2
+    reachable = sorted(j for js in descriptors(zi).values() for j in js)
+
+    def table(period: int, phase: int) -> list[int]:
+        return [2 * ((i + phase) // period) if period else 0 for i in range(entries)]
+
+    ok_a = ok_b = ok_shift = 0
+    runs = {"repeat": 0, "stall": 0}
+    moved = {"repeat": 0, "stall": 0}
+    for j in reachable:
+        shift, ta, tb = rom.law(bases[0], j)
+        repeat_period, stall_period = counter_periods(zi[j])
+        a = [rom.s16(ta + 2 * i) for i in range(entries)]
+        b = [rom.s16(tb + 2 * i) for i in range(entries)]
+        ok_a += a == table(repeat_period, 0)
+        ok_b += b == table(stall_period, 0)
+        ok_shift += shift == (2 if zi[j] & 0x1000 else 0 if zi[j] & 0x2000 else 1)
+        for counter, period, actual in (("repeat", repeat_period, a), ("stall", stall_period, b)):
+            if period:
+                runs[counter] += 1
+                moved[counter] += actual == table(period, 1)
+    n = len(reachable)
+    if not runs["repeat"] or not runs["stall"] or any(moved.values()):
+        raise InvalidRunError(f"{name}: a moved phase is not told apart ({moved} of {runs})")
+    return [
+        f"{name}: vertical descriptors on the horizontal ones' tables and shift: {shared} of 400",
+        f"{name}: tables vs counters over {entries} entries each, {n} reachable descriptors: "
+        f"A {ok_a}, B {ok_b}, shift {ok_shift}",
+        f"{name}:   CONTROL phase +1: repeat agrees on {moved['repeat']} of the {runs['repeat']} "
+        f"that run it, stall on {moved['stall']} of {runs['stall']}",
+    ]
+
+
+def against_the_tables(rom: Rom, blits: list[Blit]) -> list[str]:
+    """Every scaled axis of the capture: the counters' source per step against the tables' inverse.
+
+    The tables' inverse is the first source offset whose destination reaches the step, held at
+    the page's last column; the counters' is the driver's source_map.
+    """
+    bases = rom.descriptor_tables()
+    percent = {v: j for j, v in enumerate(rom.zoom_index(bases[0]))}  # the last j wins
+    maps = same = unknown = 0
+    for b in blits:
+        for axis, index, steps in ((0, b.iu, b.steps_u), (1, b.iv, b.steps_v)):
+            if identity(index):
+                continue
+            if index not in percent:
+                unknown += 1
+                continue
+            j, maps = percent[index], maps + 1
+            old, x = [], 0
+            for d in range(steps + 1):
+                while x < 511 and rom.scale_from(bases[axis], j, x) < d:
+                    x += 1
+                old.append(x)
+            same += old == source_walk(index, steps)
+    if not maps:
+        raise InvalidRunError("no scaled axis in the capture to compare")
+    return [
+        f"capture against the tables: {same} of {maps} scaled axis maps give the same source "
+        f"per step; indices the tables do not hold: {unknown}"
+    ]
+
+
+def identity(index: int) -> bool:
+    """Both counters idle and no clock bit: the driver's axis_scale::identity."""
+    return counter_periods(index) == (0, 0) and not index & 0x3000
+
+
 class Coverage:
-    """Which source rows a blit reads under the driver's exact law, against its opaque rows."""
+    """Which source rows a blit reads under the driver's counters, against its opaque rows."""
 
-    def __init__(self, zi: list[int], rom: Rom, bases: list[int], gfx: bytes) -> None:
-        self.table = {v: j for j, v in enumerate(zi)}  # the driver's m_zoom_table: last j wins
-        self.rom, self.bases, self.gfx = rom, bases, gfx
-
-    def percent(self, index: int) -> int:
-        """The driver's get_scale: the first index at or above this one the table holds."""
-        while index < (1 << 14):
-            if index in self.table:
-                return self.table[index]
-            index += 1
-        return 0
+    def __init__(self, gfx: bytes) -> None:
+        self.gfx = gfx
 
     def pixel(self, page: int, u: int, v: int) -> int:
         a = (page * 512 * 512 + (v & 0x1FF) * 512 + (u & 0x1FF)) & (GFX_REGION - 1)
         return self.gfx[a] if a < len(self.gfx) else 0
 
-    def reads(self, axis: int, j: int, steps: int, inclusive: bool) -> list[int]:
+    def reads(self, axis: int, index: int, steps: int, inclusive: bool) -> list[int]:
         # the driver's loops are do-whiles: the first row is drawn whatever the step count
         last = max(steps if inclusive else steps - 1, 0)
-        if j == 100:
+        if identity(index):
             # the 1:1 blit samples one source row further in on the vertical axis
             return [s + (1 if axis == 1 else 0) for s in range(last + 1)]
-        inverse, x = [], 0
-        for d in range(last + 1):
-            while x < 511 and self.rom.scale_from(self.bases[axis], j, x) < d:
-                x += 1
-            inverse.append(x)
-        return inverse
+        return source_walk(index, last)
 
     def rows_read(self, b: Blit, steps_v: int | None = None) -> tuple[list[int], list[int]]:
-        ju, jv = self.percent(b.iu), self.percent(b.iv)
-        inclusive = ju == 100 and jv == 100
+        inclusive = identity(b.iu) and identity(b.iv)
         sv = b.steps_v if steps_v is None else steps_v
-        return self.reads(0, ju, b.steps_u, inclusive), self.reads(1, jv, sv, inclusive)
+        return self.reads(0, b.iu, b.steps_u, inclusive), self.reads(1, b.iv, sv, inclusive)
 
     def opaque(self, b: Blit, us: list[int], vs: Iterable[int]) -> int:
         du = 1 if b.walk[0] & 0x4000 else -1
@@ -502,7 +625,6 @@ class Coverage:
 
 
 def coverage_report(cov: Coverage, blits: list[Blit]) -> list[str]:
-    blits = [b for b in blits if cov.percent(b.iu) and cov.percent(b.iv)]
     ms = tested(blits)
     model = score(ms, lambda i: ms[i].blit.scale(ms[i].axis))
     misses = {
@@ -564,13 +686,13 @@ def coverage_report(cov: Coverage, blits: list[Blit]) -> list[str]:
 
 
 def full_report(blits: list[Blit]) -> list[str]:
-    missing = [p for p in (DRIVER, MAINCPU, ROMSET) if not p.exists()]
+    missing = [p for p in (MAINCPU, KONGBALL_MAINCPU, ROMSET) if not p.exists()]
     if missing:
         names = ", ".join(str(p.relative_to(ROOT)) for p in missing)
-        raise InvalidRunError(f"--full needs {names} (make setup, then make disasm)")
-    zi = zoom_index()
+        raise InvalidRunError(f"--full needs {names} (make disasm, and the romset)")
     rom = Rom(MAINCPU.read_bytes())
     bases = rom.descriptor_tables()
+    zi = rom.zoom_index(bases[0])
     with zipfile.ZipFile(ROMSET) as z:
         absent = sorted(set(GFX_ROMS) - set(z.namelist()))
         if absent:
@@ -579,15 +701,20 @@ def full_report(blits: list[Blit]) -> list[str]:
     keys = set(descriptors(zi))
     off_table = sum(1 for b in blits if b.iu not in keys or b.iv not in keys)
     lines = known_answer(zi, rom, bases)
+    lines += tables_are_counters("wheelfir", rom)
+    lines += tables_are_counters("kongball", Rom(KONGBALL_MAINCPU.read_bytes()))
+    lines += against_the_tables(rom, blits)
     lines.append(
         f"decode: {off_table} kept blits carry an index outside the {len(keys)} descriptors"
     )
-    return lines + coverage_report(Coverage(zi, rom, bases, gfx), blits)
+    return lines + coverage_report(Coverage(gfx), blits)
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--full", action="store_true", help="add the known answer and the coverage")
+    ap.add_argument(
+        "--full", action="store_true", help="add the ROM's tables against the law, and the coverage"
+    )
     args = ap.parse_args(argv)
     missing = [p for p in (BLOCK, CLIPRECT, *map(frame_png, FRAMES)) if not p.exists()]
     if missing:

@@ -311,8 +311,9 @@ DWORD_000000c8:
 000003fc  0003142a              dc.l 0x0003142a
 
 ; kongball_zoom_desc_x: 400 horizontal scale descriptors, 16 bytes each: +0..+4 five bytes the
-;   sprite builder ORs into the register, +6 the shift, +8 and +0xc pointers to the two tables. It
-;   is the source of the zoom_index[400] the driver carries by hand, and it agrees on all 400
+;   sprite builder ORs into the register, +6 the shift, +8 and +0xc pointers to the two tables,
+;   which are the blitter's repeat and stall counters written out (registers.yaml:
+;   wheelfir_the_scale_tables_are_the_counters)
 kongball_zoom_desc_x:
 00000400  ; 00000400..0000069b  668 bytes the analysis never reached
 PTR_DAT_0000069c:

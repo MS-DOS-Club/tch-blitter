@@ -31,8 +31,8 @@ then is information about the fix.
   harness.
 - A driver logs the way MAME's C++ guide asks (`docs/source/contributing/cxx.rst`, Logging), because
   the drivers are proposed upstream: `logerror` for what a developer reads, `osd_printf_verbose`
-  for what a user diagnoses, never `osd_printf_*` at the default verbosity. A milestone trace (which
-  scale law a machine runs, the first time a game does something) is kept for good, through
+  for what a user diagnoses, never `osd_printf_*` at the default verbosity. A milestone trace (a
+  mode a machine enters, the first time a game does something) is kept for good, through
   `logerror`. `logerror` goes nowhere without `-log`: the launcher passes it to a played session, so
   the run's own `error.log` says what it ran, and a harness that has to state its mode reads it there.
 - On radendur a healthy boot is told by an invariant, not a count: the exception handler `0x25a4`

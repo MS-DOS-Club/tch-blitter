@@ -1114,7 +1114,7 @@ blitter:
       name: stall_counter_u_bit5
       state: confirmed
       evidence: 'MEASURED on 2026-09-05 without MAME, on top of the sweep that first placed it (set on 7369 to 6467 scaled blits): the driver''s zoom_index[400] table decoded into its fields and checked against the REAL scale each descriptor of the ROM produces (tables at 0x400 and 0x1d10, found by the known answer 100 = identity, 200 = double). The board author''s stall-counter model reproduces the 192 distinct descriptors with a worst error of 0.76 points, none above 1. The field is 6 bits: five in word 0xa/0xb/0xc and this bit as bit 5. This is the write-side counter: stalling it gives the scales BELOW 100%.'
-      meaning: 'bit 5 of the horizontal STALL counter (write side): its low five bits are n, meaning n ticks and one stall, scale n/(n+1): 80% = 4, 50% = 1. Bit 5 is set exactly when the OTHER counter (repeat) is active: on the idle counter in pure scales (value 32), on both in the 326 combined scales (60 = 1/2 x 6/5, 75 = 1/2 x 3/2, 90 = 6/7 x 21/20). A combined scale is an entry of the driver''s zoom_index[400] whose two 6-bit counters, stall in bits 0-5 and repeat in bits 6-11, both have a non-zero count'
+      meaning: 'bit 5 of the horizontal STALL counter (write side): its low five bits are n, meaning n ticks and one stall, scale n/(n+1): 80% = 4, 50% = 1. Bit 5 is set exactly when the OTHER counter (repeat) is active: on the idle counter in pure scales (value 32), on both in the 326 combined scales (60 = 1/2 x 6/5, 75 = 1/2 x 3/2, 90 = 6/7 x 21/20). A combined scale is a descriptor of wf_zoom_desc_x whose two counters both have a non-zero count. The tables the descriptors point at follow the five low bits alone (wheelfir_the_scale_tables_are_the_counters)'
     - mask: 512
       name: stall_counter_v_bit5
       state: confirmed
@@ -1523,7 +1523,7 @@ blitter:
           identity, 200 exactly double) finds both in wheelfir and kongball and none in pwball,
           and a count of every blit by its scale over 120 s of attract and of play gives pwball
           261462 and 443836 blits, none of them scaled (kongball: 350 scaled in its attract, 0 in
-          play). So Power Ball never reaches the approximation its driver falls back to.'
+          play). So none of Power Ball''s blits is scaled.'
         wheelfir: 'MEASURED on 2026-07-30 over the zooming logo of cycle 0, which runs through 46
           consecutive scales from 25 to 101. The SPURIOUS COLUMN on the right edge appears on TWO of
           those 46, and both are an EXACT HIT in zoom_index: scale 65 with index 0x0802 and scale 89
@@ -1651,9 +1651,8 @@ blitter:
           was DERIVED on 2026-09-15 without MAME, from the driver''s own zoom_index[400] table: the
           base band 50..200 is the bare stall counter (1/2 to 2), clock_halve (word 9, bits 0-1)
           takes it down to 25..49 and clock_double (word 8, 0x1000/0x2000) up to 201..399, so the
-          silicon spans exactly a factor of four each way and cannot leave it. The driver cannot
-          either, by construction: get_scale returns a percentage out of a table built as
-          m_zoom_table[zoom_index[j]] = j over j in 0..399. So a graphic that appears at a scale
+          silicon spans exactly a factor of four each way and cannot leave it, and neither can the
+          driver''s counters, whose slowest pair is 1/2 x 1/2 and fastest 2 x 2. So a graphic that appears at a scale
           outside that window is ALREADY SCALED in the ROM and the blitter is copying it 1:1.
           The decode was checked by an independent route from the 2026-09-05 measurement, which read
           the ROM descriptors: the low 12 bits of the descriptor for scale p and for scale 2p are
@@ -1960,7 +1959,7 @@ blitter:
           Observed and
           not interpreted: in those misses y1 stays at 187 or 188 while y0 moves with the scale, and
           they fall in frames 1325 to 1387, the race, where they are roadside objects near
-          the horizon. The source rows each blit reads, walked through the driver''s exact law over
+          the horizon. The source rows each blit reads, walked through the exact law over
           the gfx ROM, say what they are: the game shortens them from below and leaves v0 alone,
           so the bottom rows of the graphic are never read. Each miss reads 1 to 9 rows short
           of the deepest its source reads, where 522 of the 577 other blits of the same sources leave 0 or 1 (the endpoint a
@@ -1972,7 +1971,9 @@ blitter:
           scripts/wheelfir-blit-law.py re-derives from hardware/evidence/wheelfir-blit-law/ (the
           rows, the clip rectangle at each fire and the frames 1331, 1339 and 1389) the capture''s
           counts, the scores and both controls, the residue and its 33 cut rows, the clip rectangle
-          and the ground row, and with --full the known answer and the source-row coverage.
+          and the ground row, and with --full the known answer, the ROM''s tables against the counters
+          in Wheels & Fire and Kong Ball, every scaled axis of the capture through both, and the
+          source-row coverage.
           WHAT CUTS AT 187/188, MEASURED on 2026-09-26 on three fresh live sessions of wheelfir over
           the same window (frames 1320..1390 from boot, the attract being deterministic). A count
           watch on byte 0x700007 (word 3, dest y1 bits 0-7) counts 28 writes of 0xbb and 116 of
@@ -2021,6 +2022,26 @@ blitter:
           software from the ROM tables (0xe47fe), so this proves what the blitter receives and what
           the game declares per blit, not that the FPGAs count that way.
           NO DRIVER CHANGE and no change of level: the fields were already confirmed.'
+        wheelfir_the_scale_tables_are_the_counters: 'THE GAME''S SCALE TABLES ARE THE TWO COUNTERS
+          WRITTEN OUT, which is what lets the driver scale from the register fields alone. A
+          descriptor of wf_zoom_desc_x maps a source offset x as (2x + A[x] - B[2x + A[x]]) >> shift,
+          and with r and s the five low bits of its repeat and stall fields its tables are
+          A[x] = 2 * floor(x / (r - 1)) and, as words, B[u] = 2 * floor(u / (s + 1)), a field of 0
+          giving a table of zeros, with shift 1, then 2 under clock_halve and 0 under clock_double. So x
+          lands on w = u - floor(u / (s + 1)), with u = x + floor(x / (r - 1)), halved or doubled by
+          the clock bit. The descriptor of the same percentage in wf_zoom_desc_y points at the same
+          tables with the same shift; only the bytes it ORs into the register follow the vertical
+          layout. scripts/wheelfir-blit-law.py --full re-derives it: it decodes each descriptor''s
+          fields from the horizontal bytes, compares A, B and the shift with the counters over every
+          entry the program leaves room for (the gap to the next table), in Wheels & Fire and in Kong
+          Ball, and every descriptor the blitter can reach agrees, while a
+          repeat or stall phase moved by one disagrees on every descriptor that runs that counter.
+          It also walks every scaled axis of the capture under hardware/evidence/wheelfir-blit-law/
+          through the inverse of the tables'' map and through the counters, and the source column of
+          every step agrees. The descriptors below 25% carry fields of zero, which decode as 1:1.
+          WHAT THIS DOES NOT ESTABLISH: the tables are the program''s expectation of the blitter, so
+          the phase the counters start in is the one the game expects, not one measured on the
+          FPGAs.'
         wheelfir_blits_past_the_clip_window: 'BLITS PAST THE CLIP WINDOW, MEASURED on 2026-09-28 on
           live debug sessions of wheelfir over window 1 of the search (boot to frame 1500 of the
           attract, no controls, the race demo inside it); window 2, a played race, was measured
