@@ -106,8 +106,8 @@ to measure.
 
 **Wheels & Fire, Power Ball and Kong Ball run on a rewritten `tch/wheelfir.cpp`**, whose video
 model follows the hardware rather than the symptoms. The three are `NOT_WORKING` in stock MAME; here they
-play their attract and their game. **Six of the eight open points the original driver's
-author left written down are closed, and two remain open;
+play their attract and their game. **Seven of the eight open points the original driver's
+author left written down are closed, and one remains open;
 [the game's page](docs/games/wheels-and-fire.md) maps each of the eight to its state.** Each
 correction is a model of the hardware rather than a patch of the game, and the evidence that backs
 it is in `hardware/registers.yaml`.

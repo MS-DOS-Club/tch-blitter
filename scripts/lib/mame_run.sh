@@ -85,7 +85,8 @@ mame_cmd() {
         *) echo "mame_run: unknown mode $mode (quick or session)" >&2; return 2 ;;
     esac
     [ -z "$lua" ] || args+=(-autoboot_script "$lua")
-    [ -z "$snaps" ] || args+=(-snapshot_directory "$snaps")
+    # a capture is the emulated screen alone, never a layout's artwork
+    [ -z "$snaps" ] || args+=(-snapshot_directory "$snaps" -snapview native)
     printf '%s\n' "${args[@]}" "$@"
 }
 

@@ -57,7 +57,9 @@ validated in RED before it is believed in green.
 Every run starts from a **clean** NVRAM: an inherited EEPROM changes the attract and makes
 comparisons fail that should not. Radical Enduro's passes then share theirs, because its scenes are
 reached by navigating after the boot, and the family's sound check boots a second time on the
-EEPROM the first run left, on purpose. And Radical Enduro's goldens are tied to the driver's real CPU clock,
+EEPROM the first run left, on purpose. A capture is the emulated screen alone (`-snapview native`
+in `scripts/lib/mame_run.sh`), so Wheels & Fire's gear lever layout never reaches a golden. And
+Radical Enduro's goldens are tied to the driver's real CPU clock,
 with no multiplier ([radendurh/README.md](radendurh/README.md)).
 
 ## The siblings' goldens are not a validated reference

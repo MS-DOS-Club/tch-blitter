@@ -4,7 +4,7 @@
   <img src="../img/gifs/wheelfir-play.gif" width="672" alt="Wheels and Fire, a race in progress, the speedometer climbing to top speed">
 </p>
 
-<p align="center"><em>A race in progress: coin, START, and the accelerator to the floor up to top speed.</em></p>
+<p align="center"><em>A race in progress: coin, START, the accelerator to the floor and the gear lever in high.</em></p>
 
 The game that gives the MAME driver its name. A racing simulator with a link between two cabinets for two-player
 play, each with its own monitor. It is the game of the family that uses the complete video
@@ -80,7 +80,7 @@ header carries the list: gaps and extra rows of pixels, zoom by lookup table
 instead of by parameters, double buffering not applied, the road and the sky, layer clearing, wrong
 coordinates for the intro sprites, unidentified layer enable bits, and a slow analogue accelerator.
 
-**Of the eight points on that list, SIX are closed** and two remain open. The closures are in this
+**Of the eight points on that list, SEVEN are closed** and one remains open. The closures are in this
 repository's driver; in stock MAME all eight are still open. Point by point, against the TODO
 exactly as it is written:
 
@@ -222,8 +222,8 @@ The board serves two cabinets, a steering-wheel one and a joystick one, and asks
 of its service menu; the driver models the wheel cabinet by default and offers the other as the
 `Cabinet` setting in MAME's machine configuration. The controls are MAME's defaults, but for one:
 button 1 is the gearbox's low/high lever, so it is a toggle (a tap shifts, and the lever stays
-where it is put), declared as button 4, as Out Run declares its lever, so it takes that button's
-default key and leaves left Ctrl to the accelerator. A race starts in low: shift to high to pass
+where it is put) as Out Run's is, and it is declared as button 4 so that its default key is not the
+accelerator's. A race starts in low: shift to high to pass
 the low gears' speed ceiling. A layout draws the lever in a corner of the screen, LOW or HIGH, as
 Out Run's does; MAME's Video Options offer it on either side, over the picture or beside it. The game
 reads each pedal as a switch, so a key takes its pedal to full travel at once, and a tap of the

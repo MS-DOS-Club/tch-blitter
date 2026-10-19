@@ -2806,7 +2806,8 @@ ports:
       taken by macOS before the emulator sees it. DualSense R2 alone: accelerator ff, latch dfef
       (bit 7 set), speed 23, the plateau; R2 plus Cross (P1 Button 1): latch df6f, speed 33. So
       the physics at 0xe7146 is faithful (no bit 7, no speed past 24) and the pedal is two steps;
-      what misleads is the default mapping, not the driver. The high-score table walks its
+      what misleads is the default mapping, not the driver (the two-step reading is revised under
+      wheelfir_button_1_is_a_low_high_gear_lever: bit 7 is the gear lever). The high-score table walks its
       letters on the latch''s wheel bits and accepts on bit 4, so the keyboard only advances with
       UP; why the wheel runs the letters backwards is the game''s fold, recorded under
       wheelfir_the_high_score_letters_run_against_the_wheel_by_design, not the paddle''s
@@ -2857,8 +2858,8 @@ ports:
       wait for the end of conversion is 136.2 us on average (134 to 163), which is what that clock
       programs (64 ticks, 128 us) plus the start. And the game SPINS on the EOC bit (0xa52fa) until
       the conversion ends, so another clock could only spend more CPU (the three channels take about
-      2% of it), never deliver a value late. The slowness is the physics cap and the two-step pedal
-      measured above'
+      2% of it), never deliver a value late. The slowness is the low gear''s ceiling
+      (wheelfir_button_1_is_a_low_high_gear_lever)'
 - address: 0x7a0000
   name: line_counter
   common_to:
