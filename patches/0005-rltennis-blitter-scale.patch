@@ -1,5 +1,5 @@
 diff --git a/src/mame/tch/rltennis.cpp b/src/mame/tch/rltennis.cpp
-index d86f2a72..90314d7f 100644
+index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95126f140f 100644
 --- a/src/mame/tch/rltennis.cpp
 +++ b/src/mame/tch/rltennis.cpp
 @@ -1,9 +1,12 @@

@@ -1,5 +1,5 @@
 diff --git a/src/osd/modules/debugger/debuggdbstub.cpp b/src/osd/modules/debugger/debuggdbstub.cpp
-index 0e0b3f08..ce59deb1 100644
+index 0e0b3f0845d6f2a796387a57622c97cd01267ba0..ce59deb18f86cb2cf71caaa199340245b26b2b7a 100644
 --- a/src/osd/modules/debugger/debuggdbstub.cpp
 +++ b/src/osd/modules/debugger/debuggdbstub.cpp
 @@ -754,21 +754,18 @@ public:

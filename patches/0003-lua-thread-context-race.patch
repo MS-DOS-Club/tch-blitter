@@ -1,5 +1,5 @@
 diff --git a/src/frontend/mame/luaengine.cpp b/src/frontend/mame/luaengine.cpp
-index b548b1a7..a8baeb54 100644
+index b548b1a7761527ec6760ff67fb0bcd910997836d..a8baeb547632ceda93fbaec1f9e7dd2ae2a4a410 100644
 --- a/src/frontend/mame/luaengine.cpp
 +++ b/src/frontend/mame/luaengine.cpp
 @@ -115,34 +115,44 @@ public:

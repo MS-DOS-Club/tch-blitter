@@ -37,17 +37,23 @@ if [ -n "$orphans" ]; then
     exit 1
 fi
 
-# A new driver is an untracked file, which `git diff` does not see: `add -N` registers it for the
-# diff and the reset undoes it.
+# The diff is against HEAD, so a staged change is in the patch too. A new driver is an untracked
+# file, which no diff sees: `add -N` registers only those, and the reset undoes only those.
 echo "$PATCHES" | while IFS='|' read -r name sources; do
     [ -n "$name" ] || continue
     PATCH="$PROJECT_DIR/patches/$name"
     tmp="$PROJECT_DIR/tmp/export-patch.$$"
 
-        read -ra paths <<< "$sources"
-    git -C "$MAME_SRC" add -N -- "${paths[@]}" 2>/dev/null || true
-    git -C "$MAME_SRC" diff -- "${paths[@]}" > "$tmp"
-    git -C "$MAME_SRC" reset -q -- "${paths[@]}" 2>/dev/null || true
+    read -ra paths <<< "$sources"
+    untracked=()
+    while IFS= read -r f; do untracked+=("$f"); done \
+        < <(git -C "$MAME_SRC" ls-files --others --exclude-standard -- "${paths[@]}")
+    [ "${#untracked[@]}" -eq 0 ] || git -C "$MAME_SRC" add -N -- "${untracked[@]}"
+    # The format is pinned so the bytes depend on the tree alone: by default git abbreviates the
+    # index hashes by the clone's object count, and the user's diff settings change the rest.
+    git -C "$MAME_SRC" -c diff.noprefix=false -c diff.mnemonicPrefix=false \
+        diff --no-color --no-ext-diff --full-index -U3 --diff-algorithm=myers HEAD -- "${paths[@]}" > "$tmp"
+    [ "${#untracked[@]}" -eq 0 ] || git -C "$MAME_SRC" reset -q -- "${untracked[@]}"
 
     if [ ! -s "$tmp" ]; then
         rm -f "$tmp"
