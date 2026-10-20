@@ -142,7 +142,7 @@ index dc1cace80a7350a70305a88e4644c44d37500420..6f5c7a567f7ad0f3acfc79fe518e05ae
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa1e195edfb805ed038426c2a73bff81ec..c0c3834ae2924524389488c68491f6c01a01fe5f 100644
+index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e0afeaffc 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,20 @@
@@ -266,8 +266,8 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c0c3834ae2924524389488c68491f6c0
 +  declared on line 0, and the frame is drawn when vblank starts, so the write the counter's
 +  line 252 makes for screen line 251 arrives too late
 +- in Wheels & Fire's race the rows above the horizon still run two past the end of the scenery
-+  art, and the road starts wider than a three-row offset would draw it; the mechanism is not
-+  identified
++  art, and the road starts wider than with the background read three rows further on; the
++  mechanism is not identified
 +- a background blit covering the whole window is drawn opaque (full_background in do_blit): a
 +  rule fitted to the High Scores photo, which the game asks for transparent with nothing
 +  under it
@@ -1327,8 +1327,8 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..c0c3834ae2924524389488c68491f6c0
  
 -void wheelfir_state::ramdac_map(address_map &map)
 +// The blitter is idle after reset, so its line is asserted: Power Ball's boot waits for the
-+// level-1 handler to find an empty list before it fires its first blit. The blitter's command
-+// state and the line counter start clear; what else the board's reset clears is not known.
++// level-1 handler to find an empty list before it fires its first blit. The driver also clears
++// the blitter's command state and the line counter; whether the board's reset does is not known.
 +void wheelfir_state::machine_reset()
  {
 -	map(0x000, 0x3ff).rw("ramdac", FUNC(ramdac_device::ramdac_pal_r), FUNC(ramdac_device::ramdac_rgb888_w));
