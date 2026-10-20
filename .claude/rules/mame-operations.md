@@ -30,9 +30,15 @@ then is information about the fix.
   needs, unattended runs, the cfg traps) is `docs/mame-techniques.md`: read it before the first
   harness.
 - Both drivers are proposed upstream, so a change is written as MAME reviews it, from the first
-  line. MAME's rules are `docs/source/contributing/cxx.rst` in `upstream/`; before a pull request,
-  `srcclean` (built from `src/tools/`) leaves the files touched unchanged, and a `DEBUG=1` build
-  runs without an assertion firing.
+  line. MAME's rules are `docs/source/contributing/cxx.rst` in `upstream/`; before a pull request
+  is opened or amended, the `mame-review` skill
+  (https://github.com/rb6502/mame-ai-tips/tree/master/mame-review) reviews it from `upstream/`,
+  whose patches sit uncommitted on the pinned commit, so its paths mode reads them as the change:
+  `src/mame/tch/rltennis.cpp` for Reality Tennis's pull request, `src/mame/tch/wheelfir.cpp`,
+  `src/mame/mame.lst` and `src/mame/layout/wheelfir.lay` for the Wheels & Fire board's, never
+  the Lua and gdbstub patches, which are not proposed with them. The drafts of the pull request
+  texts go through its submission step too. `srcclean` is built from `src/tools/` before it, or
+  that check comes back skipped, and a `DEBUG=1` build runs without an assertion firing.
 - No member is initialised in the class definition. A starting value goes in `machine_start`; the
   state of the board's logic (a counter, a command latch, a write window) is cleared in
   `machine_reset`, and what behaves as memory (a scroll latch, a palette copy, a plane) keeps its
