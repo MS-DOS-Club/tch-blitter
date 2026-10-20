@@ -60,8 +60,8 @@ The race as its two goldens hold it is the validated reference, not a starting p
 The displayed page is the bit the game declares, read on line 0 of the frame, and the clearing is
 the game's own (a word-14 fill, and the bit-3 erase that walks its destination in columns); other
 page readings were tried and each broke the race. The driver states the model in its header (the
-blitter's two planes), at the line-0 sampling in `scanline_timer_callback` and above `screen_update`'s compositing
-loop.
+blitter's two planes), at the line-0 sampling in `scanline_timer_callback` and on `m_page_at_line0`,
+the page `screen_update` shows.
 
 `goldens/wheelfir/05_race_hud.png` and `06_race_hud2.png` hold that state, two frames because one
 cannot show a flicker, and they are not re-blessed to let a change pass: a change that turns them red

@@ -149,7 +149,7 @@ commands:
         width: 512
         height: 512
         status: declared
-        source: tch/wheelfir.cpp, screen_update of wheelfir_state and radendur_state (two halves of 256 rows, one shown unscrolled)
+        source: tch/wheelfir.cpp, screen_update and the displayed_sprite_page of each state (two halves of 256 rows, one shown unscrolled)
       - name: background
         when: 1
         order: 0
@@ -158,7 +158,7 @@ commands:
         width: 512
         height: 512
         status: declared
-        source: tch/wheelfir.cpp, screen_update of wheelfir_state and radendur_state (the background plane scrolled by words 10 and 11)
+        source: tch/wheelfir.cpp, draw_background (the background plane scrolled by words 10 and 11)
 
 palette_ports:
   ramdac:
