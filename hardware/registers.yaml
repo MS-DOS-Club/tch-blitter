@@ -441,6 +441,26 @@ blitter:
           still asks rows 427..428 above its road: two rows of ground fill, not three. LIMIT: the
           frame is drawn when vblank starts, so the write the counter''s line 252 makes for screen
           line 251 arrives too late.'
+        wheelfir_the_horizon_constant_is_a_steady_state: 'MEASURED on 2026-10-20, write taps on words
+          8 and 11 and the line counter over the attract race (frames 1000..2700 of a cold boot), each
+          write with its line. On line 0 the line-0 arm (0xdc5f6) writes word 8''s low byte and the
+          scenery y (0xdc61a, 0xdc624), loads the counter with 1 (0xdc62e) and then, on 1305 of the
+          1673 frames that run it, with 0x201cbc + 1 (0xdc65a); the raster arm (0xdc74e, its word-11
+          write at 0xdc764) writes its first entry on that line, load N and first entry on line N in
+          all 1305. On the other 368 the band arm takes the first lines; the other 28
+          frames run the arm at 0xdc66a. y plus the load is 430 on 907 of the 1305, 429 on 119, 431 on
+          92, 428 on 66, and 414..432 otherwise; it falls as the race approaches a crest (427 at frame
+          1305, 419 at 1317) and on into the band frames (the same sum, y plus the band''s length plus
+          0x201cbc: 416 at 1318 to 411 at 1322). So the screen line before the first raster entry asks
+          row y + load - 2 under the line lag: 428 at a sum of 430, two past the art''s last row (426).
+          This qualifies wheelfir_two_measurements_and_no_mechanism: its two samples both sum to 430,
+          but the sum is the steady state, not a constant. REFUTED as the mechanism: a handler that
+          special-cases a scroll value at the horizon (none of the six arms compares or branches on
+          the gap to change a scroll; the gap only sets the counter''s load and the table index; the
+          arms at 0xdc708 and 0xdc78a were read and did not run in the capture); and a counter that
+          also counts the line it is loaded on (a load of N is followed by the first entry on line N,
+          not N - 1). Not chased: the routine that forms y and 0x201cbc (0xdc342..0xdc544) moves y
+          toward its target on alternate frames and takes the horizon from a separate variable'
         wheelfir_artefact_G_fixed_in_the_model: 'WITHDRAWN since (wheelfir_the_three_rows_withdrawn).
           FIXED on 2026-07-31 in the VIDEO MODEL, not by
           patching the game (`WFV2_FONDOCRUDO` (switch WITHDRAWN)=1 reverts it): the BACKGROUND plane is read THREE rows

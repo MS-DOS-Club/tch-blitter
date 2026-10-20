@@ -142,7 +142,7 @@ index dc1cace80a7350a70305a88e4644c44d37500420..6f5c7a567f7ad0f3acfc79fe518e05ae
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa1e195edfb805ed038426c2a73bff81ec..7fc51f81a7f6d0fe0503099f0f2e91bd080f1755 100644
+index 1de425fa1e195edfb805ed038426c2a73bff81ec..daf216cf7d7b8a8da6448d04cfedf40236f28de5 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,20 @@
@@ -264,9 +264,9 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..7fc51f81a7f6d0fe0503099f0f2e91bd
 +  and Kong Ball, which scroll only in vblank, are unaffected. The displayed page is the one
 +  declared on line 0, and the frame is drawn when vblank starts, so the write the counter's
 +  line 252 makes for screen line 251 arrives too late
-+- in Wheels & Fire's race the rows above the horizon still run two past the end of the scenery
-+  art, and the road starts wider than with the background read three rows further on; the
-+  mechanism is not identified
++- on a steady road Wheels & Fire's race asks, on the line above its first raster entry, the
++  scenery row two past the art's last one, and the road starts wider than on the board; none of
++  the readings of the counter or of the scroll latch tried accounts for it
 +- Radical Enduro's sprite-plane flip, palette and frame scroll are modelled apart
 +  (radendur_state): its board is the design's earlier layout, hand-modified and untraced, and its
 +  game draws inside vblank; which of the two the differences follow is not settled, and its
