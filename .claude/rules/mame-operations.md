@@ -29,8 +29,23 @@ then is information about the fix.
   instrument a run without being misled (the debugger from Lua and the six things a breakpoint
   needs, unattended runs, the cfg traps) is `docs/mame-techniques.md`: read it before the first
   harness.
-- A driver logs the way MAME's C++ guide asks (`docs/source/contributing/cxx.rst`, Logging), because
-  the drivers are proposed upstream: `logerror` for what a developer reads, `osd_printf_verbose`
+- Both drivers are proposed upstream, so a change is written as MAME reviews it, from the first
+  line. MAME's rules are `docs/source/contributing/cxx.rst` in `upstream/`; before a pull request,
+  `srcclean` (built from `src/tools/`) leaves the files touched unchanged, and a `DEBUG=1` build
+  runs without an assertion firing.
+- No member is initialised in the class definition. A starting value goes in `machine_start`; the
+  state of the board's logic (a counter, a command latch, a write window) is cleared in
+  `machine_reset`, and what behaves as memory (a scroll latch, a palette copy, a plane) keeps its
+  `machine_start` value. The comment says what the driver clears, not what the board's reset does,
+  unless that was measured.
+- A control, a lever, a layout or a cabinet setting follows the genre's flagship driver in MAME,
+  because that is the pattern a reviewer recognises and asks for: Out Run (`sega/segaorun.cpp`,
+  `layout/outrun.lay`) for the gear lever.
+- A comment carries the density of the file around it: one line where its neighbours have one, the
+  why at the line it binds, no history. The story of a change goes in the commit message and the
+  pull request description.
+- A driver logs the way MAME's C++ guide asks (`docs/source/contributing/cxx.rst`, Logging):
+  `logerror` for what a developer reads, `osd_printf_verbose`
   for what a user diagnoses, never `osd_printf_*` at the default verbosity. A milestone trace (a
   mode a machine enters, the first time a game does something) is kept for good, through
   `logerror`. `logerror` goes nowhere without `-log`: the launcher passes it to a played session, so
