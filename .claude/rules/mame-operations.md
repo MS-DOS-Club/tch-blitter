@@ -39,8 +39,9 @@ then is information about the fix.
   the Lua and gdbstub patches, which are not proposed with them. The drafts of the pull request
   texts go through its submission step too. `srcclean` is built from `src/tools/` before it, or
   that check comes back skipped, and a `DEBUG=1` build runs without an assertion firing.
-- No member is initialised in the class definition. A starting value goes in `machine_start`; the
-  state of the board's logic (a counter, a command latch, a write window) is cleared in
+- No member is initialised in the class definition. A starting value goes in `machine_start`,
+  except an input's initial state (a line a device callback latches), which goes in the
+  constructor's initialiser list, where MAME's review asks for it; the state of the board's logic (a counter, a command latch, a write window) is cleared in
   `machine_reset`, and what behaves as memory (a scroll latch, a palette copy, a plane) keeps its
   `machine_start` value. The comment says what the driver clears, not what the board's reset does,
   unless that was measured.

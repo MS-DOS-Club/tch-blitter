@@ -93,9 +93,9 @@ games:
     level: verified
     evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
   driver_status:
-    value: works; the whole game plays
+    value: works, with imperfect graphics; the whole game plays
     level: verified
-    evidence: MACHINE_SUPPORTS_SAVE
+    evidence: MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE
   authors:
   - role: executive producer
     role_rom: EXECUTIVE PRODUCER
