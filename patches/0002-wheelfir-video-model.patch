@@ -142,7 +142,7 @@ index dc1cace80a7350a70305a88e4644c44d37500420..6f5c7a567f7ad0f3acfc79fe518e05ae
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e0afeaffc 100644
+index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415ff3a8c17 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,20 @@
@@ -183,7 +183,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  ----------------------------------
  Produttore  TCH
  N.revisione E133
-@@ -54,46 +47,75 @@ Note
+@@ -54,46 +47,74 @@ Note
  
  ----
  
@@ -227,8 +227,8 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +  by the arming write; the games pace their blit chain with their own interrupt mask
 +- level 3: vblank
 +- level 5: the line counter loaded at 0x7a0000, counting the 256 scanned lines (not the vblank
-+  ones) and only while bit 13 of 0x7c0000 is set; it clocks the sound streamer (one word per
-+  line to the sub cpu) and, in Wheels & Fire, the road's per-line scroll
++  ones) and only while bit 5 of the byte at 0x7c0000 is set; it clocks the sound streamer (one word per
++  line to the sub CPU) and, in Wheels & Fire, the road's per-line scroll
 +
 +Sub 68000: level 1 on every line, the 15625 Hz rate the sound mixer counts against.
 +
@@ -249,7 +249,6 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +  or doubles the result, which spans 25% to 400%
 +
 +The field is derived from the 32 MHz crystal: 512 pixels by 312 lines, a 15625 Hz line rate.
-+The games clip their sprites against 336x256; 252 lines are shown.
  
 +TODO:
 +- the zoom counters start in the phase the scaling tables of Wheels & Fire and Kong Ball expect
@@ -277,7 +276,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +  palette routing by the plane of each upload stands in for a mechanism not identified
 +- a line-counter request the main has not taken by vblank is withdrawn: fitted to Power Ball's
 +  warm boot, whose sound CPU otherwise dies on the block header the held request sends
-+- clearing bit 13 of 0x7c0000 also withdraws a pending line-counter request; that the board
++- clearing bit 5 of the byte at 0x7c0000 also withdraws a pending line-counter request; that the board
 +  does so is not established
 +- no layer enable is identified: no bit seen written (Wheels & Fire and Power Ball in play, Kong
 +  Ball's attract) behaves as one, so both planes are always composed
@@ -294,7 +293,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  #include "cpu/m68000/m68000.h"
  #include "machine/adc0808.h"
  #include "machine/eepromser.h"
-@@ -101,19 +123,57 @@ BIT N - ( scale < 50% ) ? 1 : 0
+@@ -101,19 +122,57 @@ BIT N - ( scale < 50% ) ? 1 : 0
  #include "machine/timer.h"
  #include "sound/dac.h"
  #include "video/ramdac.h"
@@ -304,8 +303,8 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  #include "speaker.h"
  
 +#include <algorithm>
-+#include <cstring>
 +#include <iterator>
++#include <utility>
 +
 +#include "wheelfir.lh"
 +
@@ -327,18 +326,18 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +// Wheels & Fire, so they draw rows 0..255; 252 of them are shown.
 +constexpr int NUM_SCANLINES = 256;
 +constexpr int FIRST_VISIBLE_LINE = 0;
-+constexpr int NUM_VBLANK_LINES = 56; // the field stays at 312 lines
-+constexpr int VISIBLE_LINES = 252;   // of the 256 scanned, what leaves the monitor
++constexpr int NUM_VBLANK_LINES = 56; // the rest of the 312-line field
++constexpr int VISIBLE_LINES = 252;   // of the 256 scanned, the lines shown
++constexpr int VISIBLE_COLUMNS = 336; // the width the games clip to
 +constexpr int DISPLAY_LAG_LINES = 1; // how far the screen runs behind the line counter, fitted (see the TODO)
-+constexpr int PIXELS_PER_LINE = 512; // MASTER_CLOCK/4 over these is the 15625 Hz line rate
++constexpr int PIXELS_PER_LINE = 512;
 +constexpr XTAL MASTER_CLOCK = 32_MHz_XTAL; // the board's only crystal
 +constexpr int LAYER_BG = 0;
 +constexpr int LAYER_FG = 1;
 +constexpr int NUM_COLORS = 256;
 +constexpr int GFX_PAGE_BYTES = 512 * 512; // one 8-bit graphics page
 +
-+// The flag bits of the blitter block, by word. The register map in blit_w is the source and
-+// says what each one is; these are only its names.
++// the flag bits of the blitter registers, by word (register map in blit_w)
 +constexpr uint16_t SRC_U_BIT8    = 0x100;  // word 6: bit 8 of the source column
 +constexpr uint16_t SRC_V_BIT8    = 0x200;  // word 6: bit 8 of the source row
 +constexpr uint16_t DST_X_FORWARD = 0x1;    // word 7: the destination walks with increasing x
@@ -358,7 +357,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  
  class wheelfir_state : public driver_device
  {
-@@ -122,121 +182,189 @@ public:
+@@ -122,121 +181,193 @@ public:
  		driver_device(mconfig, type, tag),
  		m_maincpu(*this, "maincpu"),
  		m_subcpu(*this, "subcpu"),
@@ -371,6 +370,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 -		m_adc_eoc(0),
 -		m_force_extra_irq1(false),
 -		m_disable_raster_irq(false)
++		m_ramdac(*this, "ramdac"),
 +		m_eeprom(*this, "eeprom"),
 +		m_tilepages(*this, "gfx1")
  	{ }
@@ -400,7 +400,10 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +	void board(machine_config &config) ATTR_COLD;
 +	void board_main_map(address_map &map) ATTR_COLD;
 +	void board_sub_map(address_map &map) ATTR_COLD;
-+	void draw_background(bitmap_ind16 &bitmap, const rectangle &cliprect);
++
++	// the 9-bit background scroll the registers hold, bit 8 from word 8
++	int32_t scroll_x_registers() const { return (m_blitter_data[0xa] & 0x00ff) | ((m_blitter_data[0x8] & SCROLL_X_BIT8) << 2); }
++	int32_t scroll_y_registers() const { return (m_blitter_data[0xb] & 0x00ff) | ((m_blitter_data[0x8] & SCROLL_Y_BIT8) << 1); }
 +
  	required_device<cpu_device> m_maincpu;
  	required_device<cpu_device> m_subcpu;
@@ -410,11 +413,20 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 -
 -	std::unique_ptr<int32_t[]> m_zoom_table;
  	required_shared_ptr<uint16_t> m_blitter_data;
-+
-+	std::unique_ptr<bitmap_ind16> m_tmp_bitmap[2];
-+	int32_t m_current_yscroll;
++	required_device<ramdac_device> m_ramdac;
 +
 +private:
++	// The zoom of one axis (see the header): the period of each counter, 0 when it is idle.
++	struct axis_scale
++	{
++		int stall_period;
++		int repeat_period;
++		bool clock_halve;
++		bool clock_double;
++
++		bool identity() const { return !stall_period && !repeat_period && !clock_halve && !clock_double; }
++	};
++
 +	required_device<eeprom_serial_93cxx_device> m_eeprom;
  	required_region_ptr<uint8_t> m_tilepages;
 -	required_region_ptr<uint16_t> m_maincpurom;
@@ -449,37 +461,29 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +	// word 8, which every blit rewrites, so they are captured with the coordinates.
 +	int32_t m_scroll_x_latched;
 +	int32_t m_scroll_y_latched;
-+
-+	int32_t m_adc_eoc;
-+
-+	// The zoom of one axis (see the header): the period of each counter, 0 when it is idle.
-+	struct axis_scale
-+	{
-+		int stall_period;
-+		int repeat_period;
-+		bool clock_halve;
-+		bool clock_double;
  
 -	int16_t m_scanline_cnt = 0;
-+		bool identity() const { return !stall_period && !repeat_period && !clock_halve && !clock_double; }
-+	};
++	int32_t m_adc_eoc;
  
 -	std::unique_ptr<bitmap_ind16> m_tmp_bitmap[2]{};
-+	// A repeat field of 1 would never advance the source; none was seen written, and it is idle here.
-+	static axis_scale decode_scale(int stall, int repeat, bool clock_halve, bool clock_double)
-+	{
-+		return axis_scale{ stall ? stall + 1 : 0, repeat > 1 ? repeat - 1 : 0, clock_halve, clock_double };
-+	}
++	bitmap_ind16 m_tmp_bitmap[2];
++	int32_t m_current_yscroll;
  
 -	int32_t get_scale(int32_t index)
++	// A repeat field of 1 would never advance the source; none was seen written, and it is idle here.
++	static axis_scale decode_scale(int stall, int repeat, bool clock_halve, bool clock_double)
+ 	{
+-		while (index < ZOOM_TABLE_SIZE)
++		return axis_scale{ stall ? stall + 1 : 0, repeat > 1 ? repeat - 1 : 0, clock_halve, clock_double };
++	}
++
 +	// The source walk of one axis: each source pixel read moves the write position on once, twice
 +	// when the repeat counter wraps, and a move is lost when the stall counter wraps; the clock bit
 +	// halves or doubles the position. Each destination step takes the first source pixel to reach it.
 +	static void source_map(const axis_scale &scale, int steps, int *src)
- 	{
--		while (index < ZOOM_TABLE_SIZE)
++	{
 +		int x = 0, written = 0, repeat = 0, stall = 0;
-+		const auto move = [&]()
++		const auto move = [&scale, &stall, &written] ()
 +		{
 +			if (scale.stall_period && ++stall == scale.stall_period)
 +				stall = 0;
@@ -489,7 +493,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +		for (int d = 0; d <= steps; d++)
  		{
 -			if (m_zoom_table[index] >= 0)
-+			while ((scale.clock_halve ? written >> 1 : scale.clock_double ? written << 1 : written) < d)
++			while ((scale.clock_halve ? (written >> 1) : scale.clock_double ? (written << 1) : written) < d)
  			{
 -				return m_zoom_table[index];
 +				++x;
@@ -513,9 +517,10 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 -	void wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_mask = ~0);
 -	void wheelfir_7c0000_w(offs_t offset, uint16_t data, uint16_t mem_mask = ~0);
 -	uint16_t wheelfir_7c0000_r(offs_t offset, uint16_t mem_mask = ~0);
++	void draw_background(bitmap_ind16 &bitmap, const rectangle &cliprect);
 +	void blit_w(offs_t offset, uint16_t data, uint16_t mem_mask = ~0);
-+	void control_w(offs_t offset, uint16_t data, uint16_t mem_mask = ~0);
-+	uint16_t control_r(offs_t offset, uint16_t mem_mask = ~0);
++	void control_w(uint8_t data);
++	uint8_t control_r();
  	void coin_cnt_w(uint16_t data);
  	void adc_eoc_w(int state);
 -	uint32_t screen_update_wheelfir(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
@@ -540,12 +545,11 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  {
 -	COMBINE_DATA(&m_scanline_cnt);
 -	//logerror("%d: set scanline counter to %d\n", machine().describe_context(), m_scanline_cnt);
-+	m_tmp_bitmap[0] = std::make_unique<bitmap_ind16>(512, 512);
-+	m_tmp_bitmap[1] = std::make_unique<bitmap_ind16>(512, 512);
-+
-+	// Both planes persist between frames and are painted blit by blit, so they are state.
 +	for (int i = 0; i < 2; i++)
-+		save_item(NAME(*m_tmp_bitmap[i]), i);
++	{
++		m_tmp_bitmap[i].allocate(512, 512);
++		save_item(NAME(m_tmp_bitmap[i]), i);
++	}
  }
  
  void wheelfir_state::do_blit()
@@ -588,8 +592,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  
 -	const int x_dst_step = flipx ? 1 : -1;
 -	const int y_dst_step = flipy ? 1 : -1;
-+	// word 7 bit 2 reads the source and bit 3 also writes index 0: both together are a colour fill,
-+	// bit 3 alone an erase that writes zeros and walks its destination in columns
++	// bit 3 alone is an erase: it writes zeros and walks its destination in columns
 +	const bool writes_zero = (m_blitter_data[7] & WRITES_ZERO) != 0;
 +	const bool erase = writes_zero && !(m_blitter_data[7] & READS_SOURCE);
  
@@ -610,28 +613,26 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  		// wheelfir sets 0xfc0000 and 0xf00000, both of which are out of range of any GFX ROM
  		// kongball sets 0xfc0000 but only on startup
  		m_direct_write_x0 = dst_x0;
-@@ -244,99 +372,119 @@ void wheelfir_state::do_blit()
+@@ -244,99 +375,113 @@ void wheelfir_state::do_blit()
  		m_direct_write_y0 = dst_y0;
  		m_direct_write_y1 = dst_y1;
  		m_direct_write_idx = 0;
--	}
--
++		// the channel's plane is the plane bit every blit carries: the game's video reset (0xe8d3c)
++		// opens it on the sprite plane and the scenery loaders on the background
++		m_direct_write_layer = (m_blitter_data[0x7] & DST_PLANE_BG) ? LAYER_BG : LAYER_FG;
++		return;
+ 	}
+ 
 -	if (flipy)
 -		dst_y0 -= 1;
 -	else
 -		dst_y0 += 1;
-+		// the channel's plane is the plane bit every blit carries: the game's video reset (0xe8d3c)
-+		// opens it on the sprite plane and the scenery loaders on the background
-+		m_direct_write_layer = (m_blitter_data[0x7] & DST_PLANE_BG) ? LAYER_BG : LAYER_FG;
- 
+-
 -	if (flipy)
 -		dst_y1 += 1;
 -	else
 -		dst_y1 -= 1;
-+		// this trigger defines the channel's window and draws nothing: its "source" is above the ROM
-+		return;
-+	}
- 
+-
  	dst_x0 &= 0x1ff;
  	dst_x1 &= 0x1ff;
  	dst_y0 &= 0x1ff;
@@ -652,11 +653,10 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 -		dst_y0 &= 0xff;
 -		dst_y1 &= 0xff;
 +		const int rows = ((dst_y1 - dst_y0) & 0x1ff) + 1;
-+		const int y0 = dst_y0 & 0x1ff;
-+		const int end = y0 + rows - 1;
-+		m_tmp_bitmap[vpage]->fill(0, rectangle(0, 511, y0, std::min(end, 511)));
++		const int end = dst_y0 + rows - 1;
++		m_tmp_bitmap[vpage].fill(0, rectangle(0, 511, dst_y0, std::min(end, 511)));
 +		if (end > 511)
-+			m_tmp_bitmap[vpage]->fill(0, rectangle(0, 511, 0, end - 512));
++			m_tmp_bitmap[vpage].fill(0, rectangle(0, 511, 0, end - 512));
 +		return;
  	}
  
@@ -678,6 +678,18 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 -					((m_blitter_data[0x0c] & 0xc000) >> 12) |
 -					((m_blitter_data[0x0a] & 0x4000) >> 10) |
 -					((m_blitter_data[0x08] & 0x0200) >> 4);
+-
+-	const int d2v = ((m_blitter_data[0x0c] & 0x1f00) >> 8) |
+-					((m_blitter_data[0x08] & 0x0800) >> 6);
+-	const int hflagv = (m_blitter_data[0x09] & 0x0002) ? 1 : 0;
+-	const int dflagv = (m_blitter_data[0x08] & 0x2000) ? 1 : 0;
+-	const int indexv = d1v | (d2v << 6) | (hflagv << 12) | (dflagv << 13);
+-	const float scale_v = get_scale(indexv);
+-
+-	if (scale_u == 0 || scale_v == 0) return;
+-
+-	scale_u_step = 100.f / scale_u;
+-	scale_v_step = 100.f / scale_v;
 +	if (erase)
 +	{
 +		std::swap(dst_x0, dst_y0);
@@ -685,12 +697,6 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +		std::swap(x_dst_step, y_dst_step);
 +	}
  
--	const int d2v = ((m_blitter_data[0x0c] & 0x1f00) >> 8) |
--					((m_blitter_data[0x08] & 0x0800) >> 6);
--	const int hflagv = (m_blitter_data[0x09] & 0x0002) ? 1 : 0;
--	const int dflagv = (m_blitter_data[0x08] & 0x2000) ? 1 : 0;
--	const int indexv = d1v | (d2v << 6) | (hflagv << 12) | (dflagv << 13);
--	const float scale_v = get_scale(indexv);
 +	// each axis's stall and repeat fields and its two clock bits (register map in blit_w)
 +	const axis_scale scale_u = decode_scale(
 +			BIT(m_blitter_data[0x0a], 8, 5),
@@ -711,27 +717,24 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +	const int steps_x = ((dst_x1 - dst_x0) * x_dst_step) & 0x1ff;
 +	const int steps_y = ((dst_y1 - dst_y0) * y_dst_step) & 0x1ff;
  
--	if (scale_u == 0 || scale_v == 0) return;
-+	int y = dst_y0;
- 
--	scale_u_step = 100.f / scale_u;
--	scale_v_step = 100.f / scale_v;
+-	// do the draw
+ 	int y = dst_y0;
+-	float idx_v = 0;
++
 +	// each destination step's source offset, per zoomed axis
 +	int src_u[512], src_v[512];
-+	if (!ident_u) source_map(scale_u, steps_x, src_u);
-+	if (!ident_v) source_map(scale_v, steps_y, src_v);
- 
++	if (!ident_u)
++		source_map(scale_u, steps_x, src_u);
++	if (!ident_v)
++		source_map(scale_v, steps_y, src_v);
++
 +	// a background blit covering the whole window is drawn opaque (fitted, see the TODO)
-+	static constexpr int FULL_BACKGROUND_COLUMNS = 336;
 +	static constexpr int FULL_BACKGROUND_ROWS = 254;
 +	const bool full_background = vpage == LAYER_BG
-+			&& (dst_x1 - dst_x0 + 1) >= FULL_BACKGROUND_COLUMNS && (dst_y1 - dst_y0 + 1) >= FULL_BACKGROUND_ROWS;
++			&& (dst_x1 - dst_x0 + 1) >= VISIBLE_COLUMNS && (dst_y1 - dst_y0 + 1) >= FULL_BACKGROUND_ROWS;
 +	const bool opaque = writes_zero || m_blit_opaque || full_background;
-+	bitmap_ind16 &plane = *m_tmp_bitmap[vpage];
- 
--	// do the draw
--	int y = dst_y0;
--	float idx_v = 0;
++	bitmap_ind16 &plane = m_tmp_bitmap[vpage];
++
 +	int step_y = 0;
  	do
  	{
@@ -743,7 +746,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +		// at 1:1 vertically the first source row, a border the art carries, is skipped (fitted, see
 +		// the TODO); at other scales, whether the board does the same is not known
 +		const int yy = src_v0 + v_src_step * (ident_v ? step_y + 1 : src_v[step_y]);
-+		const int py = y & 0x1ff;
++		uint16_t *const row = &plane.pix(y & 0x1ff);
  
  		do
  		{
@@ -755,7 +758,6 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +			const int address = page + (yy & 0x1ff) * 512 + (xx & 0x1ff);
  
 -			int pix = rom[address & (0x1000000 - 1)];
-+			// an erase writes index 0, not the source pixel
 +			const int pix = erase ? 0 : rom[address & m_gfx_mask];
  
 -			if (pix && x >= 0 && y >= 0 && x < 512 && y < 512)
@@ -764,39 +766,37 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 -			}
 +			const int px = x & 0x1ff;
 +			if (pix || opaque)
-+				plane.pix(py, px) = pix;
++				row[px] = pix;
 +
-+			// the endpoint is part of the blit at 1:1 only
-+			if (step_x >= steps_x + (inclusive ? 0 : -1)) break;
++			if (step_x >= steps_x + (inclusive ? 0 : -1))
++				break;
 +			step_x++;
  
  			x += x_dst_step;
 -			x &= 0x1ff;
 -			idx_u += scale_u_step;
++		} while (true);
  
 -		} while (x != dst_x1);
-+		} while (true);
-+
-+		// and so is the endpoint row, same restriction
-+		if (step_y >= steps_y + (inclusive ? 0 : -1)) break;
++		if (step_y >= steps_y + (inclusive ? 0 : -1))
++			break;
 +		step_y++;
  
  		y += y_dst_step;
 -		y &= 0x1ff;
 -		idx_v += scale_v_step;
- 
+-
 -	} while (y != dst_y1);
 +	} while (true);
-+
  }
  
  void wheelfir_state::do_direct_write(uint8_t sixdat)
-@@ -354,14 +502,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
+@@ -354,14 +499,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
  
  		if (x < 512 && y < 512)
  		{
 -			m_tmp_bitmap[LAYER_BG]->pix(y, x) = sixdat;
-+			m_tmp_bitmap[m_direct_write_layer]->pix(y, x) = sixdat;
++			m_tmp_bitmap[m_direct_write_layer].pix(y, x) = sixdat;
  		}
  	}
  
@@ -808,7 +808,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  {
  	/*
  	Blitter data format ( offset in words, offset in bytes )
-@@ -375,35 +523,47 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -375,35 +520,49 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	3  6    --------
  	   7    YYYYYYYY   Y = dest_y1 bits 0-7
  	4  8    --------
@@ -849,7 +849,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +	  1d    FFFFFFFF   F = 0xffff marks the next trigger as a fill: it clears the declared band of rows, edge to edge, to index 0
  	f 1e    TTTTTTTT
 -	  1f    TTTTTTTT    T = start blit / trigger blit (with write of 0xffff, also writes 0x0000 before filling in some params)
-+	  1f    TTTTTTTT   T = trigger: 0x0000 arms the command (resets the mode latch, drops the IRQ line), 0xffff fires it
++	  1f    TTTTTTTT   T = trigger: 0x0000 arms the command (resets the mode latch and the fill mark, drops the IRQ line), 0xffff fires it
  	*/
  
 -	m_screen->update_partial(m_screen->vpos() - 1);
@@ -857,8 +857,8 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +	// the screen trails the line counter by DISPLAY_LAG_LINES: lines before the one this write
 +	// reaches are final
 +	m_screen->update_partial(m_screen->vpos() - 1 - DISPLAY_LAG_LINES);
-+	// 0xffff to word 14 marks the next trigger as a fill
-+	if (offset == 0xe && data == 0xffff) m_word14_fill = true;
++	if (offset == 0xe && data == 0xffff)
++		m_word14_fill = true;
 +
  	COMBINE_DATA(&m_blitter_data[offset]);
  
@@ -866,20 +866,22 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +	// included (Power Ball writes word 13 as a word); the arming write resets it. The byte ports
 +	// below test the other way, because the games write words 6, 8 and 11 as words for their high
 +	// halves.
-+	if (offset == 0xc && ACCESSING_BITS_0_7) m_blit_opaque = false;
-+	if (offset == 0xd && ACCESSING_BITS_0_7) m_blit_opaque = true;
++	if (offset == 0xc && ACCESSING_BITS_0_7)
++		m_blit_opaque = false;
++	if (offset == 0xd && ACCESSING_BITS_0_7)
++		m_blit_opaque = true;
 +
  	if (offset == 0x6)
  	{
  		if (!ACCESSING_BITS_8_15)  //LSB only!
-@@ -413,111 +573,101 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -413,114 +572,91 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  		}
  	}
  
 -	if (offset == 0xa)
 +	// bit 8 of the scroll x is live in word 8: Wheels & Fire rewrites it without the coordinates
 +	if (offset == 0x8 && !ACCESSING_BITS_8_15)
-+		m_scroll_x_latched = (m_scroll_x_latched & 0x0ff) | (m_blitter_data[0x8] & SCROLL_X_BIT8) << 2;
++		m_scroll_x_latched = (m_scroll_x_latched & 0x0ff) | ((m_blitter_data[0x8] & SCROLL_X_BIT8) << 2);
 +
 +	// the scroll is latched when the Y byte is written, which always follows the X, and the row
 +	// counter loaded here advances one row per line from the screen line the write reaches; one
@@ -894,8 +896,8 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 -			m_current_yscroll -= m_screen->vpos();
 -			return;
 -		}
-+		m_scroll_y_latched = (m_blitter_data[0xb] & 0x00ff) | (m_blitter_data[0x8] & SCROLL_Y_BIT8) << 1;
-+		m_scroll_x_latched = (m_blitter_data[0xa] & 0x00ff) | (m_blitter_data[0x8] & SCROLL_X_BIT8) << 2;
++		m_scroll_y_latched = scroll_y_registers();
++		m_scroll_x_latched = scroll_x_registers();
 +		m_current_yscroll = m_scroll_y_latched - std::max(m_screen->vpos() - DISPLAY_LAG_LINES, 0);
 +		return;
  	}
@@ -940,11 +942,11 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 -		int scrolly = y;
 -		scrolly += m_current_yscroll;//
 -		scrolly &= 0x1ff;
+-		uint16_t const *const source = &m_tmp_bitmap[LAYER_BG]->pix(scrolly);
 +		const int scrolly = (y + m_current_yscroll) & 0x1ff;
- 		uint16_t const *const source = &m_tmp_bitmap[LAYER_BG]->pix(scrolly);
++		uint16_t const *const source = &m_tmp_bitmap[LAYER_BG].pix(scrolly);
  		uint16_t *const dest = &bitmap.pix(y);
  
-+		// both planes wrap, so the window reads round the plane's edge
  		for (int x = cliprect.left(); x <= cliprect.right(); x++)
 -		{
 -			int sourcex = x;
@@ -963,7 +965,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  
 +	// The sprite plane is composited unscrolled: given the background scroll, it would move
 +	// Radical Enduro's attract logos with it.
-+	copybitmap_trans(bitmap, *m_tmp_bitmap[LAYER_FG], 0, 0, 0, -displayed_sprite_page() * 256, cliprect, 0);
++	copybitmap_trans(bitmap, m_tmp_bitmap[LAYER_FG], 0, 0, 0, -displayed_sprite_page() * 256, cliprect, 0);
  	return 0;
  }
  
@@ -984,87 +986,98 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  
 -
 -void wheelfir_state::wheelfir_7c0000_w(offs_t offset, uint16_t data, uint16_t mem_mask)
-+void wheelfir_state::control_w(offs_t offset, uint16_t data, uint16_t mem_mask)
++void wheelfir_state::control_w(uint8_t data)
  {
- 	if (ACCESSING_BITS_8_15)
- 	{
+-	if (ACCESSING_BITS_8_15)
+-	{
 -		//{uint16_t x = data & 0xf800; static int y = -1; if (x != y) { y = x; printf("%s wheelfir_7c0000_w %d%d%d%d%d\n", machine().describe_context().c_str(), BIT(data, 15), BIT(data, 14), BIT(data, 13), BIT(data, 12), BIT(data, 11)); }}
 -		//{uint16_t x = data & 0x0700; static int y = -1; if (x != y) { y = x; printf("%s eeprom write %d%d%d\n", machine().describe_context().c_str(), BIT(data, 10), BIT(data, 9), BIT(data, 8)); }}
- 		m_eeprom->di_write(BIT(data, 9));
- 		m_eeprom->clk_write(BIT(data, 8));
- 		m_eeprom->cs_write(BIT(data, 10));
+-		m_eeprom->di_write(BIT(data, 9));
+-		m_eeprom->clk_write(BIT(data, 8));
+-		m_eeprom->cs_write(BIT(data, 10));
 -	}
- 
+-
 -	if (ACCESSING_BITS_0_7)
 -	{
 -		/// alternates between ac & ff
 -		//printf("7c0001 %02x\n", data & 0xff);
 -		/* seems to be scanline width/2 (used for scanline int timing ? or real width of scanline ?) */
-+		// bit 13 enables the line counter; clearing it withdraws a pending level-5 request
-+		const bool was_enabled = m_counter_enabled;
-+		m_counter_enabled = BIT(data, 13);
-+		if (was_enabled && !m_counter_enabled)
-+			m_maincpu->set_input_line(5, CLEAR_LINE);
- 	}
+-	}
++	m_eeprom->di_write(BIT(data, 1));
++	m_eeprom->clk_write(BIT(data, 0));
++	m_eeprom->cs_write(BIT(data, 2));
 +
-+	// the low byte is the link's data byte to a second cabinet, which is not modelled
++	// bit 5 enables the line counter; clearing it withdraws a pending level-5 request
++	const bool was_enabled = m_counter_enabled;
++	m_counter_enabled = BIT(data, 5);
++	if (was_enabled && !m_counter_enabled)
++		m_maincpu->set_input_line(5, CLEAR_LINE);
  }
  
 -uint16_t wheelfir_state::wheelfir_7c0000_r(offs_t offset, uint16_t mem_mask)
-+uint16_t wheelfir_state::control_r(offs_t offset, uint16_t mem_mask)
++uint8_t wheelfir_state::control_r()
  {
- 	uint16_t data = 0;
- 
- 	if (ACCESSING_BITS_8_15)
- 	{
+-	uint16_t data = 0;
+-
+-	if (ACCESSING_BITS_8_15)
+-	{
 -		data |= (machine().rand() & 0x2000); // ?
-+		// bit 13 is the link receiver's status: at 1, nothing pending, a cabinet with no partner
-+		data |= 0x2000;
- 		data |= m_eeprom->do_read() << 15;
+-		data |= m_eeprom->do_read() << 15;
 -		//printf("%s eeprom read %04x %04x\n", machine().describe_context().c_str(), data, mem_mask);
 -	}
 -
 -	if (ACCESSING_BITS_0_7)
 -	{
 -		//printf("unknown read %04x %04x\n", data, mem_mask);
- 	}
+-	}
+-
+-	return data;
++	// bit 5 is the link receiver's status: at 1, nothing pending, a cabinet with
++	// no partner
++	return 0x20 | (m_eeprom->do_read() << 7);
+ }
  
- 	return data;
-@@ -530,36 +680,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
+ void wheelfir_state::coin_cnt_w(uint16_t data)
+@@ -530,36 +666,63 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
  	machine().bookkeeping().coin_counter_w(1, data & 0x02);
  }
  
 -void wheelfir_state::wheelfir_main(address_map &map)
 +int wheelfir_state::adc_eoc_r()
-+{
+ {
+-	map(0x000000, 0x0fffff).rom();
+-	map(0x200000, 0x20ffff).ram().mirror(0x010000); // kongball either needs the mirror (or has more ram?)
 +	return m_adc_eoc;
 +}
-+
+ 
+-	map(0x700000, 0x70001f).w(FUNC(wheelfir_state::wheelfir_blit_w)).share(m_blitter_data);
+-	map(0x720001, 0x720001).w("ramdac", FUNC(ramdac_device::index_w));
+-	map(0x720003, 0x720003).w("ramdac", FUNC(ramdac_device::pal_w));
+-	map(0x720005, 0x720005).w("ramdac", FUNC(ramdac_device::mask_w)); // word write?
+-	map(0x740000, 0x740001).w("soundlatch", FUNC(generic_latch_16_device::write));
 +void wheelfir_state::adc_eoc_w(int state)
 +{
 +	m_adc_eoc = state;
 +}
 +
 +void wheelfir_state::board_main_map(address_map &map)
- {
- 	map(0x000000, 0x0fffff).rom();
--	map(0x200000, 0x20ffff).ram().mirror(0x010000); // kongball either needs the mirror (or has more ram?)
++{
++	map(0x000000, 0x0fffff).rom();
 +	// Kong Ball addresses its level-5 handler and a few variables at 0x21xxxx; a partial decode is
 +	// assumed rather than a second bank
-+	map(0x200000, 0x20ffff).ram().mirror(0x010000);
- 
--	map(0x700000, 0x70001f).w(FUNC(wheelfir_state::wheelfir_blit_w)).share(m_blitter_data);
++	map(0x200000, 0x20ffff).mirror(0x010000).ram();
++
 +	map(0x700000, 0x70001f).w(FUNC(wheelfir_state::blit_w)).share(m_blitter_data);
- 	map(0x720001, 0x720001).w("ramdac", FUNC(ramdac_device::index_w));
- 	map(0x720003, 0x720003).w("ramdac", FUNC(ramdac_device::pal_w));
- 	map(0x720005, 0x720005).w("ramdac", FUNC(ramdac_device::mask_w)); // word write?
--	map(0x740000, 0x740001).w("soundlatch", FUNC(generic_latch_16_device::write));
++	map(0x720001, 0x720001).w(m_ramdac, FUNC(ramdac_device::index_w));
++	map(0x720003, 0x720003).w(m_ramdac, FUNC(ramdac_device::pal_w));
++	map(0x720005, 0x720005).w(m_ramdac, FUNC(ramdac_device::mask_w)); // word write?
  	map(0x760000, 0x760001).w(FUNC(wheelfir_state::coin_cnt_w));
  	map(0x780000, 0x78000f).rw("adc", FUNC(adc0808_device::data_r), FUNC(adc0808_device::address_offset_start_w)).umask16(0x00ff);
 -	map(0x7a0000, 0x7a0001).w(FUNC(wheelfir_state::wheelfir_scanline_cnt_w));
 -	map(0x7c0000, 0x7c0001).rw(FUNC(wheelfir_state::wheelfir_7c0000_r), FUNC(wheelfir_state::wheelfir_7c0000_w));
 +	map(0x7a0000, 0x7a0001).w(FUNC(wheelfir_state::scanline_cnt_w));
-+	map(0x7c0000, 0x7c0001).rw(FUNC(wheelfir_state::control_r), FUNC(wheelfir_state::control_w));
++	// the low byte is the link's data byte to a second cabinet, which is not modelled
++	map(0x7c0000, 0x7c0001).rw(FUNC(wheelfir_state::control_r), FUNC(wheelfir_state::control_w)).umask16(0xff00);
  	map(0x7e0000, 0x7e0001).portr("P1");
  	map(0x7e0002, 0x7e0003).portr("P2");
  }
@@ -1097,12 +1110,12 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +
 +void wheelfir_state::ramdac_map(address_map &map)
 +{
-+	map(0x000, 0x3ff).rw("ramdac", FUNC(ramdac_device::ramdac_pal_r), FUNC(ramdac_device::ramdac_rgb888_w));
++	map(0x000, 0x3ff).rw(m_ramdac, FUNC(ramdac_device::ramdac_pal_r), FUNC(ramdac_device::ramdac_rgb888_w));
 +}
  
  static INPUT_PORTS_START( pwball )
  	PORT_START("P1")    /* 16bit */
-@@ -600,75 +776,68 @@ INPUT_PORTS_END
+@@ -600,75 +763,66 @@ INPUT_PORTS_END
  static INPUT_PORTS_START( wheelfir )
  	PORT_INCLUDE(pwball)
  
@@ -1116,10 +1129,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +	// A field whose condition fails leaves its bits at zero, which on this active-low port reads as
 +	// all four directions held: the wheel cabinet needs the bits declared unused so they read idle.
 +	PORT_BIT( 0x000f, IP_ACTIVE_LOW, IPT_UNUSED ) PORT_CONDITION("CABINET", 0x01, EQUALS, 0x00)
-+	// Button 1 is the gear shifter, a lever that stays where it is put: in low the gearbox stops
-+	// short of its top gears and the car at a speed ceiling, in high it climbs through its gears.
-+	// Declared as button 4, as Out Run declares its lever as button 3, so that its default key does
-+	// not clash with the accelerator's.
++	// the gear shifter, a low/high lever that stays where it is put
 +	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1) PORT_NAME("Gear Shift") PORT_TOGGLE
 +
  	PORT_MODIFY("STEERING")
@@ -1164,7 +1174,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  	}
  
 -	if (param < NUM_SCANLINES) //visible scanline
-+	if (param < NUM_SCANLINES) // a scanned line
++	if (param < NUM_SCANLINES)
  	{
 -		// raster IRQ, changes scroll values for road
 -
@@ -1183,7 +1193,8 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 -
 -		if (m_scanline_cnt > 0)
 +		// the displayed half, sampled on line 0 (see m_page_at_line0)
-+		if (param == 0) m_page_at_line0 = (m_blitter_data[0x8] & VISIBLE_PAGE) ? 1 : 0;
++		if (param == 0)
++			m_page_at_line0 = (m_blitter_data[0x8] & VISIBLE_PAGE) ? 1 : 0;
 +
 +		// the line counter: the game writes how many lines to wait and level 5 fires at zero
 +		if (m_counter_enabled && m_scanline_cnt > 0)
@@ -1209,14 +1220,15 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  	}
  	else
  	{
- 		if (param == NUM_SCANLINES) /* vblank */
+-		if (param == NUM_SCANLINES) /* vblank */
++		if (param == NUM_SCANLINES)
  		{
 +			// a level-5 request still pending at vblank is withdrawn (see the TODO above)
 +			m_maincpu->set_input_line(5, CLEAR_LINE);
  			m_maincpu->set_input_line(3, HOLD_LINE);
  		}
  	}
-@@ -676,90 +845,55 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
+@@ -676,90 +830,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
  	m_subcpu->set_input_line(1, HOLD_LINE);
  }
  
@@ -1307,7 +1319,6 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +	m_scroll_y_latched = 0;
 +	m_adc_eoc = 0;
 +
-+	// What influences future behaviour is saved; the mask derived from the region above is not.
 +	save_item(NAME(m_page_at_line0));
 +	save_item(NAME(m_word14_fill));
 +	save_item(NAME(m_direct_write_x0));
@@ -1349,7 +1360,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  static const uint32_t texlayout_xoffset[512] = { STEP512(0,8) };
  static const uint32_t texlayout_yoffset[512] = { STEP512(0,4096) };
  
-@@ -780,13 +914,10 @@ static GFXDECODE_START( gfx_wheelfir )
+@@ -780,13 +898,10 @@ static GFXDECODE_START( gfx_wheelfir )
  	GFXDECODE_ENTRY( "gfx1", 0, wheelfir512x5125x8_texlayout, 0x0, 1 )
  GFXDECODE_END
  
@@ -1366,7 +1377,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  
  	config.set_maximum_quantum(attotime::from_hz(12000));
  
-@@ -799,13 +930,13 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -799,31 +914,38 @@ void wheelfir_state::wheelfir(machine_config &config)
  	TIMER(config, "scan_timer").configure_scanline(FUNC(wheelfir_state::scanline_timer_callback), "screen", 0, 1);
  
  	SCREEN(config, m_screen);
@@ -1377,7 +1388,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +	// 32 MHz / 4 over 512 pixels is the 15625 Hz line rate the sound mixer counts against, and 312
 +	// lines give 50.08 Hz. No register is known to move the level-3 interrupt, which comes after
 +	// the 256 scanned lines; the monitor shows the first 252 of them.
-+	m_screen->set_raw(MASTER_CLOCK / 4, PIXELS_PER_LINE, 0, 336,
++	m_screen->set_raw(MASTER_CLOCK / 4, PIXELS_PER_LINE, 0, VISIBLE_COLUMNS,
 +			NUM_SCANLINES + NUM_VBLANK_LINES, FIRST_VISIBLE_LINE, VISIBLE_LINES);
  
 -	m_screen->set_screen_update(FUNC(wheelfir_state::screen_update_wheelfir));
@@ -1386,7 +1397,12 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  	m_screen->set_palette(m_palette);
  
  	GFXDECODE(config, "gfxdecode", m_palette, gfx_wheelfir);
-@@ -816,14 +947,21 @@ void wheelfir_state::wheelfir(machine_config &config)
+ 
+ 	PALETTE(config, m_palette).set_entries(NUM_COLORS);
+-	ramdac_device &ramdac(RAMDAC(config, "ramdac", m_palette));
+-	ramdac.set_addrmap(0, &wheelfir_state::ramdac_map);
++	RAMDAC(config, m_ramdac, m_palette);
++	m_ramdac->set_addrmap(0, &wheelfir_state::ramdac_map);
  
  	EEPROM_93C46_16BIT(config, "eeprom");
  
@@ -1410,7 +1426,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  
  void wheelfir_state::kongball(machine_config& config)
  {
-@@ -832,16 +970,203 @@ void wheelfir_state::kongball(machine_config& config)
+@@ -832,16 +954,190 @@ void wheelfir_state::kongball(machine_config& config)
  }
  
  
@@ -1419,14 +1435,11 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +// the sprite plane's displayed half is decided on the blit rather than on line 0, the palette the
 +// game uploads for a page takes effect when that page is shown, each frame starts from the scroll
 +// the registers hold with the X scroll read live, and its two CPUs talk through a plain register.
-+// Its game also issues its drawing chain inside vblank; whether these differences are the board's
-+// or that timing's is not settled.
 +class radendur_state : public wheelfir_state
 +{
 +public:
 +	radendur_state(const machine_config &mconfig, device_type type, const char *tag) :
-+		wheelfir_state(mconfig, type, tag),
-+		m_ramdac(*this, "ramdac")
++		wheelfir_state(mconfig, type, tag)
 +	{ }
 +
 +	void radendur(machine_config &config) ATTR_COLD;
@@ -1436,13 +1449,11 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +	virtual void machine_reset() override ATTR_COLD;
 +
 +	virtual void sprite_plane_blit() override;
-+	virtual int32_t frame_top_yscroll() const override;
-+	virtual int32_t background_xscroll() const override;
++	virtual int32_t frame_top_yscroll() const override { return scroll_y_registers(); } // the frame starts from the registers
++	virtual int32_t background_xscroll() const override { return scroll_x_registers(); } // read live, never latched
 +	virtual int32_t displayed_sprite_page() const override { return m_fg_dispbuf; }
 +
 +private:
-+	required_device<ramdac_device> m_ramdac;
-+
 +	// The FG is two pages of 256 rows that page-flip: m_fg_drawbuf is the half being drawn and
 +	// m_fg_dispbuf the finished half screen_update shows. Which one is bit 0x20 of word 8.
 +	int32_t m_fg_drawbuf;
@@ -1475,61 +1486,53 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +// line 0. The half coming in is cleared by the game's own fill.
 +void radendur_state::flip_page(int buf)
 +{
-+	if (buf == m_fg_drawbuf) return;
++	if (buf == m_fg_drawbuf)
++		return;
 +	m_fg_dispbuf = m_fg_drawbuf;
 +	m_fg_drawbuf = buf;
-+	std::memcpy(m_pal_fg_shown, m_pal_fg_cur, sizeof(m_pal_fg_shown));
++	std::copy(std::begin(m_pal_fg_cur), std::end(m_pal_fg_cur), m_pal_fg_shown);
 +	m_pal_fg_primed = true;
 +}
 +
-+// The displayed half is bit 0x20 of word 8, composed once per frame by the vblank handler (0x506);
++// The displayed half is bit 0x20 of word 8, composed once per frame by the vblank handler (at 0x506);
 +// with the bit set the blits draw into the low half, shown from the next flip.
 +void radendur_state::sprite_plane_blit()
 +{
 +	flip_page((m_blitter_data[0x8] & VISIBLE_PAGE) ? 0 : 1);
 +}
 +
-+// the frame starts from the scroll the game's registers hold, bit 8 from word 8
-+int32_t radendur_state::frame_top_yscroll() const
-+{
-+	return (m_blitter_data[0xb] & 0x00ff) | (m_blitter_data[0x8] & SCROLL_Y_BIT8) << 1;
-+}
-+
-+// the X scroll is read live from the registers, never latched
-+int32_t radendur_state::background_xscroll() const
-+{
-+	return (m_blitter_data[0xa] & 0x00ff) | (m_blitter_data[0x8] & SCROLL_X_BIT8) << 2;
-+}
-+
 +void radendur_state::screen_vblank(int state)
- {
--	m_force_extra_irq1 = true;
--	//m_disable_raster_irq = true;
-+	// nothing on the rising edge
++{
 +	if (!state)
 +	{
 +		// Falling edge, after this vblank's RAMDAC upload: push the palette snapshotted at the flip
 +		// for the FG-owned indices. Earlier, the live upload overwrites it.
 +		if (m_pal_fg_primed)
++		{
 +			for (int i = 0; i < NUM_COLORS; i++)
++			{
 +				if (m_pal_fg_owned[i])
 +					m_palette->set_pen_color(i, rgb_t(uint8_t(m_pal_fg_shown[i] >> 16), uint8_t(m_pal_fg_shown[i] >> 8), uint8_t(m_pal_fg_shown[i])));
++			}
++		}
 +	}
- }
- 
--void wheelfir_state::init_kongball()
++}
++
 +// The latch between the two CPUs: one word, no queue, so a second write before the read drops the
 +// first, and the sub CPU patches each word into its mix loop, so a shifted stream corrupts its code.
 +// A plain register: see the header TODO.
 +void radendur_state::latch_w(uint16_t data)
  {
 -	m_force_extra_irq1 = true;
--	m_disable_raster_irq = true; // the raster interrupt points outside of code
+-	//m_disable_raster_irq = true;
 +	m_latch_value = data;
-+}
-+
+ }
+ 
+-void wheelfir_state::init_kongball()
 +uint16_t radendur_state::latch_r()
-+{
+ {
+-	m_force_extra_irq1 = true;
+-	m_disable_raster_irq = true; // the raster interrupt points outside of code
 +	return m_latch_value;
 +}
 +
@@ -1546,7 +1549,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
 +{
 +	m_ramdac->pal_w(data);
 +	m_rd_comp[m_rd_sub] = data;
-+	if (++m_rd_sub == 3) // R, G, B collected -> one pen
++	if (++m_rd_sub == 3)
 +	{
 +		if (m_blitter_data[0x7] & DST_PLANE_BG)
 +		{
@@ -1620,7 +1623,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  }
  
  
-@@ -936,7 +1261,6 @@ ROM_START( kongball )
+@@ -936,7 +1232,6 @@ ROM_START( kongball )
  	// There's no PLD at U73 on Kong Ball
  ROM_END
  
@@ -1628,7 +1631,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  ROM_START( radendur )
  	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
  	ROM_LOAD16_BYTE( "endu.u19", 0x00001, 0x80000, CRC(d24ca61c) SHA1(64d2648959579d35fbf4c8479c0ff75781d28146) )
-@@ -969,14 +1293,52 @@ ROM_START( radendur )
+@@ -969,14 +1264,52 @@ ROM_START( radendur )
  	ROM_LOAD( "4_pal16v8.u73",  0x000, 0x117, NO_DUMP )
  ROM_END
  
@@ -1683,6 +1686,6 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..779515b834bebb466e26caefb946219e
  // crashes (always?) when selecting track on PCB
 -// some courses get to gameplay in MAME right now, but crash quickly, Medium 1 is seems to work better than most others
 -GAME( 199?, radendur,    0, wheelfir,    pwball,   wheelfir_state, init_kongball, ROT0,  "TCH / Sator Videogames", "Radical Enduro (early prototype)",    MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS ) // can get ingame if you overclock CPUs significantly (IRQ problems?)
-+GAME( 199?, radendur,    0,        radendur, pwball,   radendur_state, empty_init, ROT0, "TCH / Sator Videogames", "Radical Enduro (early prototype)", MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
++GAME( 199?, radendur,    0,        radendur, pwball,   radendur_state, empty_init, ROT0, "TCH / Sator Videogames", "Radical Enduro (early prototype)", MACHINE_NOT_WORKING | MACHINE_SUPPORTS_SAVE )
 +// imperfect sound: the prototype's code never triggers its sound effects, which are in the ROMs
 +GAME( 2026, radendurh,   radendur, radendur, pwball,   radendur_state, empty_init, ROT0, "hack", "Radical Enduro (early prototype, bugfix hack)", MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
