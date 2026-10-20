@@ -3091,7 +3091,24 @@ ports:
       blocks of 48, 11 read twice, 103 of 120 s with sound, as recorded before. radendurh with
       the generic latch: 2077 blocks, 5 read twice, 195452 main writes no read took, 35 of 120 s
       with sound, the last at second 41. The dump: 7 and 6 s with sound (its own faults stop it
-      either way). So the plain register stays, and the comment on radendur_state::latch_w in wheelfir.cpp says why.'
+      either way). So the plain register stays, and the comment on radendur_state::latch_w in wheelfir.cpp says why.
+      Superseded by radendur_the_synchronised_latch_against_the_plain_register: measured before
+      radendurh opened its blitter handlers at mask 4.'
+    radendur_the_synchronised_latch_against_the_plain_register: 'MEASURED on 2026-10-20, the sets as
+      they stand (radendurh with its four blitter interrupt handlers opened at mask 4, the dump at
+      mask 7), two builds raced to frame 6100 (122 emulated s) from a cold boot with
+      scripts/drive.lua: the plain register, and generic_latch_16_device in its place, each run
+      stating its build in its own log. Every main write to 0x740000 and every sub read of 0x780000
+      logged by taps with its frame, line and pixel in the line, 0 callback errors, and sorted in
+      time. radendurh, both builds: 304451 main writes, 1885245 sub reads, 3 writes overwritten
+      before any sub read (all on lines 138..140 of frame 12, the boot), 0 block reads (pc 0x2012da)
+      with no write since the previous one; the block words written at pixels 65 to 213 of the line
+      (99% by 108) and read at pixels 222 to 340 of the same line; the two streams differ only on
+      the vblank lines, where the sub''s header poll (0x201146, 0x2012b8) sees the 0xffff written on
+      that line one line later under the synchronised latch; seconds with more than 16 distinct DAC
+      values, 119 of 122 on both. The dump: plain register 8 of 122 s with sound, 287169 writes
+      overwritten, 302 block reads with no write between; synchronised latch 6 of 122, 292360 and
+      7; its five boot goldens unchanged'
     pwball_the_sub_cpus_latch_protocol_has_no_new_word_flag: 'READ on 2026-10-11 in the sub''s own code, one
       program for wheelfir, pwball and radendur (identical up to 0x4946). The IRQ1 mixer ends in a
       self-modified `jmp` whose target (0x20113a) is the protocol''s state: wait for 0xffff (0x632

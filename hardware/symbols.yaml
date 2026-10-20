@@ -1618,8 +1618,8 @@ images:
   - addr: 2097152
     name: sub_ram
     description: RAM (0x200000-0x20ffff)
-    evidence: 'READ from the sound 68000 map for both state classes, and they share it: board_sub_map in
-      wheelfir.cpp, under sub_map and radendur_sub_map'
+    evidence: 'READ from the sound 68000 map for both state classes, and they share it: sub_map in
+      wheelfir.cpp'
   - addr: 2101248
     name: snd_cmd_buffer
     description: Command buffer in RAM, 96 bytes = 6 registers of 16 (voice 1 at 0x201000, voice 2 at
@@ -1671,18 +1671,18 @@ images:
   - addr: 7340032
     name: ldac
     description: left DAC (data_w)
-    evidence: 'READ from the sound 68000 map for both state classes, and they share it: board_sub_map in
-      wheelfir.cpp, under sub_map and radendur_sub_map'
+    evidence: 'READ from the sound 68000 map for both state classes, and they share it: sub_map in
+      wheelfir.cpp'
   - addr: 7602176
     name: rdac
     description: right DAC (data_w)
-    evidence: 'READ from the sound 68000 map for both state classes, and they share it: board_sub_map in
-      wheelfir.cpp, under sub_map and radendur_sub_map'
+    evidence: 'READ from the sound 68000 map for both state classes, and they share it: sub_map in
+      wheelfir.cpp'
   - addr: 7864320
     name: soundlatch_r
     description: latch from the main CPU to the sub CPU (reads the main CPU's command)
-    evidence: 'READ from the sound 68000 map for both state classes, and they share it: board_sub_map in
-      wheelfir.cpp, under sub_map and radendur_sub_map'
+    evidence: 'READ from the sound 68000 map for both state classes, and they share it: sub_map in
+      wheelfir.cpp'
   rltennis_maincpu,rltennisa_maincpu:
   - addr: 0
     name: rlt_rom

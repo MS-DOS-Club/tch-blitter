@@ -36,7 +36,7 @@ assets:
 
 commands:
   blit:
-    block: {address: 0x700000, words: 16, word_bytes: 2, cpu: maincpu, status: declared, source: 'tch/wheelfir.cpp, board_main_map (0x700000..0x70001f, blit_w and the blitram share)'}
+    block: {address: 0x700000, words: 16, word_bytes: 2, cpu: maincpu, status: declared, source: 'tch/wheelfir.cpp, main_map (0x700000..0x70001f, blit_w and the blitram share)'}
     fire: {word: 15, value: 0xffff, status: proved, source: hardware/registers.yaml blitter word 15 trigger (confirmed)}
     asset: pages
     fields:
@@ -170,4 +170,4 @@ palette_ports:
     component_bits: 8
     auto_increment: true
     status: declared
-    source: 'tch/wheelfir.cpp, board_main_map (index_w at 0x720001, pal_w at 0x720003) and ramdac_map (ramdac_rgb888_w, 8 bits a component)'
+    source: 'tch/wheelfir.cpp, main_map (index_w at 0x720001, pal_w at 0x720003) and ramdac_map (ramdac_rgb888_w, 8 bits a component)'

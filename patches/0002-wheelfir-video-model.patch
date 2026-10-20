@@ -142,7 +142,7 @@ index dc1cace80a7350a70305a88e4644c44d37500420..6f5c7a567f7ad0f3acfc79fe518e05ae
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61c81678bd 100644
+index 1de425fa1e195edfb805ed038426c2a73bff81ec..25a6806e3ade547b895761b54f81cafd17e5cb86 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,20 @@
@@ -183,7 +183,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  ----------------------------------
  Produttore  TCH
  N.revisione E133
-@@ -54,46 +47,76 @@ Note
+@@ -54,46 +47,73 @@ Note
  
  ----
  
@@ -283,9 +283,6 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +- no layer enable is identified: no bit seen written (Wheels & Fire and Power Ball in play, Kong
 +  Ball's attract) behaves as one, so both planes are always composed
 +- word 4's low byte, with its bit 8 in word 8, is written by the games and read by nothing
-+- Radical Enduro's latch between the CPUs is a plain register: with generic_latch_16_device,
-+  whose write synchronises the scheduler, the sub CPU loses its stream partway into a race; how
-+  the board's latch keeps the two CPUs in step is not known
 +- the link between two cabinets (0x7c0000) answers as a cabinet alone
  
  */
@@ -295,7 +292,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  #include "cpu/m68000/m68000.h"
  #include "machine/adc0808.h"
  #include "machine/eepromser.h"
-@@ -101,19 +124,57 @@ BIT N - ( scale < 50% ) ? 1 : 0
+@@ -101,19 +121,57 @@ BIT N - ( scale < 50% ) ? 1 : 0
  #include "machine/timer.h"
  #include "sound/dac.h"
  #include "video/ramdac.h"
@@ -359,7 +356,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  
  class wheelfir_state : public driver_device
  {
-@@ -122,121 +183,193 @@ public:
+@@ -122,121 +180,193 @@ public:
  		driver_device(mconfig, type, tag),
  		m_maincpu(*this, "maincpu"),
  		m_subcpu(*this, "subcpu"),
@@ -367,14 +364,14 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  		m_screen(*this, "screen"),
  		m_palette(*this, "palette"),
  		m_blitter_data(*this, "blitram"),
--		m_tilepages(*this, "gfx1"),
++		m_ramdac(*this, "ramdac"),
++		m_eeprom(*this, "eeprom"),
+ 		m_tilepages(*this, "gfx1"),
 -		m_maincpurom(*this, "maincpu"),
 -		m_adc_eoc(0),
 -		m_force_extra_irq1(false),
 -		m_disable_raster_irq(false)
-+		m_ramdac(*this, "ramdac"),
-+		m_eeprom(*this, "eeprom"),
-+		m_tilepages(*this, "gfx1")
++		m_soundlatch(*this, "soundlatch")
  	{ }
  
 -	void wheelfir(machine_config &config);
@@ -400,8 +397,8 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +	virtual int32_t displayed_sprite_page() const { return m_page_at_line0; }
 +
 +	void board(machine_config &config) ATTR_COLD;
-+	void board_main_map(address_map &map) ATTR_COLD;
-+	void board_sub_map(address_map &map) ATTR_COLD;
++	void main_map(address_map &map) ATTR_COLD;
++	void sub_map(address_map &map) ATTR_COLD;
 +
 +	// the 9-bit background scroll the registers hold, bit 8 from word 8
 +	int32_t scroll_x_registers() const { return (m_blitter_data[0xa] & 0x00ff) | ((m_blitter_data[0x8] & SCROLL_X_BIT8) << 2); }
@@ -432,6 +429,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +	required_device<eeprom_serial_93cxx_device> m_eeprom;
  	required_region_ptr<uint8_t> m_tilepages;
 -	required_region_ptr<uint16_t> m_maincpurom;
++	required_device<generic_latch_16_device> m_soundlatch;
  
 -	int32_t m_direct_write_x0 = 0;
 -	int32_t m_direct_write_x1 = 0;
@@ -445,7 +443,8 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +	// 0xffff was written to word 14 since the last arming: the next trigger is a fill, not a blit.
 +	bool m_word14_fill;
 +	bool m_blit_opaque;   // the last mode write since the arming selected opaque
-+
+ 
+-	int16_t m_scanline_cnt = 0;
 +	int32_t m_direct_write_x0;
 +	int32_t m_direct_write_x1;
 +	int32_t m_direct_write_y0;
@@ -453,7 +452,8 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +	int32_t m_direct_write_idx;
 +	// the plane the direct-write channel streams into: the plane bit of the command that opened it
 +	int32_t m_direct_write_layer;
-+
+ 
+-	std::unique_ptr<bitmap_ind16> m_tmp_bitmap[2]{};
 +	int16_t m_scanline_cnt;
 +	bool m_counter_enabled;
 +
@@ -463,38 +463,36 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +	// word 8, which every blit rewrites, so they are captured with the coordinates.
 +	int32_t m_scroll_x_latched;
 +	int32_t m_scroll_y_latched;
- 
--	int16_t m_scanline_cnt = 0;
++
 +	int32_t m_adc_eoc;
- 
--	std::unique_ptr<bitmap_ind16> m_tmp_bitmap[2]{};
++
 +	bitmap_ind16 m_tmp_bitmap[2];
 +	int32_t m_current_yscroll;
- 
--	int32_t get_scale(int32_t index)
++
 +	// A repeat field of 1 would never advance the source; none was seen written, and it is idle here.
 +	static axis_scale decode_scale(int stall, int repeat, bool clock_halve, bool clock_double)
- 	{
--		while (index < ZOOM_TABLE_SIZE)
++	{
 +		return axis_scale{ stall ? stall + 1 : 0, repeat > 1 ? repeat - 1 : 0, clock_halve, clock_double };
 +	}
-+
+ 
+-	int32_t get_scale(int32_t index)
 +	// The source walk of one axis: each source pixel read moves the write position on once, twice
 +	// when the repeat counter wraps, and a move is lost when the stall counter wraps; the clock bit
 +	// halves or doubles the position. Each destination step takes the first source pixel to reach it.
 +	static void source_map(const axis_scale &scale, int steps, int *src)
-+	{
+ 	{
+-		while (index < ZOOM_TABLE_SIZE)
 +		int x = 0, written = 0, repeat = 0, stall = 0;
 +		const auto move = [&scale, &stall, &written] ()
-+		{
+ 		{
+-			if (m_zoom_table[index] >= 0)
 +			if (scale.stall_period && ++stall == scale.stall_period)
 +				stall = 0;
 +			else
 +				++written;
 +		};
 +		for (int d = 0; d <= steps; d++)
- 		{
--			if (m_zoom_table[index] >= 0)
++		{
 +			while ((scale.clock_halve ? (written >> 1) : scale.clock_double ? (written << 1) : written) < d)
  			{
 -				return m_zoom_table[index];
@@ -538,8 +536,6 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 -	bool m_disable_raster_irq;
 -
 -	int m_current_yscroll;
-+	void main_map(address_map &map) ATTR_COLD;
-+	void sub_map(address_map &map) ATTR_COLD;
  };
  
 -void wheelfir_state::wheelfir_scanline_cnt_w(offs_t offset, uint16_t data, uint16_t mem_mask)
@@ -615,7 +611,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  		// wheelfir sets 0xfc0000 and 0xf00000, both of which are out of range of any GFX ROM
  		// kongball sets 0xfc0000 but only on startup
  		m_direct_write_x0 = dst_x0;
-@@ -244,99 +377,113 @@ void wheelfir_state::do_blit()
+@@ -244,99 +374,113 @@ void wheelfir_state::do_blit()
  		m_direct_write_y0 = dst_y0;
  		m_direct_write_y1 = dst_y1;
  		m_direct_write_idx = 0;
@@ -793,7 +789,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  }
  
  void wheelfir_state::do_direct_write(uint8_t sixdat)
-@@ -354,14 +501,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
+@@ -354,14 +498,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
  
  		if (x < 512 && y < 512)
  		{
@@ -810,7 +806,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  {
  	/*
  	Blitter data format ( offset in words, offset in bytes )
-@@ -375,35 +522,49 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -375,35 +519,49 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	3  6    --------
  	   7    YYYYYYYY   Y = dest_y1 bits 0-7
  	4  8    --------
@@ -876,7 +872,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  	if (offset == 0x6)
  	{
  		if (!ACCESSING_BITS_8_15)  //LSB only!
-@@ -413,114 +574,91 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -413,114 +571,91 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  		}
  	}
  
@@ -928,14 +924,14 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  }
  
 -void wheelfir_state::video_start()
--{
++void wheelfir_state::draw_background(bitmap_ind16 &bitmap, const rectangle &cliprect)
+ {
 -	m_tmp_bitmap[0] = std::make_unique<bitmap_ind16>(512, 512);
 -	m_tmp_bitmap[1] = std::make_unique<bitmap_ind16>(512, 512);
 -}
 -
 -uint32_t wheelfir_state::screen_update_wheelfir(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
-+void wheelfir_state::draw_background(bitmap_ind16 &bitmap, const rectangle &cliprect)
- {
+-{
 -	bitmap.fill(0, cliprect);
 +	const int32_t xscroll = background_xscroll();
  
@@ -1040,7 +1036,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  }
  
  void wheelfir_state::coin_cnt_w(uint16_t data)
-@@ -530,36 +668,63 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
+@@ -530,37 +665,53 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
  	machine().bookkeeping().coin_counter_w(1, data & 0x02);
  }
  
@@ -1062,7 +1058,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +	m_adc_eoc = state;
 +}
 +
-+void wheelfir_state::board_main_map(address_map &map)
++void wheelfir_state::main_map(address_map &map)
 +{
 +	map(0x000000, 0x0fffff).rom();
 +	// Kong Ball addresses its level-5 handler and a few variables at 0x21xxxx; a partial decode is
@@ -1073,6 +1069,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +	map(0x720001, 0x720001).w(m_ramdac, FUNC(ramdac_device::index_w));
 +	map(0x720003, 0x720003).w(m_ramdac, FUNC(ramdac_device::pal_w));
 +	map(0x720005, 0x720005).w(m_ramdac, FUNC(ramdac_device::mask_w)); // word write?
++	map(0x740000, 0x740001).w(m_soundlatch, FUNC(generic_latch_16_device::write));
  	map(0x760000, 0x760001).w(FUNC(wheelfir_state::coin_cnt_w));
  	map(0x780000, 0x78000f).rw("adc", FUNC(adc0808_device::data_r), FUNC(adc0808_device::address_offset_start_w)).umask16(0x00ff);
 -	map(0x7a0000, 0x7a0001).w(FUNC(wheelfir_state::wheelfir_scanline_cnt_w));
@@ -1084,15 +1081,9 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  	map(0x7e0002, 0x7e0003).portr("P2");
  }
  
-+void wheelfir_state::main_map(address_map &map)
-+{
-+	board_main_map(map);
-+	map(0x740000, 0x740001).w("soundlatch", FUNC(generic_latch_16_device::write));
-+}
-+
- 
+-
 -void wheelfir_state::wheelfir_sub(address_map &map)
-+void wheelfir_state::board_sub_map(address_map &map)
++void wheelfir_state::sub_map(address_map &map)
  {
  	map(0x000000, 0x0fffff).rom();
  	map(0x200000, 0x20ffff).ram();
@@ -1101,23 +1092,19 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 -
  	map(0x700000, 0x700001).w("ldac", FUNC(dac_word_interface::data_w));
  	map(0x740000, 0x740001).w("rdac", FUNC(dac_word_interface::data_w));
++	map(0x780000, 0x780001).r(m_soundlatch, FUNC(generic_latch_16_device::read));
  }
  
-+void wheelfir_state::sub_map(address_map &map)
-+{
-+	board_sub_map(map);
-+	map(0x780000, 0x780001).r("soundlatch", FUNC(generic_latch_16_device::read));
-+}
-+
-+
+ 
 +void wheelfir_state::ramdac_map(address_map &map)
 +{
 +	map(0x000, 0x3ff).rw(m_ramdac, FUNC(ramdac_device::ramdac_pal_r), FUNC(ramdac_device::ramdac_rgb888_w));
 +}
- 
++
  static INPUT_PORTS_START( pwball )
  	PORT_START("P1")    /* 16bit */
-@@ -600,75 +765,66 @@ INPUT_PORTS_END
+ 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
+@@ -600,75 +751,66 @@ INPUT_PORTS_END
  static INPUT_PORTS_START( wheelfir )
  	PORT_INCLUDE(pwball)
  
@@ -1148,13 +1135,13 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  	PORT_MODIFY("BRAKE")
 -	PORT_BIT(0xff, 0x00, IPT_PEDAL2) PORT_INVERT PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_NAME("Brake Pedal") PORT_MINMAX(0x00, 0xff) PORT_REVERSE
 -INPUT_PORTS_END
-+	PORT_BIT(0xff, 0x00, IPT_PEDAL2) PORT_INVERT PORT_SENSITIVITY(100) PORT_KEYDELTA(255) PORT_NAME("Brake Pedal") PORT_MINMAX(0x00, 0xff) PORT_REVERSE
- 
+-
 -int wheelfir_state::adc_eoc_r()
 -{
 -	return m_adc_eoc;
 -}
--
++	PORT_BIT(0xff, 0x00, IPT_PEDAL2) PORT_INVERT PORT_SENSITIVITY(100) PORT_KEYDELTA(255) PORT_NAME("Brake Pedal") PORT_MINMAX(0x00, 0xff) PORT_REVERSE
+ 
 -void wheelfir_state::adc_eoc_w(int state)
 -{
 -	m_adc_eoc = state;
@@ -1230,7 +1217,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  			m_maincpu->set_input_line(3, HOLD_LINE);
  		}
  	}
-@@ -676,90 +832,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
+@@ -676,90 +818,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
  	m_subcpu->set_input_line(1, HOLD_LINE);
  }
  
@@ -1362,7 +1349,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  static const uint32_t texlayout_xoffset[512] = { STEP512(0,8) };
  static const uint32_t texlayout_yoffset[512] = { STEP512(0,4096) };
  
-@@ -780,13 +900,10 @@ static GFXDECODE_START( gfx_wheelfir )
+@@ -780,13 +886,10 @@ static GFXDECODE_START( gfx_wheelfir )
  	GFXDECODE_ENTRY( "gfx1", 0, wheelfir512x5125x8_texlayout, 0x0, 1 )
  GFXDECODE_END
  
@@ -1379,7 +1366,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  
  	config.set_maximum_quantum(attotime::from_hz(12000));
  
-@@ -799,31 +916,38 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -799,24 +902,24 @@ void wheelfir_state::wheelfir(machine_config &config)
  	TIMER(config, "scan_timer").configure_scanline(FUNC(wheelfir_state::scanline_timer_callback), "screen", 0, 1);
  
  	SCREEN(config, m_screen);
@@ -1409,10 +1396,11 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  	EEPROM_93C46_16BIT(config, "eeprom");
  
 -	GENERIC_LATCH_16(config, "soundlatch");
--
++	GENERIC_LATCH_16(config, m_soundlatch);
+ 
  	/* sound hardware */
  	SPEAKER(config, "speaker", 2).front();
- 	DAC_10BIT_R2R(config, "ldac", 0).add_route(ALL_OUTPUTS, "speaker", 1.0, 0); // unknown DAC
+@@ -824,6 +927,13 @@ void wheelfir_state::wheelfir(machine_config &config)
  	DAC_10BIT_R2R(config, "rdac", 0).add_route(ALL_OUTPUTS, "speaker", 1.0, 1); // unknown DAC
  }
  
@@ -1421,14 +1409,12 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +	board(config);
 +	m_maincpu->set_addrmap(AS_PROGRAM, &wheelfir_state::main_map);
 +	m_subcpu->set_addrmap(AS_PROGRAM, &wheelfir_state::sub_map);
-+
-+	GENERIC_LATCH_16(config, "soundlatch");
 +}
 +
  
  void wheelfir_state::kongball(machine_config& config)
  {
-@@ -832,16 +956,190 @@ void wheelfir_state::kongball(machine_config& config)
+@@ -832,16 +942,164 @@ void wheelfir_state::kongball(machine_config& config)
  }
  
  
@@ -1436,9 +1422,11 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +// Radical Enduro, on the board's earlier layout, and what it does differently from the later one:
 +// the sprite plane's displayed half is decided on the blit rather than on line 0, the palette the
 +// game uploads for a page takes effect when that page is shown, each frame starts from the scroll
-+// the registers hold with the X scroll read live, and its two CPUs talk through a plain register.
++// the registers hold with the X scroll read live.
 +class radendur_state : public wheelfir_state
-+{
+ {
+-	m_force_extra_irq1 = true;
+-	//m_disable_raster_irq = true;
 +public:
 +	radendur_state(const machine_config &mconfig, device_type type, const char *tag) :
 +		wheelfir_state(mconfig, type, tag)
@@ -1472,16 +1460,12 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +	uint8_t m_rd_idx;
 +	uint8_t m_rd_sub;
 +	uint8_t m_rd_comp[3];
-+	uint16_t m_latch_value;
 +
 +	void flip_page(int buf);
 +	void ramdac_index_w(uint8_t data);
 +	void ramdac_pal_w(uint8_t data);
-+	void latch_w(uint16_t data);
-+	uint16_t latch_r();
 +	void screen_vblank(int state);
 +	void radendur_main_map(address_map &map) ATTR_COLD;
-+	void radendur_sub_map(address_map &map) ATTR_COLD;
 +};
 +
 +// The page flip, decided on the blit: this game issues its drawing chain inside vblank, after
@@ -1494,12 +1478,15 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +	m_fg_drawbuf = buf;
 +	std::copy(std::begin(m_pal_fg_cur), std::end(m_pal_fg_cur), m_pal_fg_shown);
 +	m_pal_fg_primed = true;
-+}
-+
+ }
+ 
+-void wheelfir_state::init_kongball()
 +// The displayed half is bit 0x20 of word 8, composed once per frame by the vblank handler (at 0x506);
 +// with the bit set the blits draw into the low half, shown from the next flip.
 +void radendur_state::sprite_plane_blit()
-+{
+ {
+-	m_force_extra_irq1 = true;
+-	m_disable_raster_irq = true; // the raster interrupt points outside of code
 +	flip_page((m_blitter_data[0x8] & VISIBLE_PAGE) ? 0 : 1);
 +}
 +
@@ -1518,24 +1505,6 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +			}
 +		}
 +	}
-+}
-+
-+// The latch between the two CPUs: one word, no queue, so a second write before the read drops the
-+// first, and the sub CPU patches each word into its mix loop, so a shifted stream corrupts its code.
-+// A plain register: see the header TODO.
-+void radendur_state::latch_w(uint16_t data)
- {
--	m_force_extra_irq1 = true;
--	//m_disable_raster_irq = true;
-+	m_latch_value = data;
- }
- 
--void wheelfir_state::init_kongball()
-+uint16_t radendur_state::latch_r()
- {
--	m_force_extra_irq1 = true;
--	m_disable_raster_irq = true; // the raster interrupt points outside of code
-+	return m_latch_value;
 +}
 +
 +// The RAMDAC writes are passed on and followed by the BT478 protocol (index, then R, G, B with
@@ -1578,7 +1547,6 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +	std::fill(std::begin(m_pal_fg_cur), std::end(m_pal_fg_cur), 0);
 +	std::fill(std::begin(m_pal_fg_shown), std::end(m_pal_fg_shown), 0);
 +	std::fill(std::begin(m_rd_comp), std::end(m_rd_comp), 0);
-+	m_latch_value = 0;
 +
 +	save_item(NAME(m_fg_drawbuf));
 +	save_item(NAME(m_fg_dispbuf));
@@ -1589,7 +1557,6 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +	save_item(NAME(m_rd_idx));
 +	save_item(NAME(m_rd_sub));
 +	save_item(NAME(m_rd_comp));
-+	save_item(NAME(m_latch_value));
 +}
 +
 +// the RAMDAC's reset clears its index and its R, G, B step, so the copy of its protocol follows
@@ -1603,29 +1570,22 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
 +
 +void radendur_state::radendur_main_map(address_map &map)
 +{
-+	board_main_map(map);
++	main_map(map);
 +	map(0x720001, 0x720001).w(FUNC(radendur_state::ramdac_index_w));
 +	map(0x720003, 0x720003).w(FUNC(radendur_state::ramdac_pal_w));
-+	map(0x740000, 0x740001).w(FUNC(radendur_state::latch_w));
-+}
-+
-+void radendur_state::radendur_sub_map(address_map &map)
-+{
-+	board_sub_map(map);
-+	map(0x780000, 0x780001).r(FUNC(radendur_state::latch_r));
 +}
 +
 +void radendur_state::radendur(machine_config &config)
 +{
 +	board(config);
 +	m_maincpu->set_addrmap(AS_PROGRAM, &radendur_state::radendur_main_map);
-+	m_subcpu->set_addrmap(AS_PROGRAM, &radendur_state::radendur_sub_map);
++	m_subcpu->set_addrmap(AS_PROGRAM, &radendur_state::sub_map);
 +
 +	m_screen->screen_vblank().set(FUNC(radendur_state::screen_vblank));
  }
  
  
-@@ -936,7 +1234,6 @@ ROM_START( kongball )
+@@ -936,7 +1194,6 @@ ROM_START( kongball )
  	// There's no PLD at U73 on Kong Ball
  ROM_END
  
@@ -1633,7 +1593,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61
  ROM_START( radendur )
  	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
  	ROM_LOAD16_BYTE( "endu.u19", 0x00001, 0x80000, CRC(d24ca61c) SHA1(64d2648959579d35fbf4c8479c0ff75781d28146) )
-@@ -969,14 +1266,52 @@ ROM_START( radendur )
+@@ -969,14 +1226,52 @@ ROM_START( radendur )
  	ROM_LOAD( "4_pal16v8.u73",  0x000, 0x117, NO_DUMP )
  ROM_END
  

@@ -16,10 +16,10 @@ Its origin, and still its deepest work, is the restoration of **Radical Enduro**
 Videogames). In stock MAME the `radendur` set is `MACHINE_NOT_WORKING` inside `tch/wheelfir.cpp`,
 and a comment there says that some courses reach gameplay but crash quickly; here it stays in that
 driver as `radendur_state`, a subclass of the board's state that keeps what this game does
-differently (when the sprite plane flips, when its palette takes effect, a plain latch between the
-CPUs). It emulates the dump as it is (`radendur`, which hangs on the prototype's own faults), and a
-clone set, `radendurh`, whose maincpu ROM has those faults fixed in
-code: it boots, enters a game and finishes a race on the five playable tracks. The board's video
+differently (when the sprite plane flips, when its palette takes effect, where each frame's
+scroll starts). It emulates the dump as it is (`radendur`, which hangs on the prototype's own
+faults), and a clone set, `radendurh`, whose maincpu ROM has those faults fixed in code: it
+boots, enters a game and finishes a race on the five playable tracks. The board's video
 model was resolved by reading the 68000 (`docs/boards/wheels-and-fire-board.md`).
 
 There is no source code of the games, only dumps, so nothing is assembled and the gate is the
