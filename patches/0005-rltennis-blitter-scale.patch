@@ -1,5 +1,5 @@
 diff --git a/src/mame/tch/rltennis.cpp b/src/mame/tch/rltennis.cpp
-index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95126f140f 100644
+index d86f2a729f1d62193a942b1c83af0f85d0e82df0..8a59e9998d6cb57a93656f28b8215746be48ddb1 100644
 --- a/src/mame/tch/rltennis.cpp
 +++ b/src/mame/tch/rltennis.cpp
 @@ -1,9 +1,12 @@
@@ -36,19 +36,20 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95
  - awfully similar to littlerb;
  
  
-@@ -74,6 +79,11 @@ player - when there's nothing to play - first, empty 2k of ROMs are selected.
+@@ -73,6 +78,12 @@ player - when there's nothing to play - first, empty 2k of ROMs are selected.
+ #include "speaker.h"
  
  #include <algorithm>
- 
++#include <iterator>
++
 +#define LOG_SCALE (1U << 1)
 +
 +#define VERBOSE (0)
 +#include "logmacro.h"
-+
+ 
  namespace {
  
- constexpr int RLT_REFRESH_RATE   = 60;
-@@ -106,7 +116,7 @@ enum
+@@ -106,7 +117,7 @@ enum
  	BLT_Y_START,
  	BLT_Y_END,
  	BLT_FLAGS,
@@ -57,16 +58,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95
  	BLT_START,
  	BLT_UNK2
  };
-@@ -147,7 +157,7 @@ private:
- 	required_region_ptr_array<uint8_t, 2> m_samples;
- 	required_region_ptr<uint8_t> m_gfx;
- 
--	uint16_t m_blitter[RLT_NUM_BLITTER_REGS];
-+	uint16_t m_blitter[RLT_NUM_BLITTER_REGS] = { }; // compared with its previous value to find the flip and strobe edges
- 	int32_t m_data760000;
- 	int32_t m_data740000;
- 	int32_t m_dac_counter;
-@@ -161,6 +171,7 @@ private:
+@@ -161,6 +172,7 @@ private:
  	void snd1_w(offs_t offset, uint16_t data, uint16_t mem_mask = ~0);
  	void snd2_w(offs_t offset, uint16_t data, uint16_t mem_mask = ~0);
  	void blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask = ~0);
@@ -74,7 +66,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95
  
  	uint32_t screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
  
-@@ -175,35 +186,35 @@ private:
+@@ -175,35 +187,35 @@ private:
  Blitter registers description (reg/bit names selected arbitrary ) :
  
  700000 - BLT_X_START
@@ -115,7 +107,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95
    fedcba98 76543210
    -------- -------x BLTFLAG_DST_X_DIR    x dst direction (step inc or dec)
    -------- ------x- BLTFLAG_DST_Y_DIR    y dst direction
-@@ -219,10 +230,13 @@ Blitter registers description (reg/bit names selected arbitrary ) :
+@@ -219,10 +231,13 @@ Blitter registers description (reg/bit names selected arbitrary ) :
    xxxx---- --------                      src ROM num
  
  
@@ -132,7 +124,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95
  
  
  70000c - BLT_START
-@@ -233,12 +247,27 @@ Blitter registers description (reg/bit names selected arbitrary ) :
+@@ -233,12 +248,27 @@ Blitter registers description (reg/bit names selected arbitrary ) :
    x------- -------- BLTSTRT_LAYER       FG or BG layer of framebuffer
  
  70000e - BLT_UNK2
@@ -153,15 +145,15 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95
 +	src_steps = counter(4);
 +
 +	if (counter(8) != dst_steps || counter(0) != src_steps)
-+		LOGMASKED(LOG_SCALE, "scale register %04x does not repeat its nibbles; using the high ones\n", scale);
++		LOGMASKED(LOG_SCALE, "%s: scale register %04x does not repeat its nibbles; using the high ones\n", machine().describe_context(), scale);
 +	if (dst_steps > src_steps)
-+		LOGMASKED(LOG_SCALE, "scale register %04x enlarges, which the game was never seen to ask for\n", scale);
++		LOGMASKED(LOG_SCALE, "%s: scale register %04x enlarges, which the game was never seen to ask for\n", machine().describe_context(), scale);
 +}
 +
  void rltennis_state::blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask)
  {
  	int old_data=m_blitter[offset];
-@@ -281,23 +310,21 @@ void rltennis_state::blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask)
+@@ -281,23 +311,21 @@ void rltennis_state::blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask)
  		int x_src_step=(m_blitter[BLT_FLAGS] & BLTFLAG_SRC_X_DIR)?1:-1;
  		int y_src_step=(m_blitter[BLT_FLAGS] & BLTFLAG_SRC_Y_DIR)?1:-1;
  
@@ -176,13 +168,13 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95
  
 -		if(blit_w1<0) blit_w1=(-blit_w1)^0xff; /* is it correct ? game does that when flips images */
 -		if(blit_h1<0) blit_h1=-blit_h1;
-+		int blit_w=span(src_x0, src_x1, x_src_step);
-+		int blit_h=span(src_y0, src_y1, y_src_step);
++		const int blit_w=span(src_x0, src_x1, x_src_step);
++		const int blit_h=span(src_y0, src_y1, y_src_step);
  
 -		if(blit_w<0) blit_w=-blit_w;
 -		if(blit_h<0) blit_h=-blit_h;
-+		int blit_w1=span(dst_x0, dst_x1, x_dst_step);
-+		int blit_h1=span(dst_y0, dst_y1, y_dst_step);
++		const int blit_w1=span(dst_x0, dst_x1, x_dst_step);
++		const int blit_h1=span(dst_y0, dst_y1, y_dst_step);
  
 -		{
 -			/* wrong, causes gfx glitches (wrong size , but gives (so far) the best results */
@@ -197,7 +189,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95
  
  		int layer=(m_blitter[BLT_START] & BLTSTRT_LAYER )?BITMAP_BG:BITMAP_FG_1;
  
-@@ -316,12 +343,24 @@ void rltennis_state::blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask)
+@@ -316,12 +344,24 @@ void rltennis_state::blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask)
  			force_blit=true;
  		}
  
@@ -224,7 +216,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95
  
  				if(force_blit)
  				{
-@@ -334,9 +373,9 @@ void rltennis_state::blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask)
+@@ -334,9 +374,9 @@ void rltennis_state::blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask)
  				int pix = m_gfx[address & (m_gfx.length() - 1)];
  				int screen_x=(x&0xff)+((m_blitter[BLT_FLAGS] & BLTFLAG_DST_LR )?256:0);
  
@@ -236,9 +228,12 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95
  				}
  			}
  		}
-@@ -354,6 +393,9 @@ void rltennis_state::video_start()
+@@ -353,7 +393,12 @@ void rltennis_state::video_start()
+ 	m_tmp_bitmap[BITMAP_FG_2] = std::make_unique<bitmap_ind16>(512, 256);
  	m_tmp_bitmap[BITMAP_FG_DISPLAY] = std::make_unique<bitmap_ind16>(512, 256);
  
++	// compared with its previous value to find the flip and strobe edges
++	std::fill(std::begin(m_blitter), std::end(m_blitter), 0);
  	save_item(NAME(m_blitter));
 +	// The planes persist between frames and are painted blit by blit, so they are state.
 +	for (int i = BITMAP_BG; i <= BITMAP_FG_DISPLAY; i++)
@@ -246,7 +241,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95
  }
  
  uint32_t rltennis_state::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
-@@ -443,7 +485,7 @@ INTERRUPT_GEN_MEMBER(rltennis_state::interrupt)
+@@ -443,7 +488,7 @@ INTERRUPT_GEN_MEMBER(rltennis_state::interrupt)
  {
  	++m_unk_counter; // Frame counter? verify
  	device.execute().set_input_line(4, HOLD_LINE);
@@ -255,7 +250,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..90314d7f320dfbe307844f4dc2aa5e95
  }
  
  void rltennis_state::machine_start()
-@@ -476,8 +518,11 @@ void rltennis_state::rltennis(machine_config &config)
+@@ -476,8 +521,11 @@ void rltennis_state::rltennis(machine_config &config)
  
  	screen_device &screen(SCREEN(config, "screen"));
  	screen.set_refresh_hz(RLT_REFRESH_RATE);
