@@ -579,7 +579,20 @@ blitter:
           Deliberately narrow, with the two exclusions that cost a measurement each: "all backgrounds
           opaque" fixes this screen and breaks the race (56%), and not excluding the blits that open
           the direct write channel (3 in the whole run, pages above the ROM) clears the plane the race
-          inherits and moves its three goldens by 57%. With both, the seven goldens stay green'
+          inherits and moves its three goldens by 57%. With both, the seven goldens stay green.
+          Superseded by wheelfir_the_high_scores_photo_lands_on_a_cleared_plane: the rule is withdrawn.'
+        wheelfir_the_high_scores_photo_lands_on_a_cleared_plane: 'MEASURED on 2026-10-20, a write tap on
+          words 14 and 15 logging every trigger with the sixteen command words, Wheels & Fire from a
+          cold boot. At frames 2673 and 2674 the game fires, from 0xe5412, a background-plane command
+          with word 14 at 0xffff and rows 511..510, the word-14 fill of the whole plane the model
+          has since gained (512 rows going round); at frame 2675, from 0xe52f8, the photo, 336x254
+          from (1,1), page 1, word 7 0x17, so drawn transparent onto index 0. Over 3000 frames of
+          attract per set: Wheels & Fire 143 background blits of at least 336x254, all from
+          0xe52f8 (frame 2675, then the photo redrawn every frame from 2780); Power Ball, Kong Ball
+          and radendurh 0 in 127152, 126940 and 222153 triggers. A build without the full-window
+          rule against the build with it: frames 2690..2800 every 2nd and frames 10..3000 every 10th
+          of the four sets, 0 captures differ, the photo on screen in both (frame 2720 opened);
+          make check-all green on it. So the rule was compensating the fill, and it goes'
         wheelfir_timer_rendered_correctly: 'CLOSED on 2026-07-30. The High Scores time bar, which is
           what was being seen as a "vertical stripe" at x=0..1, now renders correctly under the
           default page model: MEASURED over frames 3236..3264 it grows 135, 137, 139... 191, that is
