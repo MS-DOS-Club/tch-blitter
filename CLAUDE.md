@@ -85,8 +85,8 @@ The detail is `docs/boards/wheels-and-fire-board.md`, generated from `hardware/r
 row of each tile is a one-pixel border in the graphics ROM, so a 1:1 blit samples one source row
 further in, and a scaled one never does (the offset would move with the zoom). The fix lives in two
 places and new blit code copies it: the `tile()` of `scripts/radendur_track_render.py` (`sv0+1`)
-and the E133 driver's `v_bias` (`wheelfir.cpp`). Reality Tennis's board has no
-seam, so `rltennis.cpp` carries none and must not get one. Widening the bias to every scale was
+and the first-row skip of the E133 driver's `do_blit` at 1:1 (`wheelfir.cpp`). Reality Tennis's
+board has no seam, so `rltennis.cpp` carries none and must not get one. Widening the bias to every scale was
 measured and refuted (`hardware/registers.yaml`, `wheelfir_the_fpga_skew_does_not_widen_the_seam_bias`).
 
 ## No fact is written by hand twice

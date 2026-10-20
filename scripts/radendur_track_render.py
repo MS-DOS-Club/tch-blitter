@@ -122,8 +122,9 @@ class Renderer:
         if not (1 <= w <= 512 and 1 <= h <= 512) or page >= len(self.gfxpages):
             self.cache[tv] = None
             return None
-        # vectorised sampling with a 512 wrap. seam fix (v_bias=1, as in the MAME driver): the
-        # first source row of every 1:1 tile is a 1 px edge of rubbish; sample from sv0+1.
+        # vectorised sampling with a 512 wrap. seam fix (one row in at 1:1, as in the MAME
+        # driver): the first source row of every 1:1 tile is a 1 px edge of rubbish; sample
+        # from sv0+1.
         rows = (sv0 + 1 + np.arange(h)) & 0x1FF
         cols = (su0 + np.arange(w)) & 0x1FF
         nt = self.gfxpages[page][np.ix_(rows, cols)]
