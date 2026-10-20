@@ -34,7 +34,18 @@ IMGDIR = ROOT / "disasm" / "img"
 
 MAME_SRC_LIB = ROOT / "scripts" / "lib" / "mame_src.sh"
 _FLAG = re.compile(r"\bMACHINE_[A-Z_]+\b")
+_MACRO = re.compile(r"GAMEL?\(\s*[^,]+,\s*(\w+)\s*,")
 _OFFSET = re.compile(r"([a-z0-9_]+) (0x[0-9a-f]{4,6})", re.IGNORECASE)
+
+
+def macro_in(text: str, machine: str) -> str | None:
+    """The GAME or GAMEL line whose short name is `machine`; the name also appears in other sets'
+    lines, as their machine configuration or their state class."""
+    for line in text.splitlines():
+        m = _MACRO.match(line)
+        if m and m.group(1) == machine:
+            return line
+    return None
 
 
 def game_macro(machine: str) -> str | None:
@@ -42,9 +53,9 @@ def game_macro(machine: str) -> str | None:
     if not TCH.exists():
         return None
     for f in sorted(TCH.glob("*.cpp")):
-        for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
-            if line.startswith("GAME(") and re.search(rf"\b{re.escape(machine)}\b", line):
-                return line
+        line = macro_in(f.read_text(encoding="utf-8", errors="replace"), machine)
+        if line is not None:
+            return line
     return None
 
 
@@ -70,7 +81,7 @@ def stock_macros() -> dict[str, str] | None:
     for path in names.split():
         text = git("show", f"{pin.group(1)}:{path}") if path.endswith(".cpp") else None
         for line in (text or "").splitlines():
-            m = re.match(r"GAME\(\s*[^,]+,\s*(\w+)", line)
+            m = _MACRO.match(line)
             if m:
                 macros[m.group(1)] = line
     return macros
@@ -135,7 +146,7 @@ def level_of(entry: object, label: str) -> tuple[str | None, list[str]]:
 
 def year_in(macro: str, value: object) -> tuple[bool, bool]:
     """Whether MAME knows the year (not `199?`), and whether this value is it."""
-    known = "199?" not in macro and bool(re.search(r"GAME\(\s*(19|20)\d\d", macro))
+    known = "199?" not in macro and bool(re.search(r"GAMEL?\(\s*(19|20)\d\d", macro))
     return known, str(value) in macro
 
 
