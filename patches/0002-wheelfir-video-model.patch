@@ -142,7 +142,7 @@ index dc1cace80a7350a70305a88e4644c44d37500420..6f5c7a567f7ad0f3acfc79fe518e05ae
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa1e195edfb805ed038426c2a73bff81ec..6c7437bbdac73aeeb9a3a848c702c3c899b4e56a 100644
+index 1de425fa1e195edfb805ed038426c2a73bff81ec..4c9dc2ffcadecc12aa7df2c5ef1868797428e040 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,21 @@
@@ -263,9 +263,9 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6c7437bbdac73aeeb9a3a848c702c3c8
 +  (DISPLAY_LAG_LINES), the scroll and what a blit draws alike: fitted to Wheels & Fire. With
 +  it the convergence grid has rows as regular as its columns, and at a crest the race shows no
 +  road rows on screen line 0, where the game's writes start on the counter's line 1; Power Ball
-+  and Kong Ball, which scroll only in vblank, are unaffected. The displayed page is the one declared on line 0,
-+  and the frame is drawn when vblank starts, so the write the counter's line 252 makes for
-+  screen line 251 arrives too late
++  and Kong Ball, which scroll only in vblank, are unaffected. The displayed page is the one
++  declared on line 0, and the frame is drawn when vblank starts, so the write the counter's
++  line 252 makes for screen line 251 arrives too late
 +- in Wheels & Fire's race the rows above the horizon still run two past the end of the scenery
 +  art, and the road starts wider than on the board; the mechanism is not identified
 +- a background blit covering the whole window is drawn opaque (full_background in do_blit): a
