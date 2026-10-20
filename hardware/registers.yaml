@@ -2440,8 +2440,8 @@ blitter:
         leaves open, the same question as the Wheels & Fire warning sign
         (wheelfir_the_warning_sign_blinks_by_design). No driver change'
       rltennis_the_blit_duration_is_not_established: 'NO BLIT DURATION OF THE PLANNED GRID PUTS THE
-        CONTINUE COUNTDOWN OF RLTENNIS AT A SECOND A STEP, so none is applied and rltennis.cpp keeps
-        its vblank IRQ1. MEASURED on 2026-10-03. The candidate laws were fixed before measuring,
+        CONTINUE COUNTDOWN OF RLTENNIS AT A SECOND A STEP without a vblank hold; the model the driver
+        carries is rltennis_a_list_held_until_the_flip_runs_the_game_at_30_turns. MEASURED on 2026-10-03. The candidate laws were fixed before measuring,
         with no fitted value: a blit takes (pixels walked, stall steps included, i.e. per axis the
         larger of the source and destination steps) x k clocks + s clocks of f, with f = 32 MHz /
         {1, 2, 4, 8}, k in {1, 2} and s in {0, 16}: 16 candidates, four distinct pixel times. Each
@@ -2494,6 +2494,33 @@ blitter:
         explained. WHAT THIS DOES NOT ESTABLISH: that the board''s blitter has one constant pixel
         time; that both boards share one law; another shape of duration (a per-blit setup, another
         walk count).'
+      rltennis_a_list_held_until_the_flip_runs_the_game_at_30_turns: 'A LIST HELD UNTIL THE PAGE FLIPS
+        AT VBLANK, WITH A TIME PER PIXEL, RUNS EVERY SCREEN OF RLTENNIS AT 30 LOOP TURNS A SECOND, the
+        rate its continue countdown reads as seconds; it is the model rltennis.cpp carries. READ on
+        the 68000 on 2026-10-20: the continue countdown is an object whose update (0x603a) counts
+        30 calls (0x6048, #$1e) per digit, one call per main-loop turn; the serve countdown (0x209204,
+        loaded with 5 at 0x3be0 and drawn by 0x5762) and the credit time (0x209208) count vblanks
+        (rltennis_counts_60_fields_a_second); the main loop has no vblank wait, it waits only for the
+        list''s end (0x208010); and every descriptor carries the display page in bit 5 of its flags,
+        constant inside a list and toggled between lists, so the page flip is requested by the
+        first blit of each list (the list builders OR in 0x208016, 0x18/0x1c or 0x30/0x34).
+        MEASURED on 2026-10-20 through the live debug session, a cold boot, coin at frame 1200 and
+        start at 1341, no play, the continue digit timed by a write tap on 0x20b19c from pc
+        0x603a..0x6060, the turns by 0x208118 sampled per frame, the vblank seconds by 0x209200: with
+        the flip latched at vblank and the page-changing blit held until it, 5 clocks of 32 MHz per
+        pixel walked give 60 frames per continue digit on all eight steps, 300 turns per 600 frames
+        through the match, and 10 vblank seconds per 600 frames throughout (the control); 4 clocks
+        give 60 frames per digit but about 380 turns per 600 frames in the match, 6 clocks 90 frames
+        per digit. Without the vblank hold (the grid of rltennis_the_blit_duration_is_not_established)
+        5, 6 and 7 clocks give 52, 61-62 and 72 frames per digit while the match stays at about 40
+        turns a second at every pixel time, its turns bounded by the CPU. Stopping the CPU for the
+        whole blit (6 clocks) slows the match to about 22 turns a second but loses vblanks: the
+        vblank seconds advance 5 in 1200 frames, so the serve countdown would step every 4 s, and
+        that shape is refused. The driver at the held list and 5 clocks moves no golden image of
+        either set, only the frames they appear at (scenes.conf). WHAT THIS DOES NOT ESTABLISH: the
+        board''s pixel time (anything that makes a list take between one and two frames gives the
+        same rhythm), that the board holds the list rather than the flip alone, or that the
+        countdown was meant to be a second.'
       wheelfir_no_screen_is_timed_in_loop_turns: 'NO SCREEN OF WHEELS & FIRE IS TIMED IN LOOP TURNS
         in the passes measured, unlike the earlier board (rltennis_the_chain_needs_a_held_level).
         MEASURED on 2026-10-03: an experiment build of wheelfir.cpp with IRQ1 as rltennis.cpp has it

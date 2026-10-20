@@ -135,8 +135,9 @@ Beniaján (Murcia), with branches in Valencia and Madrid.
 ## What we still don't know
 
 - **Which source pixel a scaled blit drops**, the phase of the scale.
-- **How long a blit takes on the board**, without which the held level 1 cannot be modelled: with
-  instant blits the screens the game times in loop turns run much faster than under the stand-ins.
+- **How long a blit takes on the board.** The driver gives each blit a time per pixel walked and
+  holds a list until the page flips at vblank, a value chosen so that the main loop turns at the
+  rate the game's continue countdown counts as seconds; no board has been timed to confirm it.
 - **Word 7**, written zero at startup and never again as far as the static count sees, and the loose
   bits of words 4 and 6.
 - **What `0x780000` controls**, and what `0x7a0000` holds: the program names it all over, the game
