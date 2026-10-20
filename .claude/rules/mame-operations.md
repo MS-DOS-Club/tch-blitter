@@ -66,8 +66,9 @@ the page `screen_update` shows.
 `goldens/wheelfir/05_race_hud.png` and `06_race_hud2.png` hold that state, two frames because one
 cannot show a flicker, and they are not re-blessed to let a change pass: a change that turns them red
 is wrong unless the owner decides the race changes, as when the three-row background bias went
-because the service mode's convergence grid refuted it, and the race came to show three rows of the
-game's ground fill above its horizon. A fix that only moves the timeline changes the scene's frame
-number in `scenes.conf`, never the golden.
+because the service mode's convergence grid refuted it, and when the raster's writes were moved to
+the line above (DISPLAY_LAG_LINES), which aligned the same grid and took the road off line 0 at
+crests; the race now shows two rows of the game's ground fill above its horizon. A fix that only
+moves the timeline changes the scene's frame number in `scenes.conf`, never the golden.
 The siblings' goldens are not a validated reference: they are looked at and re-blessed when Wheels
 & Fire improves (`goldens/README.md`).

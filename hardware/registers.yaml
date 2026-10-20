@@ -421,6 +421,24 @@ blitter:
           every pair looked at first (a clean three-row translation, no garbage), and a series of 600
           race frames without the bias shows no fault on the road. The convergence grid is a golden
           of its own (07_convergence), reached with the Test button, red under the old bias'
+        wheelfir_raster_writes_reach_the_line_above: 'MEASURED on 2026-10-20 and APPLIED in the
+          model (DISPLAY_LAG_LINES): a register written while the line counter is on line L reaches
+          screen line L - 1, and one written on line 0 or in vblank is where the frame starts. ONE,
+          the race at a crest: the line-0 handler (0xdc5f6) writes a scenery y below 257 and the band
+          handler (0xdc7c6) pins row 257 on lines 1..257-y, in 368 of 368 such frames of the attract
+          race (frames 1000..2700) and never on line 0, so the previous timing showed rows 249..256,
+          the bottom of road strip B, on line 0 in 360 frames. TWO, the convergence grid, whose
+          handler writes line - 1 on line L: its rows come out 0, 15-16, 31-32 .. 239-240, the
+          pattern of its columns. THREE, Power Ball scrolls only in vblank and centres its attract
+          panel (background blits at frame 66: rows 12..239, columns 53..282) on rows 0..251 and
+          columns 0..335; it is byte-identical under the change, as are Kong Ball and both Radical
+          Enduro sets, so the picture the frame starts from keeps its place, which is what refuted
+          moving the visible area to lines 1..252 instead. The predictions were written before the
+          build; one failed on a wrong premise: the car presentation is raster-scrolled too (its
+          handler writes row L + 3 on line L), so the car moves up one line with the road. The race
+          still asks rows 427..428 above its road: two rows of ground fill, not three. LIMIT: the
+          frame is drawn when vblank starts, so the write the counter''s line 252 makes for screen
+          line 251 arrives too late.'
         wheelfir_artefact_G_fixed_in_the_model: 'WITHDRAWN since (wheelfir_the_three_rows_withdrawn).
           FIXED on 2026-07-31 in the VIDEO MODEL, not by
           patching the game (`WFV2_FONDOCRUDO` (switch WITHDRAWN)=1 reverts it): the BACKGROUND plane is read THREE rows

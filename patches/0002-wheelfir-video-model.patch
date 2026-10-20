@@ -142,7 +142,7 @@ index dc1cace80a7350a70305a88e4644c44d37500420..6f5c7a567f7ad0f3acfc79fe518e05ae
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64dc4202f8 100644
+index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e53fc0abcd 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,21 @@
@@ -184,7 +184,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  ----------------------------------
  Produttore  TCH
  N.revisione E133
-@@ -54,46 +48,68 @@ Note
+@@ -54,46 +48,74 @@ Note
  
  ----
  
@@ -259,9 +259,15 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
 +  counter runs
 +- a zoomed blit stops one step short of its endpoint, and a blit at 1:1 vertically skips its
 +  first source row, a border the art carries: both fitted to the games' output
-+- in Wheels & Fire's race the rows above the horizon run three past the end of the scenery art,
-+  and the road starts wider than on the board; drawing the whole background three rows lower
-+  fits both but breaks the service mode's convergence grid, and the mechanism is not identified
++- a write to the blitter's registers on the line counter's line L reaches screen line L - 1
++  (DISPLAY_LAG_LINES), the scroll and what a blit draws alike: fitted to Wheels & Fire, whose
++  convergence grid then has rows as regular as its columns and whose race no longer shows road
++  rows on line 0 at a crest, where the game covers the lines from 1 down; Power Ball and Kong
++  Ball, which scroll only in vblank, show no difference. The displayed page is still the one
++  declared on line 0, and the frame is drawn when vblank starts, so the write the counter's
++  line 252 makes for screen line 251 arrives too late
++- in Wheels & Fire's race the rows above the horizon still run two past the end of the scenery
++  art, and the road starts wider than on the board; the mechanism is not identified
 +- a background blit covering the whole window is drawn opaque (full_background in do_blit): a
 +  rule fitted to the High Scores photo, which the game asks for transparent with nothing
 +  under it
@@ -288,7 +294,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  #include "cpu/m68000/m68000.h"
  #include "machine/adc0808.h"
  #include "machine/eepromser.h"
-@@ -101,19 +117,56 @@ BIT N - ( scale < 50% ) ? 1 : 0
+@@ -101,19 +123,57 @@ BIT N - ( scale < 50% ) ? 1 : 0
  #include "machine/timer.h"
  #include "sound/dac.h"
  #include "video/ramdac.h"
@@ -323,6 +329,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
 +constexpr int FIRST_VISIBLE_LINE = 0;
 +constexpr int NUM_VBLANK_LINES = 56; // the field stays at 312 lines
 +constexpr int VISIBLE_LINES = 252;   // of the 256 scanned, what leaves the monitor
++constexpr int DISPLAY_LAG_LINES = 1; // how far the screen runs behind the line counter (see the TODO)
 +constexpr int PIXELS_PER_LINE = 512; // MASTER_CLOCK/4 over these is the 15625 Hz line rate
 +constexpr XTAL MASTER_CLOCK = 32_MHz_XTAL; // the board's only crystal
 +constexpr int LAYER_BG = 0;
@@ -351,7 +358,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  
  class wheelfir_state : public driver_device
  {
-@@ -122,121 +175,189 @@ public:
+@@ -122,121 +182,189 @@ public:
  		driver_device(mconfig, type, tag),
  		m_maincpu(*this, "maincpu"),
  		m_subcpu(*this, "subcpu"),
@@ -603,7 +610,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  		// wheelfir sets 0xfc0000 and 0xf00000, both of which are out of range of any GFX ROM
  		// kongball sets 0xfc0000 but only on startup
  		m_direct_write_x0 = dst_x0;
-@@ -244,99 +365,119 @@ void wheelfir_state::do_blit()
+@@ -244,99 +372,119 @@ void wheelfir_state::do_blit()
  		m_direct_write_y0 = dst_y0;
  		m_direct_write_y1 = dst_y1;
  		m_direct_write_idx = 0;
@@ -784,7 +791,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  }
  
  void wheelfir_state::do_direct_write(uint8_t sixdat)
-@@ -354,14 +495,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
+@@ -354,14 +502,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
  
  		if (x < 512 && y < 512)
  		{
@@ -801,7 +808,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  {
  	/*
  	Blitter data format ( offset in words, offset in bytes )
-@@ -375,35 +516,45 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -375,35 +523,47 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	3  6    --------
  	   7    YYYYYYYY   Y = dest_y1 bits 0-7
  	4  8    --------
@@ -845,8 +852,11 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
 +	  1f    TTTTTTTT   T = trigger: 0x0000 arms the command (resets the mode latch, drops the IRQ line), 0xffff fires it
  	*/
  
- 	m_screen->update_partial(m_screen->vpos() - 1);
+-	m_screen->update_partial(m_screen->vpos() - 1);
 -	//uint16_t oldval = m_blitter_data[offset];
++	// the screen trails the line counter by DISPLAY_LAG_LINES: lines before the one this write
++	// reaches are final
++	m_screen->update_partial(m_screen->vpos() - 1 - DISPLAY_LAG_LINES);
 +	// 0xffff to word 14 marks the next trigger as a fill
 +	if (offset == 0xe && data == 0xffff) m_word14_fill = true;
 +
@@ -862,7 +872,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  	if (offset == 0x6)
  	{
  		if (!ACCESSING_BITS_8_15)  //LSB only!
-@@ -413,111 +564,100 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -413,111 +573,101 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  		}
  	}
  
@@ -872,7 +882,8 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
 +		m_scroll_x_latched = (m_scroll_x_latched & 0x0ff) | (m_blitter_data[0x8] & SCROLL_X_BIT8) << 2;
 +
 +	// the scroll is latched when the Y byte is written, which always follows the X, and the row
-+	// counter loaded here advances one row per line
++	// counter loaded here advances one row per line from the screen line the write reaches; one
++	// written in vblank or on lines 0..DISPLAY_LAG_LINES is where the frame starts
 +	if (offset == 0xb && !ACCESSING_BITS_8_15)
  	{
 -		if (!ACCESSING_BITS_8_15)  //LSB only!
@@ -885,7 +896,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
 -		}
 +		m_scroll_y_latched = (m_blitter_data[0xb] & 0x00ff) | (m_blitter_data[0x8] & SCROLL_Y_BIT8) << 1;
 +		m_scroll_x_latched = (m_blitter_data[0xa] & 0x00ff) | (m_blitter_data[0x8] & SCROLL_X_BIT8) << 2;
-+		m_current_yscroll = m_scroll_y_latched - m_screen->vpos();
++		m_current_yscroll = m_scroll_y_latched - std::max(m_screen->vpos() - DISPLAY_LAG_LINES, 0);
 +		return;
  	}
  
@@ -1019,7 +1030,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  	}
  
  	return data;
-@@ -530,36 +670,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
+@@ -530,36 +680,62 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
  	machine().bookkeeping().coin_counter_w(1, data & 0x02);
  }
  
@@ -1091,7 +1102,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  
  static INPUT_PORTS_START( pwball )
  	PORT_START("P1")    /* 16bit */
-@@ -600,75 +766,67 @@ INPUT_PORTS_END
+@@ -600,75 +776,67 @@ INPUT_PORTS_END
  static INPUT_PORTS_START( wheelfir )
  	PORT_INCLUDE(pwball)
  
@@ -1204,7 +1215,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  			m_maincpu->set_input_line(3, HOLD_LINE);
  		}
  	}
-@@ -676,90 +834,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
+@@ -676,90 +844,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
  	m_subcpu->set_input_line(1, HOLD_LINE);
  }
  
@@ -1336,7 +1347,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  static const uint32_t texlayout_xoffset[512] = { STEP512(0,8) };
  static const uint32_t texlayout_yoffset[512] = { STEP512(0,4096) };
  
-@@ -780,13 +902,10 @@ static GFXDECODE_START( gfx_wheelfir )
+@@ -780,13 +912,10 @@ static GFXDECODE_START( gfx_wheelfir )
  	GFXDECODE_ENTRY( "gfx1", 0, wheelfir512x5125x8_texlayout, 0x0, 1 )
  GFXDECODE_END
  
@@ -1353,7 +1364,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  
  	config.set_maximum_quantum(attotime::from_hz(12000));
  
-@@ -799,13 +918,13 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -799,13 +928,13 @@ void wheelfir_state::wheelfir(machine_config &config)
  	TIMER(config, "scan_timer").configure_scanline(FUNC(wheelfir_state::scanline_timer_callback), "screen", 0, 1);
  
  	SCREEN(config, m_screen);
@@ -1373,7 +1384,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  	m_screen->set_palette(m_palette);
  
  	GFXDECODE(config, "gfxdecode", m_palette, gfx_wheelfir);
-@@ -816,14 +935,21 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -816,14 +945,21 @@ void wheelfir_state::wheelfir(machine_config &config)
  
  	EEPROM_93C46_16BIT(config, "eeprom");
  
@@ -1397,7 +1408,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  
  void wheelfir_state::kongball(machine_config& config)
  {
-@@ -832,16 +958,203 @@ void wheelfir_state::kongball(machine_config& config)
+@@ -832,16 +968,203 @@ void wheelfir_state::kongball(machine_config& config)
  }
  
  
@@ -1607,7 +1618,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  }
  
  
-@@ -936,7 +1249,6 @@ ROM_START( kongball )
+@@ -936,7 +1259,6 @@ ROM_START( kongball )
  	// There's no PLD at U73 on Kong Ball
  ROM_END
  
@@ -1615,7 +1626,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..942f676250f72049fe8d2f0fac38ad64
  ROM_START( radendur )
  	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
  	ROM_LOAD16_BYTE( "endu.u19", 0x00001, 0x80000, CRC(d24ca61c) SHA1(64d2648959579d35fbf4c8479c0ff75781d28146) )
-@@ -969,14 +1281,51 @@ ROM_START( radendur )
+@@ -969,14 +1291,51 @@ ROM_START( radendur )
  	ROM_LOAD( "4_pal16v8.u73",  0x000, 0x117, NO_DUMP )
  ROM_END
  

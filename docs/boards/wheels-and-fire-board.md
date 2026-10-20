@@ -285,12 +285,13 @@ Photos by OldComputers ES unless marked, from the
   a real board is unknown.
 - **The vertical source direction** of word 8, taken by symmetry with the horizontal one, and the
   scale index bits of word 10.
-- **The race's horizon band.** Wheels & Fire's race asks its background for three rows past the end
-  of its scenery art above the horizon, so three rows of ground fill show between the sea and the
-  road, and the road starts wider than it did on the board. Drawing the background three rows lower
-  fits the race exactly and breaks the service mode's convergence grid, so the driver does not do
-  it; what the board does differently is not known.
-- **The top edge of the picture.** The left edge is pinned at column 0 by Wheels & Fire's title.
+- **The race's horizon band.** Wheels & Fire's race asks its background for two rows past the end
+  of its scenery art above the horizon, so two rows of ground fill show between the sea and the
+  road, and the road starts wider than it did on the board; what the board does differently is not
+  known.
+- **The top edge of the picture.** The left edge is pinned at column 0 by Wheels & Fire's title,
+  and the top at line 0 by Power Ball's attract panel, centred on the 252 rows its vblank scroll
+  shows; that the raster's writes reach the line above the counter's is fitted, not traced.
 - **The main RAM decode.** Kong Ball reaches its RAM as `0x21xxxx`, and both a mirror and a second
   bank fit it; the two 32K chips of each layout B board leave no room for a second bank.
 - **Why layout A's sockets are empty**, and what its wires and its cut fix: nobody has traced the
