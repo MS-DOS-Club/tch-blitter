@@ -142,7 +142,7 @@ index dc1cace80a7350a70305a88e4644c44d37500420..6f5c7a567f7ad0f3acfc79fe518e05ae
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e53fc0abcd 100644
+index 1de425fa1e195edfb805ed038426c2a73bff81ec..86506fc382cfeaa2a0343f13ea3b56cf5bd09832 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,21 @@
@@ -261,18 +261,18 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e5
 +  first source row, a border the art carries: both fitted to the games' output
 +- a write to the blitter's registers on the line counter's line L reaches screen line L - 1
 +  (DISPLAY_LAG_LINES), the scroll and what a blit draws alike: fitted to Wheels & Fire, whose
-+  convergence grid then has rows as regular as its columns and whose race no longer shows road
-+  rows on line 0 at a crest, where the game covers the lines from 1 down; Power Ball and Kong
-+  Ball, which scroll only in vblank, show no difference. The displayed page is still the one
-+  declared on line 0, and the frame is drawn when vblank starts, so the write the counter's
-+  line 252 makes for screen line 251 arrives too late
++  convergence grid has rows as regular as its columns with it and whose race shows no road rows
++  on line 0 at a crest, where the game covers the lines from 1 down; Power Ball and Kong Ball,
++  which scroll only in vblank, are unaffected. The displayed page is the one declared on line 0,
++  and the frame is drawn when vblank starts, so the write the counter's line 252 makes for
++  screen line 251 arrives too late
 +- in Wheels & Fire's race the rows above the horizon still run two past the end of the scenery
 +  art, and the road starts wider than on the board; the mechanism is not identified
 +- a background blit covering the whole window is drawn opaque (full_background in do_blit): a
 +  rule fitted to the High Scores photo, which the game asks for transparent with nothing
 +  under it
 +- Radical Enduro's sprite-plane flip, palette and frame scroll are modelled apart
-+  (radendur_state): its board is the earlier layout (A), hand-modified and untraced, and its
++  (radendur_state): its board is the design's earlier layout, hand-modified and untraced, and its
 +  game draws inside vblank; which of the two the differences follow is not settled, and its
 +  palette routing by the plane of each upload stands in for a mechanism not identified
 +- a line-counter request the main has not taken by vblank is withdrawn: fitted to Power Ball's
@@ -303,11 +303,11 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e5
  #include "screen.h"
  #include "speaker.h"
  
-+#include "wheelfir.lh"
-+
 +#include <algorithm>
 +#include <cstring>
 +#include <iterator>
++
++#include "wheelfir.lh"
 +
 +#define LOG_DIRECT (1U << 1)
 +
@@ -329,7 +329,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e5
 +constexpr int FIRST_VISIBLE_LINE = 0;
 +constexpr int NUM_VBLANK_LINES = 56; // the field stays at 312 lines
 +constexpr int VISIBLE_LINES = 252;   // of the 256 scanned, what leaves the monitor
-+constexpr int DISPLAY_LAG_LINES = 1; // how far the screen runs behind the line counter (see the TODO)
++constexpr int DISPLAY_LAG_LINES = 1; // how far the screen runs behind the line counter, fitted (see the TODO)
 +constexpr int PIXELS_PER_LINE = 512; // MASTER_CLOCK/4 over these is the 15625 Hz line rate
 +constexpr XTAL MASTER_CLOCK = 32_MHz_XTAL; // the board's only crystal
 +constexpr int LAYER_BG = 0;
@@ -1102,7 +1102,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e5
  
  static INPUT_PORTS_START( pwball )
  	PORT_START("P1")    /* 16bit */
-@@ -600,75 +776,67 @@ INPUT_PORTS_END
+@@ -600,75 +776,68 @@ INPUT_PORTS_END
  static INPUT_PORTS_START( wheelfir )
  	PORT_INCLUDE(pwball)
  
@@ -1117,8 +1117,9 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e5
 +	// all four directions held: the wheel cabinet needs the bits declared unused so they read idle.
 +	PORT_BIT( 0x000f, IP_ACTIVE_LOW, IPT_UNUSED ) PORT_CONDITION("CABINET", 0x01, EQUALS, 0x00)
 +	// Button 1 is the gear shifter, a lever that stays where it is put: in low the gearbox stops
-+	// short of its top gears and the car at a speed ceiling, in high it climbs to the last gear.
-+	// Declared as button 4, as Out Run declares its lever as button 3, so its default key is free.
++	// short of its top gears and the car at a speed ceiling, in high it climbs through its gears.
++	// Declared as button 4, as Out Run declares its lever as button 3, so that its default key does
++	// not clash with the accelerator's.
 +	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1) PORT_NAME("Gear Shift") PORT_TOGGLE
 +
  	PORT_MODIFY("STEERING")
@@ -1215,7 +1216,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e5
  			m_maincpu->set_input_line(3, HOLD_LINE);
  		}
  	}
-@@ -676,90 +844,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
+@@ -676,90 +845,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
  	m_subcpu->set_input_line(1, HOLD_LINE);
  }
  
@@ -1347,7 +1348,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e5
  static const uint32_t texlayout_xoffset[512] = { STEP512(0,8) };
  static const uint32_t texlayout_yoffset[512] = { STEP512(0,4096) };
  
-@@ -780,13 +912,10 @@ static GFXDECODE_START( gfx_wheelfir )
+@@ -780,13 +913,10 @@ static GFXDECODE_START( gfx_wheelfir )
  	GFXDECODE_ENTRY( "gfx1", 0, wheelfir512x5125x8_texlayout, 0x0, 1 )
  GFXDECODE_END
  
@@ -1364,7 +1365,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e5
  
  	config.set_maximum_quantum(attotime::from_hz(12000));
  
-@@ -799,13 +928,13 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -799,13 +929,13 @@ void wheelfir_state::wheelfir(machine_config &config)
  	TIMER(config, "scan_timer").configure_scanline(FUNC(wheelfir_state::scanline_timer_callback), "screen", 0, 1);
  
  	SCREEN(config, m_screen);
@@ -1384,7 +1385,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e5
  	m_screen->set_palette(m_palette);
  
  	GFXDECODE(config, "gfxdecode", m_palette, gfx_wheelfir);
-@@ -816,14 +945,21 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -816,14 +946,21 @@ void wheelfir_state::wheelfir(machine_config &config)
  
  	EEPROM_93C46_16BIT(config, "eeprom");
  
@@ -1408,7 +1409,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e5
  
  void wheelfir_state::kongball(machine_config& config)
  {
-@@ -832,16 +968,203 @@ void wheelfir_state::kongball(machine_config& config)
+@@ -832,16 +969,203 @@ void wheelfir_state::kongball(machine_config& config)
  }
  
  
@@ -1618,7 +1619,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e5
  }
  
  
-@@ -936,7 +1259,6 @@ ROM_START( kongball )
+@@ -936,7 +1260,6 @@ ROM_START( kongball )
  	// There's no PLD at U73 on Kong Ball
  ROM_END
  
@@ -1626,7 +1627,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..e15136fc76616ebc631d05250f0322e5
  ROM_START( radendur )
  	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
  	ROM_LOAD16_BYTE( "endu.u19", 0x00001, 0x80000, CRC(d24ca61c) SHA1(64d2648959579d35fbf4c8479c0ff75781d28146) )
-@@ -969,14 +1291,51 @@ ROM_START( radendur )
+@@ -969,14 +1292,51 @@ ROM_START( radendur )
  	ROM_LOAD( "4_pal16v8.u73",  0x000, 0x117, NO_DUMP )
  ROM_END
  
