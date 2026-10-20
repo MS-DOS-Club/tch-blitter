@@ -142,7 +142,7 @@ index dc1cace80a7350a70305a88e4644c44d37500420..6f5c7a567f7ad0f3acfc79fe518e05ae
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415ff3a8c17 100644
+index 1de425fa1e195edfb805ed038426c2a73bff81ec..44b700a4b4d9d62aceef9efa23cc8b61c81678bd 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -1,27 +1,20 @@
@@ -183,7 +183,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  ----------------------------------
  Produttore  TCH
  N.revisione E133
-@@ -54,46 +47,74 @@ Note
+@@ -54,46 +47,76 @@ Note
  
  ----
  
@@ -274,10 +274,12 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
 +  (radendur_state): its board is the design's earlier layout, hand-modified and untraced, and its
 +  game draws inside vblank; which of the two the differences follow is not settled, and its
 +  palette routing by the plane of each upload stands in for a mechanism not identified
-+- a line-counter request the main has not taken by vblank is withdrawn: fitted to Power Ball's
-+  warm boot, whose sound CPU otherwise dies on the block header the held request sends
-+- clearing bit 5 of the byte at 0x7c0000 also withdraws a pending line-counter request; that the board
-+  does so is not established
++- a line-counter request is held until the main takes it, and one still pending at vblank is
++  withdrawn: fitted to Power Ball's boot, which runs masked past the request and writes neither
++  the counter nor its enable before it unmasks, so neither the counter reload nor the acknowledge
++  cycle can drop it; the games' handlers write no acknowledge
++- clearing bit 5 of the byte at 0x7c0000 withdraws a pending request too, which is not
++  established; only Radical Enduro's dump was seen to reach it
 +- no layer enable is identified: no bit seen written (Wheels & Fire and Power Ball in play, Kong
 +  Ball's attract) behaves as one, so both planes are always composed
 +- word 4's low byte, with its bit 8 in word 8, is written by the games and read by nothing
@@ -293,7 +295,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  #include "cpu/m68000/m68000.h"
  #include "machine/adc0808.h"
  #include "machine/eepromser.h"
-@@ -101,19 +122,57 @@ BIT N - ( scale < 50% ) ? 1 : 0
+@@ -101,19 +124,57 @@ BIT N - ( scale < 50% ) ? 1 : 0
  #include "machine/timer.h"
  #include "sound/dac.h"
  #include "video/ramdac.h"
@@ -357,7 +359,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  
  class wheelfir_state : public driver_device
  {
-@@ -122,121 +181,193 @@ public:
+@@ -122,121 +183,193 @@ public:
  		driver_device(mconfig, type, tag),
  		m_maincpu(*this, "maincpu"),
  		m_subcpu(*this, "subcpu"),
@@ -613,7 +615,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  		// wheelfir sets 0xfc0000 and 0xf00000, both of which are out of range of any GFX ROM
  		// kongball sets 0xfc0000 but only on startup
  		m_direct_write_x0 = dst_x0;
-@@ -244,99 +375,113 @@ void wheelfir_state::do_blit()
+@@ -244,99 +377,113 @@ void wheelfir_state::do_blit()
  		m_direct_write_y0 = dst_y0;
  		m_direct_write_y1 = dst_y1;
  		m_direct_write_idx = 0;
@@ -791,7 +793,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  }
  
  void wheelfir_state::do_direct_write(uint8_t sixdat)
-@@ -354,14 +499,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
+@@ -354,14 +501,14 @@ void wheelfir_state::do_direct_write(uint8_t sixdat)
  
  		if (x < 512 && y < 512)
  		{
@@ -808,7 +810,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  {
  	/*
  	Blitter data format ( offset in words, offset in bytes )
-@@ -375,35 +520,49 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -375,35 +522,49 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  	3  6    --------
  	   7    YYYYYYYY   Y = dest_y1 bits 0-7
  	4  8    --------
@@ -874,7 +876,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  	if (offset == 0x6)
  	{
  		if (!ACCESSING_BITS_8_15)  //LSB only!
-@@ -413,114 +572,91 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
+@@ -413,114 +574,91 @@ void wheelfir_state::wheelfir_blit_w(offs_t offset, uint16_t data, uint16_t mem_
  		}
  	}
  
@@ -1038,7 +1040,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  }
  
  void wheelfir_state::coin_cnt_w(uint16_t data)
-@@ -530,36 +666,63 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
+@@ -530,36 +668,63 @@ void wheelfir_state::coin_cnt_w(uint16_t data)
  	machine().bookkeeping().coin_counter_w(1, data & 0x02);
  }
  
@@ -1115,7 +1117,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  
  static INPUT_PORTS_START( pwball )
  	PORT_START("P1")    /* 16bit */
-@@ -600,75 +763,66 @@ INPUT_PORTS_END
+@@ -600,75 +765,66 @@ INPUT_PORTS_END
  static INPUT_PORTS_START( wheelfir )
  	PORT_INCLUDE(pwball)
  
@@ -1228,7 +1230,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  			m_maincpu->set_input_line(3, HOLD_LINE);
  		}
  	}
-@@ -676,90 +830,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
+@@ -676,90 +832,54 @@ TIMER_DEVICE_CALLBACK_MEMBER(wheelfir_state::scanline_timer_callback)
  	m_subcpu->set_input_line(1, HOLD_LINE);
  }
  
@@ -1360,7 +1362,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  static const uint32_t texlayout_xoffset[512] = { STEP512(0,8) };
  static const uint32_t texlayout_yoffset[512] = { STEP512(0,4096) };
  
-@@ -780,13 +898,10 @@ static GFXDECODE_START( gfx_wheelfir )
+@@ -780,13 +900,10 @@ static GFXDECODE_START( gfx_wheelfir )
  	GFXDECODE_ENTRY( "gfx1", 0, wheelfir512x5125x8_texlayout, 0x0, 1 )
  GFXDECODE_END
  
@@ -1377,7 +1379,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  
  	config.set_maximum_quantum(attotime::from_hz(12000));
  
-@@ -799,31 +914,38 @@ void wheelfir_state::wheelfir(machine_config &config)
+@@ -799,31 +916,38 @@ void wheelfir_state::wheelfir(machine_config &config)
  	TIMER(config, "scan_timer").configure_scanline(FUNC(wheelfir_state::scanline_timer_callback), "screen", 0, 1);
  
  	SCREEN(config, m_screen);
@@ -1426,7 +1428,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  
  void wheelfir_state::kongball(machine_config& config)
  {
-@@ -832,16 +954,190 @@ void wheelfir_state::kongball(machine_config& config)
+@@ -832,16 +956,190 @@ void wheelfir_state::kongball(machine_config& config)
  }
  
  
@@ -1623,7 +1625,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  }
  
  
-@@ -936,7 +1232,6 @@ ROM_START( kongball )
+@@ -936,7 +1234,6 @@ ROM_START( kongball )
  	// There's no PLD at U73 on Kong Ball
  ROM_END
  
@@ -1631,7 +1633,7 @@ index 1de425fa1e195edfb805ed038426c2a73bff81ec..6e26a8887ee28e49e32ef13b41822415
  ROM_START( radendur )
  	ROM_REGION( 0x100000, "maincpu", 0 ) // 68000 Code
  	ROM_LOAD16_BYTE( "endu.u19", 0x00001, 0x80000, CRC(d24ca61c) SHA1(64d2648959579d35fbf4c8479c0ff75781d28146) )
-@@ -969,14 +1264,52 @@ ROM_START( radendur )
+@@ -969,14 +1266,52 @@ ROM_START( radendur )
  	ROM_LOAD( "4_pal16v8.u73",  0x000, 0x117, NO_DUMP )
  ROM_END
  

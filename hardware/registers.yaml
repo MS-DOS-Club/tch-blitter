@@ -3007,6 +3007,23 @@ ports:
       cold and warm (goldens/<set>/sound.crc); without the withdrawal the warm one reads 1764 writes
       where the run with it reads 873600. A rule fitted to the boot, in the driver''s TODO: the 68000
       code does not say whether the board drops an untaken request at vblank'
+    pwball_from_the_request_to_the_unmask: 'MEASURED on 2026-10-20 in a live session, Power Ball
+      booted twice on one state directory (cold, then warm on the EEPROM the first run left), write
+      taps on 0x7a0000, 0x7c0000 and 0x740000 and read taps on the level-3 and level-5 vectors
+      (0x6c, 0x74), each row with its frame, line and pc. Warm: at line 284 of frame 0 a level-3
+      entry, the counter loaded with 0x64 and bits 13:12 of 0x7c0000 set to 10. From then to line
+      124 of frame 2: no vector read, no write to 0x7a0000 or 0x740000, and 3749 writes to
+      0x7c0000''s high byte from the EEPROM routines (0x190d8..0x196da), every one with bit 13 at
+      1. At line 125 of frame 2 a level-3 entry (0xffff, 0x64), bit 13 cleared at line 126 (pc
+      0x41e), and the first level-5 entry at line 99 of frame 3. Cold: level-3 entries at line 132
+      of frame 2, line 311 of frame 10 and line 151 of frame 12, each loading 0x64, bit 13 cleared
+      at line 152 of frame 12, the first level-5 entry at line 99 of frame 13. A probe build,
+      removed after, logged each driver withdrawal that found the request pending (the cpu''s
+      input_line_state), 60 emulated s per run. At vblank: Power Ball cold 3 (frames 1, 2 and 11),
+      warm 1 (frame 1), every other run 0. On clearing bit 13: Radical Enduro''s dump 69 (a cold
+      boot only), every one on line 49, every other run 0. The other runs: wheelfir and kongball
+      cold and warm, radendurh cold racing with scripts/drive.lua. The line numbers differ by one or two
+      from the earlier records of these boots, which were taken on earlier builds'
     kongball_armed_every_frame: 'MEASURED live on 2026-09-15 over 600 frames from a cold boot:
       589 arms at 0x28850, the installer 0x288e2 run once, the level-1 handler 3539 times (the
       control). After a soft reset the installer runs BEFORE the first arm, so the handler is in
@@ -3029,6 +3046,23 @@ ports:
       voice 1's opcode at 0x201062 becomes the volume table 0x0e42, an illegal instruction. The
       block now streams during the vblank handler, which also runs at mask 7. Reverted; the
       five radendur boot goldens pass on the restored build
+  - read: the level-5 handlers acknowledge the request with a write of their own
+    symptom: none has one to make. Wheels & Fire's six arms (0xdc5f6, 0xdc66a, 0xdc708, 0xdc74e,
+      0xdc78a, 0xdc7c6) write, of the board's registers, the latch (the raster arms), words 8, 10
+      and 11, 0x7c0000''s counter bits (the line-0 arms) and the counter; Power Ball''s and Kong
+      Ball''s write the latch, 0x7c0000 and the counter (the evidence above, and
+      pwball_the_first_block_after_the_masked_boot_must_fit_before_vblank). Radical Enduro''s
+      trampoline is not read here. The one register every arm writes is the counter
+  - read: the counter reload, or the 68000''s acknowledge cycle (what HOLD_LINE models), is what
+      clears the request, and nothing else is needed
+    symptom: on Power Ball''s warm boot neither the counter nor bit 13 is written between the
+      counter''s zero and the next level-3 entry (pwball_from_the_request_to_the_unmask), and a
+      level 5 and a level 3 both pending enter on one line with the level 5 first
+      (pwball_stale_requests_at_boot_desync_the_sub), so under either rule the request reaches the
+      handler and sends a block header with no block behind it, the failure of
+      pwball_a_warm_boot_needs_the_pending_level_5_withdrawn_at_vblank. A request the main has
+      not taken has to be dropped without a write from the game; when (at vblank, or a line after
+      it is raised, the earlier experiment C) the 68000 code does not say
 - address: 0x740000
   name: soundlatch
   common_to:
