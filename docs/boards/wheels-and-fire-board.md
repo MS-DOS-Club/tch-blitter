@@ -28,8 +28,8 @@ Arming also resets the transparency mode, so every blit says again how it wants 
 And it does so in an odd way: there is no transparency bit. Writing `0xff` to the low byte of word
 12 asks for **transparent**, writing it to word 13 asks for **opaque**. Sprites use the first so the
 background shows round them; big rectangles mostly use the second. Mostly, not always: Wheels &
-Fire's High Scores photo is one full-screen blit asked for transparent, so the driver also treats
-a background blit that covers the whole window as opaque.
+Fire's High Scores photo is one full-screen blit asked for transparent, drawn onto a plane the game
+has just cleared with a band fill.
 
 The same sixteen words do three more jobs, all of them in Wheels & Fire:
 

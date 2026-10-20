@@ -309,7 +309,9 @@ blitter:
           also writes its index 0, so a new background no longer lets the previous one show through.
           MEASURED at the screen change on frame 2706: ten frames later 33 pixels out of 86016 are
           identical to the previous screen, that is 0.0%. Before, it was the photo''s 27796 index-0
-          pixels that showed the race landscape'
+          pixels that showed the race landscape. Superseded by
+          wheelfir_the_high_scores_photo_lands_on_a_cleared_plane: the plane is cleared by the
+          game''s own word-14 fill, and the rule is withdrawn.'
         wheelfir_artefact_G_mechanism: 'ARTEFACT G, MECHANISM READ FROM THE 68000 on 2026-07-31, and
           the gap turns out to be FOUR lines, not twelve. The whole chain, measured: the road is a
           PRE-DRAWN STRIP in the background plane, not a blit. The plane is filled through the direct
@@ -487,7 +489,9 @@ blitter:
           transparent) repaints rows 1..254 and 78346 pixels change; at the 3171 one the plane does
           not change A SINGLE PIXEL and the new screen inherits the previous background. So the E1 fix
           is at the right level: the only thing that can cover the previous screen is the new
-          background blit itself, and that is why it has to write its index 0'
+          background blit itself, and that is why it has to write its index 0. Superseded by
+          wheelfir_the_high_scores_photo_lands_on_a_cleared_plane: the game clears the plane with a
+          word-14 fill, which this pass did not model.'
         wheelfir_artefact_B_wraparound: 'ARTEFACT B CLOSED on 2026-07-30: what went out on the right
           came back on the left, which is literally what `& 0x1ff` does to the background plane
           destination. (rltennis was cited here as clipping instead of wrapping; measured on
@@ -581,18 +585,24 @@ blitter:
           the direct write channel (3 in the whole run, pages above the ROM) clears the plane the race
           inherits and moves its three goldens by 57%. With both, the seven goldens stay green.
           Superseded by wheelfir_the_high_scores_photo_lands_on_a_cleared_plane: the rule is withdrawn.'
-        wheelfir_the_high_scores_photo_lands_on_a_cleared_plane: 'MEASURED on 2026-10-20, a write tap on
-          words 14 and 15 logging every trigger with the sixteen command words, Wheels & Fire from a
-          cold boot. At frames 2673 and 2674 the game fires, from 0xe5412, a background-plane command
-          with word 14 at 0xffff and rows 511..510, the word-14 fill of the whole plane the model
-          has since gained (512 rows going round); at frame 2675, from 0xe52f8, the photo, 336x254
-          from (1,1), page 1, word 7 0x17, so drawn transparent onto index 0. Over 3000 frames of
-          attract per set: Wheels & Fire 143 background blits of at least 336x254, all from
-          0xe52f8 (frame 2675, then the photo redrawn every frame from 2780); Power Ball, Kong Ball
-          and radendurh 0 in 127152, 126940 and 222153 triggers. A build without the full-window
-          rule against the build with it: frames 2690..2800 every 2nd and frames 10..3000 every 10th
-          of the four sets, 0 captures differ, the photo on screen in both (frame 2720 opened);
-          make check-all green on it. So the rule was compensating the fill, and it goes'
+        wheelfir_the_high_scores_photo_lands_on_a_cleared_plane: 'MEASURED on 2026-10-20 at the
+          50 Hz field (the earlier records count frames at 60 Hz: their 2709 is this 2675). A write
+          tap on words 14 and 15 logging each word-14 write and each trigger with the sixteen command
+          words, Wheels & Fire from a cold boot. At frames 2673 and 2674 a word-14 write of 0xffff
+          (pc 0xe540a) is followed by a background-plane trigger (pc 0xe5412) declaring rows 511..510,
+          which the model draws as a fill of all 512 rows; at frame 2675 the photo (pc 0xe52f8), 336x254
+          from (1,1), page 1, word 7 0x17, with no word-14 write before it. Over 9000 frames of
+          attract, the photo is drawn in runs starting at frames 2675, 2780, 3331, 6482, 6587 and 7138,
+          after whole-plane fills at 2674 and 6481. Over 3000 frames of attract per set, background
+          blits of at least 336x254 from a ROM page: Wheels & Fire 143, all the photo from 0xe52f8
+          (frame 2675, every frame 2780..2879, every second frame to 2963), besides three 512x256
+          commands that open the direct-write channel; Power Ball, Kong Ball and radendurh 0 in
+          127152, 126940 and 222153 triggers (Kong Ball''s nearest are 336x151). A build without the
+          full-window rule against the build with it: frames 2690..2800 every 2nd, 10..3000 every 10th
+          of the four sets and 3300..7300 every 4th of Wheels & Fire, 0 captures differ, the photo on
+          screen in both (frames 2720 and 3340 opened); make check-all green on it. CONTROL: a build
+          that also ignores word-14 fills differs on all 56 frames of the first window, the previous
+          screens showing through, so the comparison sees that screen''s plane'
         wheelfir_timer_rendered_correctly: 'CLOSED on 2026-07-30. The High Scores time bar, which is
           what was being seen as a "vertical stripe" at x=0..1, now renders correctly under the
           default page model: MEASURED over frames 3236..3264 it grows 135, 137, 139... 191, that is
