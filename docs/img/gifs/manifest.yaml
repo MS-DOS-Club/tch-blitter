@@ -148,7 +148,7 @@ gifs:
   height: 504
   duration_s: 5.99
   emulated_frames: 300
-  mb: 3.86
+  mb: 3.85
 - file: wheelfir-play.gif
   set: wheelfir
   refresh_hz: 50.08

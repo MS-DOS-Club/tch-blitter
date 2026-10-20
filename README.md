@@ -60,7 +60,7 @@ still matches the caption.
 <td align="center"><b>here</b></td>
 </tr></table>
 
-The original driver's signature failure: it draws the ROAD A SECOND TIME where the sky belongs, lane markings and all, with the real road below it. 82.4% of the pixels change. (`wheelfir`, frame 2300)
+The original driver's signature failure: it draws the ROAD A SECOND TIME where the sky belongs, lane markings and all, with the real road below it. 83.0% of the pixels change. (`wheelfir`, frame 2300)
 
 <table><tr>
 <td width="50%"><img src="docs/img/before-after/wheelfir-cars-before.png" alt="Wheels & Fire: the two Porsches of the presentation, MAME 0.288"></td>
@@ -70,7 +70,7 @@ The original driver's signature failure: it draws the ROAD A SECOND TIME where t
 <td align="center"><b>here</b></td>
 </tr></table>
 
-Of the two Porsches in the presentation the original driver draws only one, surrounded by leftovers of the previous screen. 64.4% of the pixels change. (`wheelfir`, frame 600)
+Of the two Porsches in the presentation the original driver draws only one, surrounded by leftovers of the previous screen. 67.0% of the pixels change. (`wheelfir`, frame 600)
 
 <table><tr>
 <td width="50%"><img src="docs/img/before-after/wheelfir-sky-before.png" alt="Wheels & Fire: the sky during the race, MAME 0.288"></td>
@@ -80,7 +80,7 @@ Of the two Porsches in the presentation the original driver draws only one, surr
 <td align="center"><b>here</b></td>
 </tr></table>
 
-In-race, the original driver leaves the sky unpainted: no horizon, no mountain, no sea, none of the roadside signs. 76.3% of the pixels change. (`wheelfir`, frame 1800)
+In-race, the original driver leaves the sky unpainted: no horizon, no mountain, no sea, none of the roadside signs. 78.0% of the pixels change. (`wheelfir`, frame 1800)
 
 <table><tr>
 <td width="50%"><img src="docs/img/before-after/kongball-title-before.png" alt="Kong Ball: the title screen, MAME 0.288"></td>
