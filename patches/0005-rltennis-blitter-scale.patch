@@ -1,5 +1,5 @@
 diff --git a/src/mame/tch/rltennis.cpp b/src/mame/tch/rltennis.cpp
-index d86f2a729f1d62193a942b1c83af0f85d0e82df0..4e49faff91cbb125d1f522a6f674d0ec0cf13cc2 100644
+index d86f2a729f1d62193a942b1c83af0f85d0e82df0..e35465f82c1c994d64a89f1fd49dfd898c7aebab 100644
 --- a/src/mame/tch/rltennis.cpp
 +++ b/src/mame/tch/rltennis.cpp
 @@ -1,9 +1,12 @@
@@ -11,13 +11,13 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..4e49faff91cbb125d1f522a6f674d0ec
  
 - driver by Tomasz Slanina
 +Original driver by Tomasz Slanina.
-+The blitter's scale register identified on the running game and implemented as the ratio of its
-+two counters by Marcos Hernández, in collaboration, within MS-DOS Club's TCH preservation project
-+(github.com/MS-DOS-Club/tch-blitter).
++The blitter's scaling, 8-bit spans, (1,1) origin and blit timing implemented from the game's use
++of the hardware by Marcos Hernández, in collaboration, within MS-DOS Club's TCH preservation
++project (github.com/MS-DOS-Club/tch-blitter).
  
      based on informations provided by Antonio 'Peluko' Carrillo
  
-@@ -53,11 +56,14 @@ and select 2k sample to play. There's probably no way to stop the sample
+@@ -53,11 +56,12 @@ and select 2k sample to play. There's probably no way to stop the sample
  player - when there's nothing to play - first, empty 2k of ROMs are selected.
  
   TODO:
@@ -26,18 +26,16 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..4e49faff91cbb125d1f522a6f674d0ec
 -  (what's the correct size? based on src or dest rectangle ? is there some kind of zoom?
 -  or just rect clipping?)
 -- what the 70000a blitter reg is for ?
-+- the blitter's timing is a model, not a measurement: a time per pixel walked, and a list held
-+  until the page flips at vblank, so the main loop takes a whole number of frames a turn;
-+  BLIT_CLOCKS_PER_PIXEL is a value that makes it two in play and in the menus, the rate at which
-+  the continue countdown (one digit every 30 turns) reads as seconds
++- the blitter's timing is estimated, not measured on a board: a time per pixel walked
++  (BLIT_CLOCKS_PER_PIXEL), and a list held until the page flips at vblank
 +- which source pixel a scaled blit drops in each period (the phase) is a model choice, see
-+  blitter_w; so are a destination longer than its source holding the source's last step, and a
++  do_blit; so are a destination longer than its source holding the source's last step, and a
 +  walk wrapping in y as it does in x; the right and bottom edges of the visible area are not
 +  established
  - awfully similar to littlerb;
  
  
-@@ -73,12 +79,21 @@ player - when there's nothing to play - first, empty 2k of ROMs are selected.
+@@ -73,12 +77,21 @@ player - when there's nothing to play - first, empty 2k of ROMs are selected.
  #include "speaker.h"
  
  #include <algorithm>
@@ -59,7 +57,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..4e49faff91cbb125d1f522a6f674d0ec
  constexpr uint16_t BLTFLAG_DST_X_DIR   = 1 << 0;
  constexpr uint16_t BLTFLAG_DST_Y_DIR   = 1 << 1;
  constexpr uint16_t BLTFLAG_DST_LR      = 1 << 2;
-@@ -106,7 +121,7 @@ enum
+@@ -106,7 +119,7 @@ enum
  	BLT_Y_START,
  	BLT_Y_END,
  	BLT_FLAGS,
@@ -68,7 +66,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..4e49faff91cbb125d1f522a6f674d0ec
  	BLT_START,
  	BLT_UNK2
  };
-@@ -156,16 +171,26 @@ private:
+@@ -156,16 +169,26 @@ private:
  	int32_t m_unk_counter = 0;
  	std::unique_ptr<bitmap_ind16> m_tmp_bitmap[RLT_NUM_BITMAPS];
  	emu_timer *m_timer = nullptr;
@@ -95,7 +93,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..4e49faff91cbb125d1f522a6f674d0ec
  
  	void rltennis_main(address_map &map) ATTR_COLD;
  	void ramdac_map(address_map &map) ATTR_COLD;
-@@ -175,35 +200,35 @@ private:
+@@ -175,35 +198,35 @@ private:
  Blitter registers description (reg/bit names selected arbitrary ) :
  
  700000 - BLT_X_START
@@ -136,7 +134,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..4e49faff91cbb125d1f522a6f674d0ec
    fedcba98 76543210
    -------- -------x BLTFLAG_DST_X_DIR    x dst direction (step inc or dec)
    -------- ------x- BLTFLAG_DST_Y_DIR    y dst direction
-@@ -219,10 +244,13 @@ Blitter registers description (reg/bit names selected arbitrary ) :
+@@ -219,10 +242,13 @@ Blitter registers description (reg/bit names selected arbitrary ) :
    xxxx---- --------                      src ROM num
  
  
@@ -153,7 +151,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..4e49faff91cbb125d1f522a6f674d0ec
  
  
  70000c - BLT_START
-@@ -233,112 +261,174 @@ Blitter registers description (reg/bit names selected arbitrary ) :
+@@ -233,112 +259,174 @@ Blitter registers description (reg/bit names selected arbitrary ) :
    x------- -------- BLTSTRT_LAYER       FG or BG layer of framebuffer
  
  70000e - BLT_UNK2
@@ -392,20 +390,17 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..4e49faff91cbb125d1f522a6f674d0ec
  		}
  	}
  }
-@@ -353,7 +443,12 @@ void rltennis_state::video_start()
- 	m_tmp_bitmap[BITMAP_FG_2] = std::make_unique<bitmap_ind16>(512, 256);
+@@ -354,6 +442,9 @@ void rltennis_state::video_start()
  	m_tmp_bitmap[BITMAP_FG_DISPLAY] = std::make_unique<bitmap_ind16>(512, 256);
  
-+	// compared with its previous value to find the flip and strobe edges
-+	std::fill(std::begin(m_blitter), std::end(m_blitter), 0);
  	save_item(NAME(m_blitter));
-+	// The planes persist between frames and are painted blit by blit, so they are state.
++	// the planes persist between frames and are painted blit by blit, so they are state
 +	for (int i = BITMAP_BG; i <= BITMAP_FG_DISPLAY; i++)
 +		save_item(NAME(*m_tmp_bitmap[i]), i);
  }
  
  uint32_t rltennis_state::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
-@@ -443,12 +538,14 @@ INTERRUPT_GEN_MEMBER(rltennis_state::interrupt)
+@@ -443,12 +534,14 @@ INTERRUPT_GEN_MEMBER(rltennis_state::interrupt)
  {
  	++m_unk_counter; // Frame counter? verify
  	device.execute().set_input_line(4, HOLD_LINE);
@@ -421,7 +416,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..4e49faff91cbb125d1f522a6f674d0ec
  
  	save_item(NAME(m_data760000));
  	save_item(NAME(m_data740000));
-@@ -456,11 +553,22 @@ void rltennis_state::machine_start()
+@@ -456,11 +549,24 @@ void rltennis_state::machine_start()
  	save_item(NAME(m_sample_rom_offset));
  	save_item(NAME(m_offset_shift));
  	save_item(NAME(m_unk_counter));
@@ -435,7 +430,9 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..4e49faff91cbb125d1f522a6f674d0ec
  {
  	m_timer->adjust(attotime::from_hz(RLT_TIMER_FREQ));
 +
-+	// the blitter comes out of reset idle
++	// the blitter comes out of reset idle; the driver also clears its registers, against which
++	// each write finds the flip and strobe edges
++	std::fill(std::begin(m_blitter), std::end(m_blitter), 0);
 +	m_blit_done_timer->adjust(attotime::never);
 +	m_blit_busy = false;
 +	m_blit_deferred = false;
@@ -444,7 +441,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..4e49faff91cbb125d1f522a6f674d0ec
  }
  
  void rltennis_state::ramdac_map(address_map &map)
-@@ -470,15 +578,19 @@ void rltennis_state::ramdac_map(address_map &map)
+@@ -470,15 +576,19 @@ void rltennis_state::ramdac_map(address_map &map)
  
  void rltennis_state::rltennis(machine_config &config)
  {
