@@ -43,7 +43,7 @@ fixed in the ROM it boots, enters a game and its playable tracks finish the race
 | MAME set | `radendur` (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its blitter interrupt handlers opened to the sound's interrupt as Power Ball's are, built from the dump by `make radendurh` and published on the [Internet Archive](https://archive.org/details/radendurh) |
 | driver in MAME | `tch/wheelfir.cpp` |
 | driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten and the game's differences in `radendur_state` |
-| status in stock MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: a comment in its driver says that some courses reach gameplay but crash quickly |
+| status in stock MAME | `NOT_WORKING`: a comment in its driver says that it crashes (always?) when selecting a track on the board |
 <!-- end of generated block -->
 
 ## What was achieved here

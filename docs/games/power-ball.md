@@ -71,7 +71,7 @@ footage.
 | MAME set | `pwball` |
 | driver in MAME | `tch/wheelfir.cpp` |
 | driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten |
-| status in stock MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS`, with the comment "mostly complete" |
+| status in stock MAME | **working** |
 <!-- end of generated block -->
 
 ## Its role in this project: the clean reference

@@ -33,9 +33,9 @@ plus a fixed clone of one of them, one shared video architecture.
 | game | set | year | manufacturer | state in stock MAME | state here |
 |---|---|---|---|---|---|
 | [Reality Tennis](docs/games/reality-tennis.md) | `rltennis`, `rltennisa` | 1993 ⚠ | TCH | works, with imperfect graphics and timing | works, with imperfect graphics and timing |
-| [Wheels & Fire](docs/games/wheels-and-fire.md) | `wheelfir` | 1997 * | TCH | NOT_WORKING | works, with imperfect graphics; the whole game plays |
-| [Power Ball](docs/games/power-ball.md) | `pwball` | _unknown_ (`199?`) | TCH | NOT_WORKING (prototype), commented "mostly complete" | works; the whole game plays |
-| [Kong Ball](docs/games/kong-ball.md) | `kongball` | 1997 | TCH / Digital Dreams Multimedia | NOT_WORKING (prototype), no sound | works, with no sound; plays to its game over |
+| [Wheels & Fire](docs/games/wheels-and-fire.md) | `wheelfir` | 1997 * | TCH | works, with imperfect graphics | works, with imperfect graphics; the whole game plays |
+| [Power Ball](docs/games/power-ball.md) | `pwball` | _unknown_ (`199?`) | TCH | works | works; the whole game plays |
+| [Kong Ball](docs/games/kong-ball.md) | `kongball` | 1997 | TCH / Digital Dreams Multimedia | works, with no sound | works, with no sound; plays to its game over |
 | [Radical Enduro](docs/games/radical-enduro.md) | `radendur` | _unknown_ (`199?`) | TCH / Sator Videogames | NOT_WORKING (early prototype) | NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurh clone, its maincpu ROM fixed and built from the dump, finishes a race with its music at its real 16 MHz |
 
 `*` from an external source, not verifiable in the binary. `⚠` sources contradict each other: the game's page says which ones and why this value is the published one. `199?` is MAME's own: the year of those games was lost, and is not filled in.

@@ -89,9 +89,9 @@ games:
     sources:
     - an unpublished account from the period
   mame_status:
-    value: NOT_WORKING
+    value: works, with imperfect graphics
     level: verified
-    evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
+    evidence: MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE
   driver_status:
     value: works, with imperfect graphics; the whole game plays
     level: verified
@@ -135,7 +135,6 @@ games:
     board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout B"
     driver_here: "the same `tch/wheelfir.cpp`, with the video model rewritten"
     year_note: " (a prototype)"
-    status_note: ", with the comment \"mostly complete\""
   manufacturer:
     value: TCH
     level: verified
@@ -145,9 +144,9 @@ games:
     level: unknown
     evidence: MAME writes 199? in the GAME macro
   mame_status:
-    value: NOT_WORKING (prototype), commented "mostly complete"
+    value: works
     level: verified
-    evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
+    evidence: MACHINE_SUPPORTS_SAVE
   driver_status:
     value: works; the whole game plays
     level: verified
@@ -170,9 +169,9 @@ games:
     evidence: 'macro GAME of wheelfir.cpp, and confirmed by the ROM in kongball_maincpu 0x048fc2: "*1997
       ALL RIGHTS RESERVED"'
   mame_status:
-    value: NOT_WORKING (prototype), no sound
+    value: works, with no sound
     level: verified
-    evidence: MACHINE_NOT_WORKING | MACHINE_NO_SOUND | MACHINE_IMPERFECT_GRAPHICS
+    evidence: MACHINE_NO_SOUND | MACHINE_SUPPORTS_SAVE
   driver_status:
     value: works, with no sound; plays to its game over
     level: verified
@@ -199,7 +198,7 @@ games:
     board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A"
     driver_here: "the same `tch/wheelfir.cpp`, with the video model rewritten and the game's differences in `radendur_state`"
     sets_note: " (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its blitter interrupt handlers opened to the sound's interrupt as Power Ball's are, built from the dump by `make radendurh` and published on the [Internet Archive](https://archive.org/details/radendurh)"
-    status_note: ": a comment in its driver says that some courses reach gameplay but crash quickly"
+    status_note: ": a comment in its driver says that it crashes (always?) when selecting a track on the board"
   manufacturer:
     value: TCH / Sator Videogames
     level: verified
@@ -230,7 +229,7 @@ games:
   mame_status:
     value: NOT_WORKING (early prototype)
     level: verified
-    evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
+    evidence: MACHINE_NOT_WORKING | MACHINE_SUPPORTS_SAVE
   driver_status:
     value: NOT_WORKING (early prototype), the dump hangs on its own faults; the radendurh clone,
       its maincpu ROM fixed and built from the dump, finishes a

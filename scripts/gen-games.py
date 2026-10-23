@@ -81,12 +81,13 @@ def flags_of(j: dict) -> list[str]:
 
 def check_page(j: dict) -> None:
     """INVALID (3) for page data that would render a lie: a typo'd note vanishing through .get,
-    no MACHINE_ flag reading as "working", a known year with no value."""
+    evidence with no MACHINE_ flag at all, a known year with no value."""
     if j["set"] not in PAGE or "board" not in j.get("page", {}):
         print(f"INVALID: {j['set']} has no game page in PAGE, or no `page: board` in games.yaml")
         sys.exit(3)
     unknown = set(j["page"]) - PAGE_KEYS
-    if unknown or not flags_of(j) or (j["year"]["level"] != "unknown" and not j["year"]["value"]):
+    no_flags = not re.search(r"MACHINE_\w+", j["mame_status"]["evidence"])
+    if unknown or no_flags or (j["year"]["level"] != "unknown" and not j["year"]["value"]):
         print(
             f"INVALID: {j['set']}: unknown page keys {sorted(unknown)}, no MACHINE_ flag, "
             "or a known year with no value"
@@ -105,7 +106,7 @@ def facts_table(j: dict) -> str:
     flags = flags_of(j)
     state = ", ".join(f"`{f}`" for f in flags)
     if "NOT_WORKING" not in flags:
-        state = f"**working**, {state}"
+        state = f"**working**, {state}" if state else "**working**"
     rows = [
         "| | |",
         "|---|---|",

@@ -70,7 +70,7 @@ corrected video model:
 | MAME set | `wheelfir` |
 | driver in MAME | `tch/wheelfir.cpp` |
 | driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten |
-| status in stock MAME | `NOT_WORKING`, `IMPERFECT_GRAPHICS` |
+| status in stock MAME | **working**, `IMPERFECT_GRAPHICS` |
 <!-- end of generated block -->
 
 ## Why stock MAME marks it as not working

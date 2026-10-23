@@ -4,7 +4,7 @@
 # order only, and nothing here would say which.
 # shellcheck disable=SC2034  # read by the scripts that source this file
 PATCHES="
-0002-wheelfir-video-model.patch|src/mame/tch/wheelfir.cpp src/mame/mame.lst src/mame/layout/wheelfir.lay
+0002-wheelfir-video-model.patch|src/mame/tch/wheelfir.cpp src/mame/mame.lst
 0003-lua-thread-context-race.patch|src/frontend/mame/luaengine.cpp
 0004-gdbstub-one-thread-per-cpu.patch|src/osd/modules/debugger/debuggdbstub.cpp
 0005-rltennis-blitter-scale.patch|src/mame/tch/rltennis.cpp
