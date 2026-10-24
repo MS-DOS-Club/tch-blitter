@@ -42,7 +42,7 @@ travels, since `upstream/` is not committed:
 
 | driver | games | SUBTARGET | binary | patch |
 |--------|-------|-----------|--------|-------|
-| `tch/wheelfir.cpp` | wheelfir, pwball, kongball, radendur, radendurh | `wheelfir` | `upstream/wheelfir` | `0002-wheelfir-video-model.patch` (and `mame.lst`) |
+| `tch/wheelfir.cpp` | wheelfir, pwball, kongball, radendur, radendurh | `wheelfir` | `upstream/wheelfir` | `0002-wheelfir-radendurh.patch` (and `mame.lst`) |
 | `tch/rltennis.cpp` | rltennis, rltennisa | `rltennis` | `upstream/rltennis` | `0005-rltennis-blitter-scale.patch` |
 
 Two more patches are not drivers. `0003-lua-thread-context-race.patch` fixes a race in MAME's Lua
