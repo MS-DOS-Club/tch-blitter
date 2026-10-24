@@ -70,8 +70,9 @@ footage.
 | board | [the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout B |
 | MAME set | `pwball` |
 | driver in MAME | `tch/wheelfir.cpp` |
-| driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten |
-| status in stock MAME | **working** |
+| driver in this repository | the same file: its video model and blitter were rewritten here, then merged into MAME |
+| status in MAME 0.289 | `NOT_WORKING`, `IMPERFECT_GRAPHICS`, with the comment "mostly complete" |
+| status in current MAME | **working** |
 <!-- end of generated block -->
 
 ## Its role in this project: the clean reference

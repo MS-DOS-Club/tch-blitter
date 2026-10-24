@@ -31,8 +31,9 @@ at a glance whether the page model is right.
 | board | [the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout B |
 | MAME set | `kongball` |
 | driver in MAME | `tch/wheelfir.cpp` |
-| driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten |
-| status in stock MAME | **working**, `NO_SOUND` |
+| driver in this repository | the same file: its video model and blitter were rewritten here, then merged into MAME |
+| status in MAME 0.289 | `NOT_WORKING`, `NO_SOUND`, `IMPERFECT_GRAPHICS`, with the comment "can't get ingame?" |
+| status in current MAME | **working**, `NO_SOUND` |
 <!-- end of generated block -->
 
 ## Why it has no sound

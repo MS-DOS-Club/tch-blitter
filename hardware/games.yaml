@@ -1,9 +1,16 @@
+# The release this repository's work started from, and the last before MAME took the Wheels &
+# Fire board's rewritten driver: each game's `mame_status_baseline` is read at this commit.
+mame_baseline:
+  release: '0.289'
+  tag: mame0289
+  commit: f34f02505e32c1993c6a782b6814232cbfc74e36
 games:
 - set: rltennis
   name: Reality Tennis
   mame_driver: tch/rltennis.cpp
   page:
     board: "[the first blitter board](../boards/reality-tennis.md), with a single 68000 at 8 MHz"
+    driver_here: "the same file, with the blitter's scaling, its 8-bit spans, the (1,1) origin and its timing, proposed to MAME"
     year_note: " (`⚠` recreativas.org dates it 1994)"
   manufacturer:
     value: TCH
@@ -18,6 +25,10 @@ games:
       than hidden: nothing available settles it, and the ROM carries no year.'
     sources:
     - https://www.recreativas.org/reality-tennis-540-tch
+  mame_status_baseline:
+    value: works, with imperfect graphics and timing
+    level: verified
+    evidence: MACHINE_IMPERFECT_GRAPHICS | MACHINE_IMPERFECT_TIMING | MACHINE_SUPPORTS_SAVE
   mame_status:
     value: works, with imperfect graphics and timing
     level: verified
@@ -75,7 +86,7 @@ games:
   mame_driver: tch/wheelfir.cpp
   page:
     board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout B"
-    driver_here: "the same `tch/wheelfir.cpp`, with the video model rewritten"
+    driver_here: "the same file: its video model and blitter were rewritten here, then merged into MAME"
     year_note: ", from an outside source; MAME dates it as `199?` and the ROM carries no year"
   manufacturer:
     value: TCH
@@ -88,6 +99,10 @@ games:
       an account from the period that is not published'
     sources:
     - an unpublished account from the period
+  mame_status_baseline:
+    value: NOT_WORKING
+    level: verified
+    evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
   mame_status:
     value: works, with imperfect graphics
     level: verified
@@ -133,8 +148,9 @@ games:
   mame_driver: tch/wheelfir.cpp
   page:
     board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout B"
-    driver_here: "the same `tch/wheelfir.cpp`, with the video model rewritten"
+    driver_here: "the same file: its video model and blitter were rewritten here, then merged into MAME"
     year_note: " (a prototype)"
+    status_note_baseline: ", with the comment \"mostly complete\""
   manufacturer:
     value: TCH
     level: verified
@@ -143,6 +159,10 @@ games:
     value: null
     level: unknown
     evidence: MAME writes 199? in the GAME macro
+  mame_status_baseline:
+    value: 'NOT_WORKING (prototype), commented "mostly complete"'
+    level: verified
+    evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
   mame_status:
     value: works
     level: verified
@@ -157,8 +177,9 @@ games:
   mame_driver: tch/wheelfir.cpp
   page:
     board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout B"
-    driver_here: "the same `tch/wheelfir.cpp`, with the video model rewritten"
+    driver_here: "the same file: its video model and blitter were rewritten here, then merged into MAME"
     year_note: ", printed in the ROM itself (a prototype)"
+    status_note_baseline: ", with the comment \"can't get ingame?\""
   manufacturer:
     value: TCH / Digital Dreams Multimedia
     level: verified
@@ -168,6 +189,10 @@ games:
     level: verified
     evidence: 'macro GAME of wheelfir.cpp, and confirmed by the ROM in kongball_maincpu 0x048fc2: "*1997
       ALL RIGHTS RESERVED"'
+  mame_status_baseline:
+    value: NOT_WORKING (prototype), no sound
+    level: verified
+    evidence: MACHINE_NOT_WORKING | MACHINE_NO_SOUND | MACHINE_IMPERFECT_GRAPHICS
   mame_status:
     value: works, with no sound
     level: verified
@@ -196,9 +221,10 @@ games:
   mame_driver: tch/wheelfir.cpp
   page:
     board: "[the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A"
-    driver_here: "the same `tch/wheelfir.cpp`, with the video model rewritten and the game's differences in `radendur_state`"
+    driver_here: "the same file: its `radendur_state` was written here, then merged into MAME; the `radendurh` clone is this repository's"
     sets_note: " (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its blitter interrupt handlers opened to the sound's interrupt as Power Ball's are, built from the dump by `make radendurh` and published on the [Internet Archive](https://archive.org/details/radendurh)"
     status_note: ": a comment in its driver says that it crashes (always?) when selecting a track on the board"
+    status_note_baseline: ": a comment in its driver says that it can get in game if the CPUs are overclocked significantly"
   manufacturer:
     value: TCH / Sator Videogames
     level: verified
@@ -226,6 +252,10 @@ games:
     level: unknown
     evidence: MAME writes 199? in the GAME macro. Its two code ROMs hold not one readable text, so there
       is no internal copyright to take it from either
+  mame_status_baseline:
+    value: NOT_WORKING (early prototype)
+    level: verified
+    evidence: MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS
   mame_status:
     value: NOT_WORKING (early prototype)
     level: verified

@@ -30,8 +30,8 @@ PAGE = {
     "kongball": "kong-ball",
     "radendur": "radical-enduro",
 }
-# two states, because there are two drivers: stock MAME's at the pin, and this repository's
-HEAD_GAMES = "| game | set | year | manufacturer | state in stock MAME | state here |"
+# three states: MAME at the release this work started from, MAME at the pin, and this repository's
+HEAD_GAMES = "| game | set | year | manufacturer | in MAME {baseline} | in current MAME | here |"
 HEAD_RESOURCES = "| game | main 68000 | sound 68000 | graphics | other ROMs |"
 HEAD_CREDITS = "| game | who made it, according to its own ROM |"
 HEAD_PRESERVED = "| game | who preserved it |"
@@ -55,6 +55,10 @@ def mame_state_of(j: dict) -> str:
     return str(j["mame_status"]["value"])
 
 
+def baseline_state_of(j: dict) -> str:
+    return str(j["mame_status_baseline"]["value"])
+
+
 def driver_state_of(j: dict) -> str:
     return str(j["driver_status"]["value"])
 
@@ -70,13 +74,38 @@ def sets_of(j):
     return ", ".join(f"`{s}`" for s in sets)
 
 
-PAGE_KEYS = {"board", "driver_here", "year_note", "sets_note", "status_note"}
+PAGE_KEYS = {
+    "board",
+    "driver_here",
+    "year_note",
+    "sets_note",
+    "status_note",
+    "status_note_baseline",
+}
+STATES = ("mame_status_baseline", "mame_status")
 
 
-def flags_of(j: dict) -> list[str]:
+def flags_of(status: dict) -> list[str]:
     """The GAME macro's flags, as verify-games.py checks them against the driver: the state."""
-    flags = re.findall(r"MACHINE_(\w+)", j["mame_status"]["evidence"])
+    flags = re.findall(r"MACHINE_(\w+)", status["evidence"])
     return [f for f in flags if f != "SUPPORTS_SAVE"]
+
+
+def state_cell(status: dict) -> str:
+    flags = flags_of(status)
+    state = ", ".join(f"`{f}`" for f in flags)
+    if "NOT_WORKING" not in flags:
+        state = f"**working**, {state}" if state else "**working**"
+    return state
+
+
+def baseline_of(data: dict) -> str:
+    """The release the baseline states were read at, named once in games.yaml."""
+    release = (data.get("mame_baseline") or {}).get("release")
+    if not release:
+        print("INVALID: hardware/games.yaml names no `mame_baseline: release`")
+        sys.exit(3)
+    return str(release)
 
 
 def check_page(j: dict) -> None:
@@ -86,27 +115,25 @@ def check_page(j: dict) -> None:
         print(f"INVALID: {j['set']} has no game page in PAGE, or no `page: board` in games.yaml")
         sys.exit(3)
     unknown = set(j["page"]) - PAGE_KEYS
-    no_flags = not re.search(r"MACHINE_\w+", j["mame_status"]["evidence"])
+    no_flags = any(
+        not re.search(r"MACHINE_\w+", (j.get(k) or {}).get("evidence", "")) for k in STATES
+    )
     if unknown or no_flags or (j["year"]["level"] != "unknown" and not j["year"]["value"]):
         print(
-            f"INVALID: {j['set']}: unknown page keys {sorted(unknown)}, no MACHINE_ flag, "
-            "or a known year with no value"
+            f"INVALID: {j['set']}: unknown page keys {sorted(unknown)}, a state with no MACHINE_ "
+            "flag, or a known year with no value"
         )
         sys.exit(3)
 
 
-def facts_table(j: dict) -> str:
-    """A game page's fact table: the year, the sets, the driver and the state in stock MAME are
+def facts_table(j: dict, baseline: str) -> str:
+    """A game page's fact table: the year, the sets, the driver and the two states in MAME are
     the data file's; the board, the driver here and the short notes are the page's own, under
     `page:`."""
     page = j["page"]
     year = j["year"]
     known = "no known date" if year["level"] == "unknown" else str(year["value"])
     sets = [v["set"] for v in j.get("variants", [])] or [j["set"]]
-    flags = flags_of(j)
-    state = ", ".join(f"`{f}`" for f in flags)
-    if "NOT_WORKING" not in flags:
-        state = f"**working**, {state}" if state else "**working**"
     rows = [
         "| | |",
         "|---|---|",
@@ -123,7 +150,11 @@ def facts_table(j: dict) -> str:
         ]
     else:
         rows.append(f"| driver | {driver} |")
-    rows.append(f"| status in stock MAME | {state}{page.get('status_note', '')} |")
+    rows += [
+        f"| status in MAME {baseline} | {state_cell(j['mame_status_baseline'])}"
+        f"{page.get('status_note_baseline', '')} |",
+        f"| status in current MAME | {state_cell(j['mame_status'])}{page.get('status_note', '')} |",
+    ]
     return "\n".join(rows) + "\n"
 
 
@@ -137,7 +168,7 @@ def games_table(data: dict) -> str:
     A note explaining a symbol absent from the table is noise and ages badly: it says there is an
     external fact when there no longer is one, and the reader goes looking for it.
     """
-    rows = [HEAD_GAMES, "|---|---|---|---|---|---|"]
+    rows = [HEAD_GAMES.format(baseline=baseline_of(data)), "|---|---|---|---|---|---|---|"]
     marks: set[str] = set()
     for j in data["games"]:
         year = year_of(j)
@@ -145,7 +176,8 @@ def games_table(data: dict) -> str:
         page = PAGE.get(j["set"], j["set"])
         rows.append(
             f"| [{j['name']}]({page_link(page)}) | {sets_of(j)} | {year} | "
-            f"{j['manufacturer']['value']} | {mame_state_of(j)} | {driver_state_of(j)} |"
+            f"{j['manufacturer']['value']} | {baseline_state_of(j)} | {mame_state_of(j)} | "
+            f"{driver_state_of(j)} |"
         )
     notes = {
         "*": "`*` from an external source, not verifiable in the binary.",
@@ -339,7 +371,7 @@ def main() -> int:
             sys.exit(3)
         page_text = page_path.read_text(encoding="utf-8")
         where = str(page_path.relative_to(ROOT))
-        new_page = insert_block(page_text, "facts", facts_table(j), where)
+        new_page = insert_block(page_text, "facts", facts_table(j, baseline_of(data)), where)
         new_page = insert_block(new_page, "thanks", thanks_list(data, j["set"]), where)
         pending[page_path] = (page_text, new_page)
     stale = [p for p, (old, new) in pending.items() if old != new]

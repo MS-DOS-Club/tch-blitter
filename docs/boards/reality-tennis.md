@@ -3,7 +3,7 @@
 TCH's first blitter board, as far as the dates go: one 68000, two FPGAs that the silkscreen calls
 **JUANA** and **JOAQUIN**, one reading the graphics and the other writing the screen, and two DACs
 fed straight from the sample ROMs. It runs the oldest game of the family as MAME dates it, and it is
-the only one of the two boards stock MAME emulates as working. The hardware was designed by **David
+the one of the two boards MAME already emulated as working before this work began. The hardware was designed by **David
 Sandoval** and the game programmed and designed by **Antonio 'Peluko' Carrillo**, as the MAME driver
 credits them. Its successor, by everything the two blitters share, is
 [the Wheels & Fire board](wheels-and-fire-board.md).
@@ -84,12 +84,13 @@ against the addresses that write them, so the table is the truth, not the names.
 | level | source | used for |
 |-------|--------|----------|
 | 4 | vblank | the end of a frame; it also steps the counter the game reads in the top three bits of `0x7e0000` |
-| 1 | blitter | on the board a level held while the blitter is idle; the driver stands in with one interrupt request on every blit strobe and one at vblank |
+| 1 | blitter | a level held while the blitter is idle, dropped by the write that clears the strobe |
 
 The game emits one blit of a list per level 1 interrupt and starts a list by unmasking it, which
-only makes sense if the line stays up while the blitter is idle. The driver's blits take no time,
-so it stands in for that level; the set carries `MACHINE_IMPERFECT_TIMING` for it. No raster interrupt
-is known.
+only makes sense if the line stays up while the blitter is idle, and that is how the driver holds
+it: each blit takes a time per pixel walked, and the line comes back up when it ends. How long a
+blit really takes is not known (*What we still don't know*), so the set keeps
+`MACHINE_IMPERFECT_TIMING`. No raster interrupt is known.
 
 ## What it gives the bigger board, and what it does not
 
@@ -223,13 +224,9 @@ data that looks like an address counts too.
 
 ## Status in MAME
 
-| set | driver | status in stock MAME, at the pinned version |
-|-----|--------|-----------------|
-| `rltennis` (set 1) | `tch/rltennis.cpp` | **works**: `IMPERFECT_GRAPHICS`, `IMPERFECT_TIMING`, `SUPPORTS_SAVE` |
-| `rltennisa` (set 2, the board photographed) | `tch/rltennis.cpp` | the same; a split set, four files of its own and twelve from the parent |
-
-The only board of the family without `NOT_WORKING` in stock MAME. The other four games are on
-[the Wheels & Fire board page](wheels-and-fire-board.md).
+Both sets, `rltennis` (set 1) and `rltennisa` (set 2, the board photographed, a split set with four
+files of its own and twelve from the parent), run on `tch/rltennis.cpp`. Their state in MAME, before
+this work and now, and here, is [the README's games table](../../README.md#the-games).
 
 ## Sources
 

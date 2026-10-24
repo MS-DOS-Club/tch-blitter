@@ -8,9 +8,9 @@
 
 A TCH prototype attributed to **Sator Videogames**, never released. A motocross game whose track is
 built out of sprites stacked by depth, on the same blitter board as
-[Wheels & Fire](wheels-and-fire.md). In stock MAME it is `NOT_WORKING`, and a comment in its driver says that
-some courses reach gameplay but crash quickly; with this repository's driver and its faults
-fixed in the ROM it boots, enters a game and its playable tracks finish the race.
+[Wheels & Fire](wheels-and-fire.md). In MAME it is `NOT_WORKING`, and a comment in its driver says that
+it crashes when a track is selected; in this repository's `radendurh` clone, with the prototype's
+faults fixed in the ROM, it boots, enters a game and its playable tracks finish the race.
 
 <table>
 <tr>
@@ -42,8 +42,9 @@ fixed in the ROM it boots, enters a game and its playable tracks finish the race
 | board | [the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout A |
 | MAME set | `radendur` (the dump, which hangs on its own faults); `radendurh`, a clone whose maincpu ROM has them fixed, its blitter interrupt handlers opened to the sound's interrupt as Power Ball's are, built from the dump by `make radendurh` and published on the [Internet Archive](https://archive.org/details/radendurh) |
 | driver in MAME | `tch/wheelfir.cpp` |
-| driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten and the game's differences in `radendur_state` |
-| status in stock MAME | `NOT_WORKING`: a comment in its driver says that it crashes (always?) when selecting a track on the board |
+| driver in this repository | the same file: its `radendur_state` was written here, then merged into MAME; the `radendurh` clone is this repository's |
+| status in MAME 0.289 | `NOT_WORKING`, `IMPERFECT_GRAPHICS`: a comment in its driver says that it can get in game if the CPUs are overclocked significantly |
+| status in current MAME | `NOT_WORKING`: a comment in its driver says that it crashes (always?) when selecting a track on the board |
 <!-- end of generated block -->
 
 ## What was achieved here

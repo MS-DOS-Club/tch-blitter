@@ -6,7 +6,7 @@
 
 <p align="center"><em>A game in progress: coin, START, and player 1 serves against the computer.</em></p>
 
-The oldest game in the family and the only one stock MAME emulates as working. A tennis game built on
+The oldest game in the family, and the one MAME already emulated as working before this work began. A tennis game built on
 digitised images of period players: the court is drawn in perspective and everything on screen has
 been copied there by the board's blitter, rectangle by rectangle. It runs on the first generation of
 TCH's blitter board, with a single 68000 at 8 MHz.
@@ -44,8 +44,10 @@ that starts at (1,1).
 | year | 1993 (`⚠` recreativas.org dates it 1994) |
 | board | [the first blitter board](../boards/reality-tennis.md), with a single 68000 at 8 MHz |
 | MAME sets | `rltennis` and `rltennisa` |
-| driver | `tch/rltennis.cpp` |
-| status in stock MAME | **working**, `IMPERFECT_GRAPHICS`, `IMPERFECT_TIMING` |
+| driver in MAME | `tch/rltennis.cpp` |
+| driver in this repository | the same file, with the blitter's scaling, its 8-bit spans, the (1,1) origin and its timing, proposed to MAME |
+| status in MAME 0.289 | **working**, `IMPERFECT_GRAPHICS`, `IMPERFECT_TIMING` |
+| status in current MAME | **working**, `IMPERFECT_GRAPHICS`, `IMPERFECT_TIMING` |
 <!-- end of generated block -->
 
 ## Its role: the Rosetta stone

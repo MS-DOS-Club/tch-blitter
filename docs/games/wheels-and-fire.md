@@ -69,20 +69,22 @@ corrected video model:
 | board | [the Wheels & Fire board](../boards/wheels-and-fire-board.md#one-design-two-layouts), layout B |
 | MAME set | `wheelfir` |
 | driver in MAME | `tch/wheelfir.cpp` |
-| driver in this repository | the same `tch/wheelfir.cpp`, with the video model rewritten |
-| status in stock MAME | **working**, `IMPERFECT_GRAPHICS` |
+| driver in this repository | the same file: its video model and blitter were rewritten here, then merged into MAME |
+| status in MAME 0.289 | `NOT_WORKING`, `IMPERFECT_GRAPHICS` |
+| status in current MAME | **working**, `IMPERFECT_GRAPHICS` |
 <!-- end of generated block -->
 
-## Why stock MAME marks it as not working
+## Why MAME used to mark it as not working
 
-Not because nothing shows up, but because its emulation is not faithful, and stock MAME's driver
-header carries the list: gaps and extra rows of pixels, zoom by lookup table
+Not because nothing showed up, but because its emulation was not faithful, and the driver header
+of the release this work started from (the one the facts table names) carried the list: gaps and extra rows of pixels, zoom by lookup table
 instead of by parameters, double buffering not applied, the road and the sky, layer clearing, wrong
 coordinates for the intro sprites, unidentified layer enable bits, and a slow analogue accelerator.
 
-**Of the eight points on that list, SEVEN are closed** and one remains open. The closures are in this
-repository's driver; in stock MAME all eight are still open. Point by point, against the TODO
-exactly as it is written:
+**Of the eight points on that list, SEVEN are closed** and one remains open. The closures were made
+in this repository's driver, which MAME has since merged, so a current MAME carries them too and
+its header keeps the open one ("no layer enable is identified"). Point by point, against the TODO
+exactly as it was written:
 
 | author's point | status |
 |----------------|--------|

@@ -279,7 +279,7 @@ Photos by OldComputers ES unless marked, from the
 - **The real rate of the sound interrupt.** Everything assumes 15625 Hz: the mixer's own constant,
   16 MHz / 1024, 32 MHz / 2048 and one mailbox word per line all agree, but nobody has measured a
   board. Whether the field runs at 50 or 60 Hz hangs from the same question.
-- **How long a blit takes**, and how long the board holds a level 5 request. The drivers complete
+- **How long a blit takes**, and how long the board holds a level 5 request. The driver completes
   every blit at once and hold the request until the CPU takes it, withdrawing it when bit 13 of
   0x7c0000 clears or when vblank comes first (both fitted); the length of the drawing chain on
   a real board is unknown.
@@ -590,15 +590,9 @@ Anything reached through a pointer is not included.
 
 ## Status in MAME
 
-| set | driver | status in stock MAME, at the pinned version |
-|-----|--------|-----------------|
-| `wheelfir` | `tch/wheelfir.cpp` | `NOT_WORKING`, `IMPERFECT_GRAPHICS` |
-| `pwball` | `tch/wheelfir.cpp` | `NOT_WORKING`, `IMPERFECT_GRAPHICS`, "mostly complete" |
-| `kongball` | `tch/wheelfir.cpp` | `NOT_WORKING`, `NO_SOUND`, `IMPERFECT_GRAPHICS` |
-| `radendur` | `tch/wheelfir.cpp` | `NOT_WORKING`, `IMPERFECT_GRAPHICS` |
-
-`NOT_WORKING` here means the emulation is not faithful, not that nothing shows. This repository's
-drivers carry their own flags, and the state of each game here is in the README's games table.
+The four sets, `wheelfir`, `pwball`, `kongball` and `radendur`, run on `tch/wheelfir.cpp`, and
+`radendurh` on the same driver here. Their state in MAME, before this work and now, and here, is
+[the README's games table](../../README.md#the-games).
 
 ## Sources
 

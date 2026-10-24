@@ -4,7 +4,8 @@ A level says what can be trusted: `verified` (read from a binary or MAME's code)
 outside source, named in `sources`) or `unknown` (said, not filled in). This checks:
 
 - verified states: `mame_status` against the set's `GAME(...)` flags in stock MAME at the pinned
-  commit, `driver_status` against this repository's driver;
+  commit, `mame_status_baseline` against them at the `mame_baseline` commit (fetched into the
+  clone when it is not there), `driver_status` against this repository's driver;
 - verified years and manufacturers against the driver's `GAME(...)` macro, and an `unknown` one
   against what MAME does not know either (`199?`, `<unknown>`);
 - authors and credits verified with ROM evidence: the text is at the offset the evidence names;
@@ -59,27 +60,34 @@ def game_macro(machine: str) -> str | None:
     return None
 
 
-@cache
-def stock_macros() -> dict[str, str] | None:
-    """Every tch `GAME(...)` line of stock MAME at the pinned commit, by set; None when the clone
-    cannot answer. The pin is read from the one file that declares it, never repeated here."""
+def pinned_commit() -> str | None:
+    """The pin, read from the one file that declares it, never repeated here."""
     pin = re.search(
         r'^MAME_PINNED_COMMIT="([0-9a-f]{40})"', MAME_SRC_LIB.read_text(encoding="utf-8"), re.M
     )
+    return pin.group(1) if pin else None
+
+
+@cache
+def stock_macros(commit: str | None) -> dict[str, str] | None:
+    """Every tch `GAME(...)` line of stock MAME at `commit`, by set; None when the clone cannot
+    answer. The clone is shallow at the pin, so another commit is fetched into it, once."""
     clone = ROOT / "upstream"
-    if pin is None or not (clone / ".git").exists():
+    if commit is None or not (clone / ".git").exists():
         return None
 
     def git(*args: str) -> str | None:
         r = subprocess.run(["git", "-C", str(clone), *args], capture_output=True, encoding="utf-8")
         return r.stdout if r.returncode == 0 else None
 
-    names = git("ls-tree", "--name-only", pin.group(1), "src/mame/tch/")
+    if git("cat-file", "-e", f"{commit}^{{commit}}") is None:
+        git("fetch", "-q", "--depth", "1", "origin", commit)
+    names = git("ls-tree", "--name-only", commit, "src/mame/tch/")
     if not names:
         return None
     macros: dict[str, str] = {}
     for path in names.split():
-        text = git("show", f"{pin.group(1)}:{path}") if path.endswith(".cpp") else None
+        text = git("show", f"{commit}:{path}") if path.endswith(".cpp") else None
         for line in (text or "").splitlines():
             m = _MACRO.match(line)
             if m:
@@ -190,11 +198,22 @@ def main() -> int:
     checked = 0
     uncheckable: list[str] = []
 
+    baseline = (data.get("mame_baseline") or {}).get("commit")
+    if not baseline:
+        failures.append("games.yaml: no `mame_baseline: commit`")
     for j in data["games"]:
         name = j.get("name") or j.get("set") or "?"
         missing = [
             k
-            for k in ("set", "name", "year", "manufacturer", "mame_status", "driver_status")
+            for k in (
+                "set",
+                "name",
+                "year",
+                "manufacturer",
+                "mame_status_baseline",
+                "mame_status",
+                "driver_status",
+            )
             if k not in j
         ]
         if missing:
@@ -209,15 +228,18 @@ def main() -> int:
             checked += n
             failures += found
 
-        stock = stock_macros()
-        if stock is None:
-            uncheckable.append(f"{name}: stock MAME at the pin could not be read (no clone?)")
-        elif j["set"] not in stock:
-            failures.append(f"{name}: stock MAME at the pin has no GAME macro for {j['set']}")
-        for what, against in (
-            ("mame_status", None if stock is None else stock.get(j["set"])),
-            ("driver_status", macro),
+        against_of: dict[str, str | None] = {"driver_status": macro}
+        for what, commit, where in (
+            ("mame_status", pinned_commit(), "the pin"),
+            ("mame_status_baseline", baseline, "the baseline"),
         ):
+            stock = stock_macros(commit)
+            if stock is None:
+                uncheckable.append(f"{name}: stock MAME at {where} could not be read (no clone?)")
+            elif j["set"] not in stock:
+                failures.append(f"{name}: stock MAME at {where} has no GAME macro for {j['set']}")
+            against_of[what] = None if stock is None else stock.get(j["set"])
+        for what, against in against_of.items():
             n, found = check_status(name, what, j[what], against)
             checked += n
             failures += found
