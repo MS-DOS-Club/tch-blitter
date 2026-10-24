@@ -38,9 +38,15 @@ then is information about the fix.
   `src/mame/tch/wheelfir.cpp` and `src/mame/mame.lst` for the clone's, never the Lua and gdbstub
   patches, which are not proposed with them. The drafts of the pull request
   texts go through its submission step too. `srcclean` is built from `src/tools/` before it, or
-  that check comes back skipped, and a `DEBUG=1` build runs without an assertion firing. What a
-  core developer tidied by hand after the skill had passed a driver is in the fleet's
-  `reference/mame-procedures.md`, *Writing a driver that can go upstream*: read it with the skill.
+  that check comes back skipped, and a `DEBUG=1` build runs without an assertion firing.
+- What a core developer tidied by hand in the merged `wheelfir.cpp`, after the skill had passed it,
+  is written that way from the start: `using std::swap; swap(a, b);`; an endless loop left by
+  `break` as `while (true) { }`, never `do { } while (true);`; `<bit>` over bit tricks
+  (`std::has_single_bit(x)`, not `!(x & (x - 1))`); a `DEF_STR` in its exact meaning (the control
+  type is `DEF_STR( Controls )`, not `Cabinet`, and an option with a standard string takes it);
+  a blank line after the base config call (`board(config);`) before what it sets, two blank lines
+  between top-level groups and between one game's ROM blocks and the next game's, one between a
+  parent and its clone.
 - No member is initialised in the class definition. A starting value goes in `machine_start`,
   except an input's initial state (a line a device callback latches), which goes in the
   constructor's initialiser list, where MAME's review asks for it; the state of the board's logic (a counter, a command latch, a write window) is cleared in
