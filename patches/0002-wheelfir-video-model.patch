@@ -11,7 +11,7 @@ index 432f2e6cc3c9a6cd2bf1c48a03faa2155122a3f9..0efeaec06a22c460c7590ea60bff23e3
  
  @source:teamconcepts/comquest.cpp
 diff --git a/src/mame/tch/wheelfir.cpp b/src/mame/tch/wheelfir.cpp
-index e00ac4f239106ea8bc81f97827fd60baf73c3404..bd5c86c7b5bb5892af0af23af52f459359847b5b 100644
+index e00ac4f239106ea8bc81f97827fd60baf73c3404..bf9a259311a297bdeedff36874475f865490eda3 100644
 --- a/src/mame/tch/wheelfir.cpp
 +++ b/src/mame/tch/wheelfir.cpp
 @@ -6,6 +6,7 @@ Wheels & Fire
@@ -22,11 +22,10 @@ index e00ac4f239106ea8bc81f97827fd60baf73c3404..bd5c86c7b5bb5892af0af23af52f4593
  
  Original driver by Tomasz Slanina.
  The video model and the blitter rewritten from the games' use of the hardware by Marcos
-@@ -1094,6 +1095,43 @@ ROM_START( radendur )
+@@ -1094,6 +1095,42 @@ ROM_START( radendur )
  	ROM_LOAD( "4_pal16v8.u73",  0x000, 0x117, NO_DUMP )
  ROM_END
  
-+
 +// The main CPU program is the parent's with the prototype's faults fixed in its code, so that its
 +// five tracks play, and its four blitter interrupt handlers opened at mask 4 instead of 7, so that
 +// the line counter's interrupt, which streams the sound, gets through them; every other ROM is
@@ -66,7 +65,7 @@ index e00ac4f239106ea8bc81f97827fd60baf73c3404..bd5c86c7b5bb5892af0af23af52f4593
  } // anonymous namespace
  
  GAMEL( 199?, wheelfir,   0, wheelfir,    wheelfir, wheelfir_state, empty_init,    ROT0,  "TCH", "Wheels & Fire", MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE, layout_wheelfir )
-@@ -1104,3 +1142,5 @@ GAME( 1997, kongball,    0, kongball,    pwball,   wheelfir_state, empty_init,
+@@ -1104,3 +1141,5 @@ GAME( 1997, kongball,    0, kongball,    pwball,   wheelfir_state, empty_init,
  
  // crashes (always?) when selecting track on PCB
  GAME( 199?, radendur,    0,        wheelfir,    pwball,   radendur_state, empty_init,    ROT0,  "TCH / Sator Videogames", "Radical Enduro (early prototype)", MACHINE_NOT_WORKING | MACHINE_SUPPORTS_SAVE )

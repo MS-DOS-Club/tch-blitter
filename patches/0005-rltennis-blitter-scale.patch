@@ -1,5 +1,5 @@
 diff --git a/src/mame/tch/rltennis.cpp b/src/mame/tch/rltennis.cpp
-index d86f2a729f1d62193a942b1c83af0f85d0e82df0..e35465f82c1c994d64a89f1fd49dfd898c7aebab 100644
+index d86f2a729f1d62193a942b1c83af0f85d0e82df0..69847ee3d7b86e4b313d066f3f0f7f95f9d001c7 100644
 --- a/src/mame/tch/rltennis.cpp
 +++ b/src/mame/tch/rltennis.cpp
 @@ -1,9 +1,12 @@
@@ -35,10 +35,11 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..e35465f82c1c994d64a89f1fd49dfd89
  - awfully similar to littlerb;
  
  
-@@ -73,12 +77,21 @@ player - when there's nothing to play - first, empty 2k of ROMs are selected.
+@@ -73,12 +77,22 @@ player - when there's nothing to play - first, empty 2k of ROMs are selected.
  #include "speaker.h"
  
  #include <algorithm>
++#include <bit>
 +#include <iterator>
 +
 +#define LOG_SCALE (1U << 1)
@@ -57,7 +58,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..e35465f82c1c994d64a89f1fd49dfd89
  constexpr uint16_t BLTFLAG_DST_X_DIR   = 1 << 0;
  constexpr uint16_t BLTFLAG_DST_Y_DIR   = 1 << 1;
  constexpr uint16_t BLTFLAG_DST_LR      = 1 << 2;
-@@ -106,7 +119,7 @@ enum
+@@ -106,7 +120,7 @@ enum
  	BLT_Y_START,
  	BLT_Y_END,
  	BLT_FLAGS,
@@ -66,7 +67,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..e35465f82c1c994d64a89f1fd49dfd89
  	BLT_START,
  	BLT_UNK2
  };
-@@ -156,16 +169,26 @@ private:
+@@ -156,16 +170,26 @@ private:
  	int32_t m_unk_counter = 0;
  	std::unique_ptr<bitmap_ind16> m_tmp_bitmap[RLT_NUM_BITMAPS];
  	emu_timer *m_timer = nullptr;
@@ -93,7 +94,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..e35465f82c1c994d64a89f1fd49dfd89
  
  	void rltennis_main(address_map &map) ATTR_COLD;
  	void ramdac_map(address_map &map) ATTR_COLD;
-@@ -175,35 +198,35 @@ private:
+@@ -175,35 +199,35 @@ private:
  Blitter registers description (reg/bit names selected arbitrary ) :
  
  700000 - BLT_X_START
@@ -134,7 +135,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..e35465f82c1c994d64a89f1fd49dfd89
    fedcba98 76543210
    -------- -------x BLTFLAG_DST_X_DIR    x dst direction (step inc or dec)
    -------- ------x- BLTFLAG_DST_Y_DIR    y dst direction
-@@ -219,10 +242,13 @@ Blitter registers description (reg/bit names selected arbitrary ) :
+@@ -219,10 +243,13 @@ Blitter registers description (reg/bit names selected arbitrary ) :
    xxxx---- --------                      src ROM num
  
  
@@ -151,7 +152,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..e35465f82c1c994d64a89f1fd49dfd89
  
  
  70000c - BLT_START
-@@ -233,112 +259,174 @@ Blitter registers description (reg/bit names selected arbitrary ) :
+@@ -233,112 +260,174 @@ Blitter registers description (reg/bit names selected arbitrary ) :
    x------- -------- BLTSTRT_LAYER       FG or BG layer of framebuffer
  
  70000e - BLT_UNK2
@@ -390,7 +391,16 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..e35465f82c1c994d64a89f1fd49dfd89
  		}
  	}
  }
-@@ -354,6 +442,9 @@ void rltennis_state::video_start()
+@@ -346,7 +435,7 @@ void rltennis_state::blitter_w(offs_t offset, uint16_t data, uint16_t mem_mask)
+ void rltennis_state::video_start()
+ {
+ 	// assumes it can make an address mask with m_gfx.length() - 1
+-	assert(!(m_gfx.length() & (m_gfx.length() - 1)));
++	assert(std::has_single_bit(m_gfx.length()));
+ 
+ 	m_tmp_bitmap[BITMAP_BG] = std::make_unique<bitmap_ind16>(512, 256);
+ 	m_tmp_bitmap[BITMAP_FG_1] = std::make_unique<bitmap_ind16>(512, 256);
+@@ -354,6 +443,9 @@ void rltennis_state::video_start()
  	m_tmp_bitmap[BITMAP_FG_DISPLAY] = std::make_unique<bitmap_ind16>(512, 256);
  
  	save_item(NAME(m_blitter));
@@ -400,7 +410,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..e35465f82c1c994d64a89f1fd49dfd89
  }
  
  uint32_t rltennis_state::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
-@@ -443,12 +534,14 @@ INTERRUPT_GEN_MEMBER(rltennis_state::interrupt)
+@@ -443,12 +535,14 @@ INTERRUPT_GEN_MEMBER(rltennis_state::interrupt)
  {
  	++m_unk_counter; // Frame counter? verify
  	device.execute().set_input_line(4, HOLD_LINE);
@@ -416,7 +426,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..e35465f82c1c994d64a89f1fd49dfd89
  
  	save_item(NAME(m_data760000));
  	save_item(NAME(m_data740000));
-@@ -456,11 +549,24 @@ void rltennis_state::machine_start()
+@@ -456,11 +550,24 @@ void rltennis_state::machine_start()
  	save_item(NAME(m_sample_rom_offset));
  	save_item(NAME(m_offset_shift));
  	save_item(NAME(m_unk_counter));
@@ -441,7 +451,7 @@ index d86f2a729f1d62193a942b1c83af0f85d0e82df0..e35465f82c1c994d64a89f1fd49dfd89
  }
  
  void rltennis_state::ramdac_map(address_map &map)
-@@ -470,15 +576,19 @@ void rltennis_state::ramdac_map(address_map &map)
+@@ -470,15 +577,19 @@ void rltennis_state::ramdac_map(address_map &map)
  
  void rltennis_state::rltennis(machine_config &config)
  {
