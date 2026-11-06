@@ -247,6 +247,16 @@ def test_the_build_is_reproducible() -> None:
     assert a and rh.zipped(a) == rh.zipped(b)
 
 
+@needs_rom
+def test_the_build_writes_the_maincpu_image_beside_the_zip(tmp_path: Path) -> None:
+    """`rom_check` compares a flat image, so the build leaves one beside the zip."""
+    t = table()
+    out = tmp_path / "radendurh.zip"
+    assert rh.main(["--out", str(out)]) == 0
+    roms, _ = rh.build(t, None)
+    assert (tmp_path / "radendurh_maincpu.bin").read_bytes() == image(roms, t)
+
+
 def test_the_set_leaves_the_optional_layer_out() -> None:
     names = [layer["name"] for layer in rh.selected(table())]
     assert "scenery" not in names and names == ["fixes", "sound"]
@@ -344,15 +354,28 @@ def test_each_mask_word_is_the_immediate_of_a_move_to_sr() -> None:
 
 @needs_rom
 @pytest.mark.skipif(not rh.DRIVER.exists(), reason="no upstream/ checkout: make setup")
-def test_check_answers_by_the_zip_on_disk(tmp_path: Path) -> None:
+def test_maincpu_image_interleaves_the_two_halves() -> None:
+    t = {"clone": {"roms": {"even": "a.bin", "odd": "b.bin"}}}
+    assert rh.maincpu_image({"a.bin": b"\x01\x03", "b.bin": b"\x02\x04"}, t) == (
+        b"\x01\x02\x03\x04"
+    )
+
+
+def test_check_answers_by_the_zip_and_the_flat_image_on_disk(tmp_path: Path) -> None:
     t = table()
     roms, _ = rh.build(t, None)
     out = tmp_path / "radendurh.zip"
+    flat = tmp_path / "radendurh_maincpu.bin"
     assert rh.check(t, roms, out) == 1
     out.write_bytes(rh.zipped(roms))
+    assert rh.check(t, roms, out) == 1, "the flat image the recipe names is missing"
+    flat.write_bytes(rh.maincpu_image(roms, t))
     assert rh.check(t, roms, out) == 0
     name = next(iter(roms))
     flipped = {**roms, name: bytes([roms[name][0] ^ 1]) + roms[name][1:]}
     out.write_bytes(rh.zipped(flipped))
     assert rh.check(t, roms, out) == 1
     assert rh.check(t, flipped, out) == 1
+    out.write_bytes(rh.zipped(roms))
+    flat.write_bytes(b"stale")
+    assert rh.check(t, roms, out) == 1, "a stale flat image is not up to date"

@@ -1,0 +1,11 @@
+{
+  "format": "scry-start/1",
+  "binary": "${root}/upstream/wheelfir",
+  "system": "radendurh",
+  "rompath": "${root}/run/mame_roms",
+  "inipath": "${root}/run",
+  "reference_rom": "${root}/run/mame_roms/radendurh_maincpu.bin",
+  "reference_addr": "0x7b8",
+  "symbols": "${root}/disasm/symbols-radendur_maincpu.yaml",
+  "boot_seconds": 25.0
+}

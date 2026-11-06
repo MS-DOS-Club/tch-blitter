@@ -1,0 +1,11 @@
+{
+  "format": "scry-start/1",
+  "binary": "${root}/upstream/rltennis",
+  "system": "rltennisa",
+  "rompath": "${root}/run/mame_roms",
+  "inipath": "${root}/run",
+  "reference_rom": "${root}/disasm/img/rltennisa_maincpu.bin",
+  "reference_addr": "0x0",
+  "symbols": "${root}/disasm/symbols-rltennisa_maincpu.yaml",
+  "boot_seconds": 25.0
+}

@@ -20,7 +20,9 @@ checkout, patched): the parent's are the input check and the clone's are the out
 is written once.
 
 USE:
-    uv run scripts/radendurh.py                          # build run/mame_roms/<clone>.zip
+    uv run scripts/radendurh.py                          # build run/mame_roms/<clone>.zip and
+                                                         # its <clone>_maincpu.bin, the flat image
+                                                         # `rom_check` compares
     uv run scripts/radendurh.py --check                  # 0 up to date, 1 stale or missing
     uv run scripts/radendurh.py --stage fixes --out F    # stop after a layer, write elsewhere
     uv run scripts/radendurh.py --with scenery --out F   # add an optional layer, write elsewhere
@@ -283,6 +285,15 @@ def zipped(roms: dict[str, bytes]) -> bytes:
     return buf.getvalue()
 
 
+def maincpu_image(roms: dict[str, bytes], table: dict[str, Any]) -> bytes:
+    """The clone's main cpu as `rom_check` compares it: the two halves interleaved."""
+    r = table["clone"]["roms"]
+    image = bytearray(len(roms[r["even"]]) * 2)
+    image[0::2] = roms[r["even"]]
+    image[1::2] = roms[r["odd"]]
+    return bytes(image)
+
+
 def write_atomically(path: Path, data: bytes) -> None:
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
     with os.fdopen(fd, "wb") as f:
@@ -304,6 +315,10 @@ def check(table: dict[str, Any], roms: dict[str, bytes], out: Path) -> int:
         on_disk = {n: sums(z.read(n)) for n in z.namelist()}
     if on_disk != want:
         print(f"{out} is not what ROM_START declares: make radendurh")
+        return 1
+    flat = out.with_name(f"{table['clone']['set']}_maincpu.bin")
+    if not flat.is_file() or flat.read_bytes() != maincpu_image(roms, table):
+        print(f"{flat} is missing or not what the zip holds: make radendurh")
         return 1
     print(f"{table['clone']['set']}: up to date with the driver")
     return 0
@@ -341,9 +356,11 @@ def main(argv: list[str] | None = None) -> int:
         if a.check:
             return check(table, roms, out)
         write_atomically(out, zipped(roms))
+        flat = out.with_name(f"{table['clone']['set']}_maincpu.bin")
+        write_atomically(flat, maincpu_image(roms, table))
         for n, d in sorted(roms.items()):
             print(f"{n} crc32 sha1 {sums(d)}")
-        print(f"wrote {out} ({', '.join(done)})")
+        print(f"wrote {out} and {flat} ({', '.join(done)})")
         return 0
     except UsageError as e:
         print(f"usage: {e}", file=sys.stderr)

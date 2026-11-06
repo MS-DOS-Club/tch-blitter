@@ -1,0 +1,11 @@
+{
+  "format": "scry-start/1",
+  "binary": "${root}/upstream/wheelfir",
+  "system": "pwball",
+  "rompath": "${root}/run/mame_roms",
+  "inipath": "${root}/run",
+  "reference_rom": "${root}/disasm/img/pwball_maincpu.bin",
+  "reference_addr": "0x0",
+  "symbols": "${root}/disasm/symbols-pwball_maincpu.yaml",
+  "boot_seconds": 25.0
+}
