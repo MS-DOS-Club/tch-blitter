@@ -41,7 +41,7 @@ def rom_addresses(set_path: Path) -> set[int]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("image", help="the image the sets were traced on, e.g. radendur_maincpu")
-    ap.add_argument("sets", type=Path, nargs="+", help="the tracer's .set.jsonl files")
+    ap.add_argument("sets", type=Path, nargs="+", help="the tracer's `-set.jsonl` files")
     ap.add_argument("--source", action="append", required=True, help="what each run was")
     args = ap.parse_args()
     if len(args.source) != len(args.sets):

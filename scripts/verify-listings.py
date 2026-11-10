@@ -18,7 +18,7 @@ so `ghidra-export.sh` runs this over the freshly written listings before it move
   address that instruction references in the facts FactsTCH.java dumped of the same project.
 
 `--trace SET` adds the machine as the oracle: a MAME trace's executed addresses (one JSON object
-per line with "addr", the tracer's `.set.jsonl`), every one in ROM has to start an instruction
+per line with "addr", the tracer's `-set.jsonl`), every one in ROM has to start an instruction
 in the listing of `--image`.
 
 Exit codes: 0 every listing holds | 1 a listing contradicts its image | 2 usage | 3 INVALID (no
@@ -189,7 +189,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("dir", type=Path, help="the listings")
     ap.add_argument("--ports", type=Path, help="port_names.py's TSV (made afresh when omitted)")
-    ap.add_argument("--trace", type=Path, help="a MAME trace's .set.jsonl, judged on --image")
+    ap.add_argument("--trace", type=Path, help="a MAME trace's `-set.jsonl`, judged on --image")
     ap.add_argument("--image", help="the image the trace was taken on")
     ap.add_argument("--facts", type=Path, default=FACTS, help="FactsTCH.java's JSON of the project")
     ap.add_argument("--suspects", type=Path, help="write the unmarked non-68000 lines here (TSV)")
