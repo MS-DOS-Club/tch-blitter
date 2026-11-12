@@ -1,0 +1,17 @@
+{
+  "format": "scry-about/1",
+  "purpose": "How this repository's arcade boards start under SCRY.",
+  "server": "mame",
+  "build": {
+    "command": "make setup && make disasm"
+  },
+  "files": {
+    "start/radendur.json": "Radical Enduro, the early prototype.",
+    "start/radendurh.json": "Radical Enduro, the clone whose ROM this repository fixes.",
+    "start/wheelfir.json": "Wheels & Fire.",
+    "start/pwball.json": "Power Ball.",
+    "start/kongball.json": "Kong Ball.",
+    "start/rltennis.json": "Reality Tennis.",
+    "start/rltennisa.json": "Reality Tennis, the second layout."
+  }
+}
