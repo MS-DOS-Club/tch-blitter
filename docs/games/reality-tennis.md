@@ -63,18 +63,25 @@ much smaller board, and its page scheme does not carry over to the larger one.
 ## The sound, from the programmer's account and the driver's code
 
 The sound hardware is a bank of 2048-byte samples on two ROMs, concatenated by an interrupt that
-reloads the top address bits from a register naming the next sample, through two DACs. That is how
-the driver emulates it, and it is also how the board's programmer describes it in an account
-from the period. The account is a recollection; what backs it is that the driver's code, written long before
-from the same information, matches it literally: the driver reloads the high address bits when the counter reaches the end of a 2048-byte
-block and shifts the selected bank by eleven bits, one DAC per ROM.
+reloads the top address bits from a register naming the next sample, through two DACs.
 
-The same account settles who clears the hidden half of the sprite layer, and the game agrees: across
-attract and match on both sets, it draws only sprites into the hidden half, flips once per frame and never issues a clearing blit, neither a fill nor a strip
-nor a page-sized copy of black. If nobody cleared it, stale sprites would pile up, so **the board
-clears the hidden half on the flip**, and the driver's clearing at the change of the display bit is
-the hardware, not a workaround. The larger board does not do this on its own: Wheels & Fire clears
-its pages from the game, one fill per band.
+That is how the driver emulates it, and it is also how the board's programmer describes it in an
+account from the period.
+
+The account is a recollection; what backs it is that the driver's code, written long before from
+the same information, matches it literally. The driver reloads the high address bits when the
+counter reaches the end of a 2048-byte block and shifts the selected bank by eleven bits, one DAC
+per ROM.
+
+The same account settles who clears the hidden half of the sprite layer, and the game agrees.
+Across attract and match on both sets, it draws only sprites into the hidden half, flips once per
+frame and never issues a clearing blit, neither a fill nor a strip nor a page-sized copy of black.
+
+If nobody cleared it, stale sprites would pile up, so **the board clears the hidden half on the
+flip**. The driver's clearing at the change of the display bit is the hardware, not a workaround.
+
+The larger board does not do this on its own: Wheels & Fire clears its pages from the game, one
+fill per band.
 
 ## The two versions
 

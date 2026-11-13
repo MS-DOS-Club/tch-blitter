@@ -96,23 +96,29 @@ Kong Ball's title, which the original driver paints over the leftovers of the pr
 
 ## What this repository adds
 
-Four of the five games were repaired here, starting from the MAME release the table above names,
-and the driver that repairs three of them is now MAME's own. The fifth, Reality Tennis, already worked in MAME; its driver here
-adds the scale register, the blit spans, the picture's origin and the blitter's timing, read off
-the running game, and is proposed to MAME. What is still open is listed
-on the Wheels & Fire and Radical Enduro pages, with what is known about each case and what is left
-to measure.
+Four of the five games were repaired here, starting from the MAME release the table above names.
+The driver that repairs three of them is now MAME's own.
+
+The fifth, Reality Tennis, already worked in MAME. Its driver here adds the scale register, the
+blit spans, the picture's origin and the blitter's timing, read off the running game, and is
+proposed to MAME.
+
+What is still open is listed on the Wheels & Fire and Radical Enduro pages, with what is known
+about each case and what is left to measure.
 
 ### The games that run
 
 **Wheels & Fire, Power Ball and Kong Ball run on a `tch/wheelfir.cpp` rewritten here**, whose
 video model follows the hardware rather than the symptoms. In that release the three were
 `NOT_WORKING`; the rewrite was merged into MAME, so a current MAME plays their attract and their
-game as this repository does. **Seven of the eight open points the original driver's author left
-written down are closed, and one remains open;
-[the game's page](docs/games/wheels-and-fire.md) maps each of the eight to its state.** Each
-correction is a model of the hardware rather than a patch of the game, and the evidence that backs
-it is in `hardware/registers.yaml`.
+game as this repository does.
+
+**Seven of the eight open points the original driver's author left written down are closed, and
+one remains open; [the game's page](docs/games/wheels-and-fire.md) maps each of the eight to its
+state.**
+
+Each correction is a model of the hardware rather than a patch of the game, and the evidence that
+backs it is in `hardware/registers.yaml`.
 
 **Not one byte of their ROMs is modified**, and that is stated precisely because the difference
 decides what could reach MAME: the three run on the dumps exactly as they were preserved.
@@ -127,12 +133,14 @@ emulation fault: the board its dump came from was missing the sound ROMs.
 ### Radical Enduro, the one still in progress
 
 **Radical Enduro is playable.** In MAME it is a `NOT_WORKING` prototype, and it stays one, because
-the dump hangs on faults that are the prototype's own; here, in the `radendurh` clone with those
+the dump hangs on faults that are the prototype's own. Here, in the `radendurh` clone with those
 faults fixed, it boots, enters a race, and **five of its tracks run to the finish**: the whole of
-Level 0 and the opening of the next two. It shares `tch/wheelfir.cpp` with its siblings, as a
-subclass, written here and merged into MAME with the rest of the driver, that keeps
-what its board, the design's earlier layout, and its game do differently: when the sprite plane
-flips, which page it shows, and where each frame's scroll starts.
+Level 0 and the opening of the next two.
+
+It shares `tch/wheelfir.cpp` with its siblings, as a subclass written here and merged into MAME
+with the rest of the driver. That subclass keeps what its board, the design's earlier layout, and
+its game do differently: when the sprite plane flips, which page it shows, and where each frame's
+scroll starts.
 
 **`radendurh` keeps its music through the race (flagged with imperfect sound because the
 prototype's code never triggers its sound effects), and the game runs at the 16 MHz the board
@@ -141,14 +149,19 @@ and the blitter interrupt is a **held level** timed by the game's own interrupt 
 a fixed scanline.
 
 **It is the exception on ROMs**: the faults are the prototype's own, so the driver emulates the
-dump as it is (`radendur`, which hangs on them), and a clone set, `radendurh`, loads a maincpu ROM
-with five faults fixed in its code (the fifth stamped the props of the row the view scrolls down into
-on its top row) and its blitter interrupt handlers opened to the sound's interrupt, as Power Ball's are.
+dump as it is (`radendur`, which hangs on them). A clone set, `radendurh`, loads a maincpu ROM with
+five faults fixed in its code (the fifth stamped the props of the row the view scrolls down into on
+its top row) and its blitter interrupt handlers opened to the sound's interrupt, as Power Ball's are.
+
 It fixes the prototype and does not finish it: the zones the prototype's own engine leaves out of
-the view stay out. A layer that draws them, **not the board's behaviour**, stays in the patch table
-as an option of the builder and outside the set. That ROM is built here from the verified dump by
-`make radendurh`, refusing any other input and any word that is not what it expects, and the same
-two images are published on the [Internet Archive](https://archive.org/details/radendurh).
+the view stay out.
+
+A layer that draws them, **not the board's behaviour**, stays in the patch table as an option of
+the builder and outside the set.
+
+That ROM is built here from the verified dump by `make radendurh`, refusing any other input and
+any word that is not what it expects, and the same two images are published on the
+[Internet Archive](https://archive.org/details/radendurh).
 
 Of its 16 track sections only five are playable: the rest carry data the prototype itself left
 half-finished, and no emulator fixes that.

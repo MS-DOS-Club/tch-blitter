@@ -99,16 +99,21 @@ whether the mode is honoured there changes no pixel of what the game draws.
 
 **It has sound, and its boot is what made that hard.** The music and effects are streamed to the
 sound 68000 one word per scanline by the line-counter interrupt, in blocks of 48 words with no
-handshake: a word missed or repeated, and the sound CPU runs garbage for the rest of the session.
+handshake. A word missed or repeated, and the sound CPU runs garbage for the rest of the session.
+
 Power Ball reads its EEPROM at boot with interrupts masked for several frames and comes out with a
-vblank request still pending, so a counter left running would expire just before the next vblank
-and cut the first block short. The way out is a bit the game writes itself: bit 13 of the control
-port, set at vblank and cleared after the 48th word, enables the counter, and the boot clears it
-on its way out. Wheels & Fire keeps it set while it plays, which is why its road keeps its
-per-line clock. A board that has run before boots on the EEPROM it wrote, gets through that read
-sooner and unmasks with a counter request from the masked frames still pending; served, it opens a
-block that nothing follows, so the driver withdraws a request not taken by the next vblank, a rule
-fitted to this boot (the driver's TODO says so).
+vblank request still pending. A counter left running would then expire just before the next vblank
+and cut the first block short.
+
+The way out is a bit the game writes itself: bit 13 of the control port, set at vblank and cleared
+after the 48th word, enables the counter, and the boot clears it on its way out.
+
+Wheels & Fire keeps it set while it plays, which is why its road keeps its per-line clock.
+
+A board that has run before boots on the EEPROM it wrote, gets through that read sooner and unmasks
+with a counter request from the masked frames still pending. Served, it opens a block that nothing
+follows, so the driver withdraws a request not taken by the next vblank, a rule fitted to this boot
+(the driver's TODO says so).
 
 ## Sources
 

@@ -51,13 +51,18 @@ faults fixed in the ROM, it boots, enters a game and its playable tracks finish 
 
 With its faults fixed it boots, enters a game and **five tracks finish the race** with no grey
 screen. The faults that are the prototype's own are fixed in the code of the `radendurh` ROM, never
-by the driver, which emulates the dump as it is. The same ROM lets the sound's interrupt through
-the blitter's interrupt handlers, as Power Ball's handler does, so the music lasts the race. And there it stops: the set
-fixes the prototype, it does not finish it, so the zones of scenery the prototype's engine leaves
-out of the view stay out. A layer that draws them, an enhancement and not the board, is kept in the
-patch table as an option of the builder (`uv run scripts/radendurh.py --with scenery --out <zip>`, a ROM
-other than the set's), and besides drawing what the prototype never drew it slows the race clock,
-and on the first jungle track, where its frames run latest, the sound dies with it.
+by the driver, which emulates the dump as it is.
+
+The same ROM lets the sound's interrupt through the blitter's interrupt handlers, as Power Ball's
+handler does, so the music lasts the race.
+
+And there it stops: the set fixes the prototype, it does not finish it, so the zones of scenery the
+prototype's engine leaves out of the view stay out.
+
+A layer that draws them, an enhancement and not the board, is kept in the patch table as an option
+of the builder (`uv run scripts/radendurh.py --with scenery --out <zip>`, a ROM other than the set's).
+Besides drawing what the prototype never drew it slows the race clock, and on the first jungle
+track, where its frames run latest, the sound dies with it.
 
 The root causes, all read from the code rather than guessed:
 
@@ -108,13 +113,16 @@ emulator** (`docs/img/radendur/sections/`):
 | MEDIUM, start | 4 | jungle, 9743 objects  | race completed on the game's own time limit |
 | HARD, start   | 8 | mountain, 6802 objects| race completed on the game's own time limit |
 
-**Only Level 0 (desert) is finished as a track**, all three of its segments. Of Levels 1
-and 2 only the start is done. Level 3 (EXPERT) is the furthest from finished: three of its four
-sections hold a large share of their objects at impossible coordinates, and the game kills itself
-as soon as it loads most of them; the fourth, `L3s1`, draws a complete and continuous layout with
-no scenery at all. Of the 16 sections, five run a full race and end on the game's own time limit;
-section 3 is a byte-for-byte duplicate of 2 and section 13 runs out of track within seconds; the
-other nine are fragments the game cannot load, and no emulator fixes that.
+**Only Level 0 (desert) is finished as a track**, all three of its segments. Of Levels 1 and 2
+only the start is done.
+
+Level 3 (EXPERT) is the furthest from finished: three of its four sections hold a large share of
+their objects at impossible coordinates, and the game kills itself as soon as it loads most of
+them. The fourth, `L3s1`, draws a complete and continuous layout with no scenery at all.
+
+Of the 16 sections, five run a full race and end on the game's own time limit; section 3 is a
+byte-for-byte duplicate of 2 and section 13 runs out of track within seconds; the other nine are
+fragments the game cannot load, and no emulator fixes that.
 
 The two axes are shown through separate channels on purpose: that a section **is unfinished** is proved
 by rendering it from the ROM, with no emulator; that it **hangs** is a different thing, and
@@ -192,14 +200,15 @@ The full sweep of all 16, section by section, is in
 ## The track system
 
 The Radical Enduro engine draws the track as an **isometric sprite system**
-(Filmation / *Knight Lore* style): **it does not use raster to warp the screen**
-and no 2D tilemap either, but sprites stacked by depth that produce the 3/4 view. All
-of it is reconstructed **by reading the ROM and the 68000 code**, and it
-is reproduced in Python (`scripts/radendur_track_render.py`, no MAME) by emulating
-the blitter, the paint order and the palette, which allows the MAME render to be compared
-against an independent reference. Since the **hardware is fixed**, this
-model holds for the whole application: with the tracks reproduced faithfully, the
-same mechanism explains any screen in the game.
+(Filmation / *Knight Lore* style): **it does not use raster to warp the screen** and no 2D tilemap
+either, but sprites stacked by depth that produce the 3/4 view.
+
+All of it is reconstructed **by reading the ROM and the 68000 code**, and it is reproduced in
+Python (`scripts/radendur_track_render.py`, no MAME) by emulating the blitter, the paint order and
+the palette. That allows the MAME render to be compared against an independent reference.
+
+Since the **hardware is fixed**, this model holds for the whole application: with the tracks
+reproduced faithfully, the same mechanism explains any screen in the game.
 
 The data format, the two planes and the paint order, and the palette are on their own reference
 page: [the Radical Enduro track system](../radendur-track-system.md).
@@ -228,12 +237,16 @@ counter while a block streams.
 
 **The blitter's interrupt handlers decide whether the music lasts.** The sound 68000 takes one word
 per scanline with no handshake, so a word that arrives a line late is a word read twice, and from
-there it runs garbage. The prototype starts each block at the top of the frame, where its drawing
-chain runs, and each of the chain's blitter interrupt handlers raises the main 68000's mask to 7, so
-the sound's interrupt waits behind it; on the dump the music dies a few seconds in. Power Ball's
-blitter handler leaves the mask low. `radendurh` opens those handlers at mask 4, which still keeps
-the vblank out and lets the sound in, and keeps its music through the race however long the blitter
-takes to draw.
+there it runs garbage.
+
+The prototype starts each block at the top of the frame, where its drawing chain runs. Each of the
+chain's blitter interrupt handlers raises the main 68000's mask to 7, so the sound's interrupt
+waits behind it; on the dump the music dies a few seconds in.
+
+Power Ball's blitter handler leaves the mask low.
+
+`radendurh` opens those handlers at mask 4, which still keeps the vblank out and lets the sound
+in, and keeps its music through the race however long the blitter takes to draw.
 
 **Not fixable is the missing per-event triggering.** The game code calls the sound API once, where
 its sibling Power Ball calls it for every event, so the per-event EFFECT call sites were never

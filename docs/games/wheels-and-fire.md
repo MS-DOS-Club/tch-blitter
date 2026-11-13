@@ -103,11 +103,15 @@ read its source, and what is missing is where they land. It is a finding of this
 leftover of the list.
 
 **And three findings that are NOT on that list**, because they belong to this repository and not
-to the list: the real visible area, 336x252 of the 256 the board scans; that the transparency mode is chosen by the REGISTER written to and not by a flag bit;
-and that **the screen clearing is done by the GAME**, by two paths the driver only has to obey (a
-word 14 fill erases the band it declares, edge to edge, and a blit carrying bit 3 of word 7 without
-bit 2 walks its destination in COLUMNS). A heuristic for when to clear fails at some instant,
-because the instant is the game's to choose.
+to the list. The real visible area, 336x252 of the 256 the board scans; that the transparency mode
+is chosen by the REGISTER written to and not by a flag bit; and that **the screen clearing is done
+by the GAME**.
+
+That clearing runs by two paths the driver only has to obey: a word 14 fill erases the band it
+declares, edge to edge, and a blit carrying bit 3 of word 7 without bit 2 walks its destination in
+COLUMNS.
+
+A heuristic for when to clear fails at some instant, because the instant is the game's to choose.
 
 Detail of all of them, with the video model and the blitter, on
 [the Wheels & Fire board page](../boards/wheels-and-fire-board.md).
@@ -210,26 +214,34 @@ one that reveals the faults that go unnoticed in Power Ball or Kong Ball.
 
 ## Two linked cabinets
 
-The board's service menu has a COMUNICATION page, with NUMBER OF PLAYERS, PLAYER NUMBER and WAITING
-FOR ANOTHER PLAYER (strings read from the ROM), so two boards could race each other. The physical
-half comes from the programmer's account from the period: the link ran over the VGA connector
-already noted on the PCB, and the cable also synchronised the horizontal-line interrupts of both
-boards, which is why the handshake between two cabinets uses the same technique as the one between
-the two CPUs of a single board. MAME does not model the link, and it is part of what "fully
-emulated" means for this board.
+The board's service menu has a COMUNICATION page, with NUMBER OF PLAYERS, PLAYER NUMBER and
+WAITING FOR ANOTHER PLAYER (strings read from the ROM), so two boards could race each other.
+
+The physical half comes from the programmer's account from the period: the link ran over the VGA
+connector already noted on the PCB. The cable also synchronised the horizontal-line interrupts of
+both boards, which is why the handshake between two cabinets uses the same technique as the one
+between the two CPUs of a single board.
+
+MAME does not model the link, and it is part of what "fully emulated" means for this board.
 
 ## How it is driven in MAME
 
 The board serves two cabinets, a steering-wheel one and a joystick one, and asks which at the door
-of its service menu; the driver models the wheel cabinet by default and offers the other as the
-`Controls` setting in MAME's machine configuration. The controls are MAME's defaults, but for one:
-button 1 is the gearbox's low/high lever, so it is a toggle (a tap shifts, and the lever stays
-where it is put) as Out Run's is, and it is declared as button 4 so that its default key is not the
-accelerator's. A race starts in low: shift to high to pass
-the low gears' speed ceiling. A layout draws the lever in a corner of the screen, LOW or HIGH, as
-Out Run's does; MAME's Video Options offer it on either side, over the picture or beside it. The game
-reads each pedal as a switch, so a key takes its pedal to full travel at once, and a tap of the
-accelerator also selects in the menus and the high-score table. `make ref SET=wheelfir` plays it.
+of its service menu. The driver models the wheel cabinet by default and offers the other as the
+`Controls` setting in MAME's machine configuration.
+
+The controls are MAME's defaults, but for one: button 1 is the gearbox's low/high lever, so it is a
+toggle (a tap shifts, and the lever stays where it is put) as Out Run's is, and it is declared as
+button 4 so that its default key is not the accelerator's.
+
+A race starts in low: shift to high to pass the low gears' speed ceiling.
+
+A layout draws the lever in a corner of the screen, LOW or HIGH, as Out Run's does; MAME's Video
+Options offer it on either side, over the picture or beside it.
+
+The game reads each pedal as a switch, so a key takes its pedal to full travel at once, and a tap
+of the accelerator also selects in the menus and the high-score table. `make ref SET=wheelfir`
+plays it.
 
 | control | keyboard | game controller |
 |---------|----------|-----------------|
@@ -269,10 +281,13 @@ that set of pages is the signature that identifies the cycle.
 
 **Cycle 1 does not move the car: it moves the camera.** The horizontal scroll sweeps the 512 torus
 at 5 px per frame and goes all the way round in about 100 frames, so the car, which is standing
-still on the layer, goes out on the right and comes back in on the left. What cleans it up are the
-curtains of bit 3 of word 7, which walk the destination in columns and follow right behind the edge
-the image leaves by. Without them, cycle 2 would start with the remains of cycle 1 on top, and
-cycle 3 with the red Porsche of cycle 2 stuck to it, as if that screen had two cars.
+still on the layer, goes out on the right and comes back in on the left.
+
+What cleans it up are the curtains of bit 3 of word 7, which walk the destination in columns and
+follow right behind the edge the image leaves by.
+
+Without them, cycle 2 would start with the remains of cycle 1 on top, and cycle 3 with the red
+Porsche of cycle 2 stuck to it, as if that screen had two cars.
 
 The largest graphic each cycle requests, with its address in the graphics ROM, which is how the
 material of each screen is identified:
@@ -291,11 +306,13 @@ material of each screen is identified:
 ### How it was read
 
 The graphics ROM is not a tilemap: it is flat 512x512 pages of 8-bit indices, and the blitter crops
-whatever rectangle it wants out of them. So a "sprite" does not exist as an entity there, only as
-(page, x, y, width, height), and the way to recognise one is to cut that rectangle out of the ROM
-and look at it. The colours are the other half and are not in that ROM: the BT478 is reloaded in
-bursts, so one attract screen's palette is not the next one's, and it is read off the running
-machine.
+whatever rectangle it wants out of them.
+
+So a "sprite" does not exist as an entity there, only as (page, x, y, width, height), and the way
+to recognise one is to cut that rectangle out of the ROM and look at it.
+
+The colours are the other half and are not in that ROM: the BT478 is reloaded in bursts, so one
+attract screen's palette is not the next one's, and it is read off the running machine.
 
 ## Who made it
 
