@@ -79,13 +79,15 @@ logging `PC`.
 
 **A read tap says that an address was read, not that code ran there.** On these boards' 68000 a
 read tap on the program space sees instruction fetches from ROM as well as data reads: a tap on
-the vblank handler's first word fires once a frame. The debugger's watchpoints are installed as
-taps too (`src/emu/debug/points.cpp`), so a read watchpoint on code fires on its fetch as well;
-"this code ran" is still a breakpoint's answer. Taps need no debugger and are the cheap way to
-watch I/O and RAM. Two details bite: a callback that returns a number replaces the value the cpu
-reads, and a callback that raises an error is dropped silently while the tap keeps firing, so a
-counter incremented before the risky part, with the body under `pcall`, tells a quiet machine from
-a broken callback.
+the vblank handler's first word fires once a frame.
+
+The debugger's watchpoints are installed as taps too (`src/emu/debug/points.cpp`), so a read
+watchpoint on code fires on its fetch as well; "this code ran" is still a breakpoint's answer.
+
+Taps need no debugger and are the cheap way to watch I/O and RAM. Two details bite: a callback
+that returns a number replaces the value the cpu reads, and a callback that raises an error is
+dropped silently while the tap keeps firing, so a counter incremented before the risky part, with
+the body under `pcall`, tells a quiet machine from a broken callback.
 
 **The Lua `screen` has no `vpos`.** The beam line is derived from what it does have:
 `floor((frame_period - time_until_pos(0, 0) + pixel_period / 2) / scan_period + 1e-9)`, wrapped
