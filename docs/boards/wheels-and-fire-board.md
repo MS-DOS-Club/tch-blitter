@@ -129,25 +129,32 @@ It reads like code written to save every cycle it can, four ways:
 
 The mailbox, `0x740000`, runs at the same pace. At vblank the main CPU writes `0xffff`, "apply the
 block you hold"; then the line counter carries `0xa0a0` and the next 96-byte block across, one word
-per scanline. Each voice gets sixteen bytes: where its sample starts and where it restarts, its
-volume table, its read opcode and its step, the last four straight into the mixer's holes, with
-zero meaning "keep what you have". Power Ball
-and Kong Ball start the block at line 99, after the frame's drawing; Wheels & Fire keeps the line
-counter running from line 0 while a game runs; the Radical Enduro dump starts it at line 0, under
-the drawing chain, whose blitter interrupt handlers raise the main CPU's mask to 7, so one word comes
-late and desynchronises the sound CPU for good; `radendurh` keeps the line and opens those handlers
-at mask 4, so the sound's interrupt gets through them as it gets through Power Ball's. There is no
-way back: the sound CPU never answers,
-never acknowledges and cannot ask for a word again.
+per scanline.
+
+Each voice gets sixteen bytes: where its sample starts and where it restarts, its volume table, its
+read opcode and its step, the last four straight into the mixer's holes, with zero meaning "keep what
+you have".
+
+Power Ball and Kong Ball start the block at line 99, after the frame's drawing; Wheels & Fire keeps
+the line counter running from line 0 while a game runs; the Radical Enduro dump starts it at line 0,
+under the drawing chain, whose blitter interrupt handlers raise the main CPU's mask to 7, so one word
+comes late and desynchronises the sound CPU for good; `radendurh` keeps the line and opens those
+handlers at mask 4, so the sound's interrupt gets through them as it gets through Power Ball's.
+There is no way back: the sound CPU never answers, never acknowledges and cannot ask for a word
+again.
 
 The music is not on the sound CPU at all. The main CPU runs a **ProTracker-style module player**:
 ProTracker's period table is in the ROM word for word, the song format is 31 instruments, 4 channels
 and 64-row patterns, and the effects keep ProTracker's numbers (arpeggio, portamento, volume slide,
-position jump, pattern break, set speed). It is not a `.MOD` file, though: no `M.K.`, no names, a
-native format already resolved down to bytes, and only half of ProTracker's effects. The last two
-voices are left to the game for sound effects, and Wheels & Fire's engine noise pushes one of them
-up to 30000 Hz: above 15625, the modulus the mixer's phase step counts against, the game switches
-the voice to the post-increment read and sets the step to the rate minus 15625 (`wf_engine_pitch`).
+position jump, pattern break, set speed).
+
+It is not a `.MOD` file, though: no `M.K.`, no names, a native format already resolved down to
+bytes, and only half of ProTracker's effects.
+
+The last two voices are left to the game for sound effects, and Wheels & Fire's engine noise pushes
+one of them up to 30000 Hz: above 15625, the modulus the mixer's phase step counts against, the game
+switches the voice to the post-increment read and sets the step to the rate minus 15625
+(`wf_engine_pitch`).
 
 ## What is soldered on it
 
@@ -184,12 +191,14 @@ the voice to the post-increment read and sets the step to the rate minus 15625 (
 
 The four photographed boards carry what looks like one circuit, with the same designators and the
 same parts, laid out two ways.
+
 The Radical Enduro board, **layout A**, has its JAMMA edge on top, the ROMs in two rows along the
 bottom, and `WHEELS & FIRE` and a large `TCH MURCIA SPAIN` in its silkscreen. Wheels & Fire, Power
 Ball and Kong Ball, **layout B**, turn the JAMMA edge to a long side, stack the ROMs in a double
-column and say only a small `TCH MURCIA-SPAIN`. On the boards, the games differ in how many
-graphics ROMs are fitted: Wheels & Fire U52 to U59, Kong Ball one more at U200, Power Ball up to
-U204 and Radical Enduro all fourteen.
+column and say only a small `TCH MURCIA-SPAIN`.
+
+On the boards, the games differ in how many graphics ROMs are fitted: Wheels & Fire U52 to U59,
+Kong Ball one more at U200, Power Ball up to U204 and Radical Enduro all fourteen.
 
 <p align="center">
   <a href="../img/sources/radendur/radical-enduro-p22595.jpg"><img src="../img/sources/radendur/radical-enduro-p22595.jpg" width="560" alt="The whole Radical Enduro board, layout A"></a>
