@@ -19,7 +19,7 @@ script renders all sixteen, omitting the out-of-range entries and counting how m
 | 6 | L1s2 | 3560 | 49.6% | the same |
 | 7 | L1s3 | 3560 | 49.6% | the same (a duplicate of 6) |
 | 8 | L2s0 | 6802 | 0% | a complete track with scenery |
-| 9 | L2s1 | 283 | 36.4% | one palette descriptor runs off, and the render clips it to the entries that fit |
+| 9 | L2s1 | 180 | 36.4% | one palette descriptor runs off, and the render clips it to the entries that fit |
 | 10 | L2s2 | 67 | 48.1% | practically empty, four loose fragments |
 | 11 | L2s3 | 67 | 48.1% | the same (a duplicate of 10) |
 | 12 | L3s0 | 265 | 45.7% | a fragmented trail |

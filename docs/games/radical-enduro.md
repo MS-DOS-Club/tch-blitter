@@ -121,8 +121,9 @@ their objects at impossible coordinates, and the game kills itself as soon as it
 them. The fourth, `L3s1`, draws a complete and continuous layout with no scenery at all.
 
 Of the 16 sections, five run a full race and end on the game's own time limit; section 3 is a
-byte-for-byte duplicate of 2 and section 13 runs out of track within seconds; the other nine are
-fragments the game cannot load, and no emulator fixes that.
+byte-for-byte duplicate of 2 and section 13 runs out of track within seconds; the other nine never
+finish: section 5 draws a fragmented track and hangs halfway, and the remaining eight die before
+drawing anything. No emulator fixes the data.
 
 The two axes are shown through separate channels on purpose: that a section **is unfinished** is proved
 by rendering it from the ROM, with no emulator; that it **hangs** is a different thing, and
