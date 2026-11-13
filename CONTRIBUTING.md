@@ -28,11 +28,12 @@ Questions and support are not issues.
   can be judged, reverted or taken upstream alone.
 - **Build it and run it.** `make setup` builds the two binaries. A driver change is also built
   once with `DEBUG=1`, as MAME asks, so its assertions compile and do not trigger:
-  `cd upstream && make SUBTARGET=wheelfir SOURCES=src/mame/tch/wheelfir.cpp REGENIE=1 DEBUG=1 -j8` builds
+  `(cd upstream && make SUBTARGET=wheelfir SOURCES=src/mame/tch/wheelfir.cpp REGENIE=1 DEBUG=1 -j8)` builds
   `upstream/wheelfird`, which runs the set as `upstream/wheelfird -rompath run/mame_roms wheelfir`.
   Watch the change working on the set it is about.
 - **Run the checks.** Once `make setup` has run, `make check` runs the linters, the tests, the documentation against its data
-  and the patches against `upstream/`; `make check-all` adds every golden and the save-state check.
+  and the patches against `upstream/`; `make check-all` adds the visual goldens (captured frames compared byte for byte against the
+  checked-in PNGs, `goldens/README.md`) and the save-state check.
   A golden that turns red is information about the change: say in the description which ones moved
   and why.
 - **A driver change travels as its patch.** `upstream/` is not committed; `make patch` exports the

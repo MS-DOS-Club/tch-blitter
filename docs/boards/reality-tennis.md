@@ -3,7 +3,7 @@
 TCH's first blitter board, as far as the dates go: one 68000, two FPGAs that the silkscreen calls
 **JUANA** and **JOAQUIN**, one reading the graphics and the other writing the screen, and two DACs
 fed straight from the sample ROMs. It runs the oldest game of the family as MAME dates it, and it is
-the one of the two boards MAME already emulated as working before this work began. The hardware was designed by **David
+the one of the two boards MAME already emulated as working. The hardware was designed by **David
 Sandoval** and the game programmed and designed by **Antonio 'Peluko' Carrillo**, as the MAME driver
 credits them. Its successor, by everything the two blitters share, is
 [the Wheels & Fire board](wheels-and-fire-board.md).
@@ -22,7 +22,8 @@ and the driver labels the registers the same way: in the first four words, the h
 JUANA's source and the low byte JOAQUIN's destination.
 
 The driver documents eight 16-bit words at `0x700000`, and a blit fires on the **0 to 1 edge** of bit 14 of
-word 6. There is no arming step and nothing to reset between blits.
+word 6. The game clears the strobe and raises it again once per blit, and that clearing write is
+also what drops the blitter's interrupt.
 
 **It scales.** Word 5 holds the ratio as two bytes whose high nibbles are `a` and `b`: the
 destination is `(a+1)/(b+1)` of the source on both axes. The game writes `0x0000` before each

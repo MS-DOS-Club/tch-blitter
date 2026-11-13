@@ -55,7 +55,7 @@ by the driver, which emulates the dump as it is. The same ROM lets the sound's i
 the blitter's interrupt handlers, as Power Ball's handler does, so the music lasts the race. And there it stops: the set
 fixes the prototype, it does not finish it, so the zones of scenery the prototype's engine leaves
 out of the view stay out. A layer that draws them, an enhancement and not the board, is kept in the
-patch table as an option of the builder (`scripts/radendurh.py --with scenery --out <zip>`, a ROM
+patch table as an option of the builder (`uv run scripts/radendurh.py --with scenery --out <zip>`, a ROM
 other than the set's), and besides drawing what the prototype never drew it slows the race clock,
 and on the first jungle track, where its frames run latest, the sound dies with it.
 
@@ -109,10 +109,12 @@ emulator** (`docs/img/radendur/sections/`):
 | HARD, start   | 8 | mountain, 6802 objects| race completed on the game's own time limit |
 
 **Only Level 0 (desert) is finished as a track**, all three of its segments. Of Levels 1
-and 2 only the start is done. Level 3 (EXPERT) has no finished track at all: half the sections
-hold a large share of their objects at impossible coordinates, and the game kills itself as soon
-as it loads most of them. Of the 16 sections, only
-five play through in full; the rest have half-finished data, and no emulator fixes that.
+and 2 only the start is done. Level 3 (EXPERT) is the furthest from finished: three of its four
+sections hold a large share of their objects at impossible coordinates, and the game kills itself
+as soon as it loads most of them; the fourth, `L3s1`, draws a complete and continuous layout with
+no scenery at all. Of the 16 sections, five run a full race and end on the game's own time limit;
+section 3 is a byte-for-byte duplicate of 2 and section 13 runs out of track within seconds; the
+other nine are fragments the game cannot load, and no emulator fixes that.
 
 The two axes are shown through separate channels on purpose: that a section **is unfinished** is proved
 by rendering it from the ROM, with no emulator; that it **hangs** is a different thing, and

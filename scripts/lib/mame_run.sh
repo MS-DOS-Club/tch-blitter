@@ -85,7 +85,7 @@ mame_cmd() {
             args+=(-resolution "${res:-320x240}" -nothrottle -seconds_to_run "$seconds") ;;
         session)
             # the drivers log through logerror, as MAME's C++ guide asks, so a played run keeps its
-            # log: error.log in the working directory says, among other things, which scale law ran
+            # log: error.log in the working directory says, among other things, which writes were unexpected
             args+=(-resolution "${res:-960x720}" -log)
             [ -z "$seconds" ] || args+=(-seconds_to_run "$seconds") ;;
         *) echo "mame_run: unknown mode $mode (quick or session)" >&2; return 2 ;;

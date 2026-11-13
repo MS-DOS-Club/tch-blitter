@@ -41,7 +41,7 @@ reading one record past its array. It is the prototype's own overrun, not an una
 - It happens on pressing START: the race-entry path, not a general failure. The second crash,
   in a race, is a different mechanism with the same ending (crashes-radendur.md, crash 2).
 - It is an integration defect of the prototype, not a content one, and it is the board's too: MAME's
-  developers note that it *"crashes when selecting track on PCB"*.
+  developers note that it *"crashes (always?) when selecting track on PCB"*.
 
 ## What that means for the restoration
 

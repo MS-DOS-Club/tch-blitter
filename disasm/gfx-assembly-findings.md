@@ -26,8 +26,10 @@ Edge adjustments (`dst_y0 += 1; dst_y1 -= 1`), a do-while destination walk that 
 exit test, and a floating-point source step all garble text that a bounded, integer-step copy of
 the same source rectangle renders correctly.
 
-Two things that look like blit-model defects are not: blits carrying the disable bit
-(`d7 & 0x08`) draw nothing, and blits that read regions of index 0 draw nothing visible.
+Two things that look like blit-model defects are not. Blits carrying the index-0 bit
+(`d7 & 0x08`) read no graphic and write index 0 across their rectangle: with the read-source bit
+that is a colour fill, and alone it is an erase. Blits that read regions of index 0 draw nothing
+visible.
 
 ## Tools
 

@@ -16,8 +16,9 @@ not because they get completed.
 
 ## How each capture is labelled
 
-- **The phase is read from RAM**, never counted in frames: `0x20100e`/`0x20101a` after every
-  press, and `0x201014` after START.
+- **The phase is read from RAM**, never counted in frames: `0x20100e` holds the level and
+  `0x20101a` the segment, read after every press, and START writes their section number
+  (`level*4 + segment`) to `0x201014`.
 - **A race is alive when the image changes** relative to the menu. `0x20100c` cannot tell: a hung
   68000 leaves it frozen at 4, saying "racing".
 - **A race is finished when the game returns to the attract**, and there `0x20100c` does tell,

@@ -222,7 +222,7 @@ emulated" means for this board.
 
 The board serves two cabinets, a steering-wheel one and a joystick one, and asks which at the door
 of its service menu; the driver models the wheel cabinet by default and offers the other as the
-`Cabinet` setting in MAME's machine configuration. The controls are MAME's defaults, but for one:
+`Controls` setting in MAME's machine configuration. The controls are MAME's defaults, but for one:
 button 1 is the gearbox's low/high lever, so it is a toggle (a tap shifts, and the lever stays
 where it is put) as Out Run's is, and it is declared as button 4 so that its default key is not the
 accelerator's. A race starts in low: shift to high to pass
@@ -242,12 +242,6 @@ accelerator also selects in the menus and the high-score table. `make ref SET=wh
 
 Up on a joystick would be a second, weaker accelerator (the game folds it into the pedal's bit), so
 the wheel cabinet gives player 1 no joystick directions at all.
-
-## Sources
-
-- [Entry at recreativas.org](https://www.recreativas.org/wheels-and-fire-549-tch). Board photos
-  by Victor Fernandez (City Game); documentation by Victor Fernandez and Tomas
-  Garcia-Meras.
 
 ## The attract cycles
 
@@ -311,6 +305,12 @@ Fernando Jimenez, and graphics Javier Martinez, Francisco Bocanegra and **Joaqui
 first two in bold also sign [Reality Tennis](reality-tennis.md) in 1993, and **one of the
 two FPGAs of the Reality Tennis board is labelled "JOAQUIN"**, like the graphic artist. Detail:
 [teams-and-signatures.md](../teams-and-signatures.md).
+
+## Sources
+
+- [Entry at recreativas.org](https://www.recreativas.org/wheels-and-fire-549-tch). Board photos
+  by Victor Fernandez (City Game); documentation by Victor Fernandez and Tomas
+  Garcia-Meras.
 
 ## Credits and thanks
 

@@ -30,7 +30,7 @@ Python runs with `uv run scripts/<name>.py`, and every MAME launch goes through 
 | script | what it does |
 |--------|--------------|
 | `gen-hw-docs.py` | `make hw-docs`: `hardware/*.yaml` into the board pages' tables and `disasm/symbols.txt`, validating the schema |
-| `gen-games.py` | `hardware/games.yaml` into the README's game, credits and resources tables and each game page's facts |
+| `gen-games.py` | `hardware/games.yaml` into the README's game, credits, preservation and resources tables, and each game page's facts and thanks |
 | `gen-before-after.py` | `docs/img/before-after/manifest.yaml` into the README's before/after section |
 | `gen-gif-manifest.py` | measures every published GIF into `docs/img/gifs/manifest.yaml` |
 | `verify-docs.py` | links, images and generated blocks of every document, and every generator's `--check` |
@@ -60,7 +60,7 @@ Python runs with `uv run scripts/<name>.py`, and every MAME launch goes through 
 | script | what it does |
 |--------|--------------|
 | `disasm.sh` | `make disasm`: the 68000 program images, `disasm/img/` |
-| `ghidra-setup.sh`, `ghidra-import.sh`, `ghidra-export.sh` | download the pinned Ghidra, analyse the images, write `disasm/analysis.txt` and `disasm/listings/` (`make disasm-all` runs the chain) |
+| `ghidra-setup.sh`, `ghidra-import.sh`, `ghidra-export.sh` | download the pinned Ghidra, analyse the images, write `disasm/analysis.txt` and `disasm/listings/` (`make ghidra-setup` downloads it, `make disasm-all` runs the rest of the chain) |
 | `ghidra-labels.py` | the export's precondition: the project carries exactly `hardware/symbols.yaml`'s labels |
 | `verify-listings.py` | each listing against its image with capstone; marks what Ghidra decoded and no 68000 runs |
 | `listing_format.py` | the line formats of a listing and of an executed-address file |

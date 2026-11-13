@@ -1,7 +1,8 @@
 # Goldens: the family's visual gate
 
-One directory per game. A FAIL is **never cosmetic**: it means the image changed, and what the
-change is has to be looked at before anything is re-blessed.
+A golden is a captured frame of a set, compared byte for byte against the checked-in PNG, one
+directory per set. A FAIL is **never cosmetic**: it means the image changed, and what the change
+is has to be looked at before anything is re-blessed.
 
 | game | how |
 |------|-----|

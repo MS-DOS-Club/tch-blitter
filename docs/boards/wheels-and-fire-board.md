@@ -591,7 +591,7 @@ Anything reached through a pointer is not included.
 ## Status in MAME
 
 The four sets, `wheelfir`, `pwball`, `kongball` and `radendur`, run on `tch/wheelfir.cpp`, and
-`radendurh` on the same driver here. Their state in MAME, before this work and now, and here, is
+`radendurh` on the same driver here. Their state in MAME, and here, is
 [the README's games table](../../README.md#the-games).
 
 ## Sources

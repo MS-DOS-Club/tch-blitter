@@ -1,11 +1,11 @@
 # Who made these games: where each name is
 
-An arcade game's credits are easily lost: there is no box art, the board changes hands and the team
-disperses. But the code is still there.
+This document is where each name the README credits comes from, with its address in the ROM. An arcade game's
+credits are easily lost: there is no box art, the board changes hands and the team disperses. But
+the code is still there.
 
 **The names are in the README**, credited game by game beside whoever preserved them. This document
-is the other half: **where each one comes from**, with the exact address, so that anyone can check
-rather than take it on trust. Once `make disasm` has built the program images, it reproduces
+is the other half. Once `make disasm` has built the program images, it reproduces
 whole:
 
 ```sh
@@ -19,9 +19,9 @@ doubled and **only reads correctly de-interleaved**. Reality Tennis's signature 
 which is why an ordinary `strings` over the combined image returns `EESSTTEE JJUUEEGGOO...` and gets
 discarded as garbage.
 
-Of the family's **nine** code images, **four carry a signature** and five do not. The ninth is
-`rltennisa`, the second Reality Tennis dump, and its signature is IDENTICAL to the first's: the same
-two names, nobody added and nobody removed. The revision is by its own authors.
+Of the family's **nine** code images, **four carry a signature** and five do not. `rltennisa`, the
+second Reality Tennis dump, has the same signature as the first: the same two names, nobody added
+and nobody removed. The revision is by its own authors.
 
 ---
 

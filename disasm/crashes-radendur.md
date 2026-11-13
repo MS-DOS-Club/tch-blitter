@@ -2,7 +2,7 @@
 
 The prototype has two different grey screens, and both are the same kind of fault: **game code
 walking off its own array**. Neither is an emulation failure: the first happens on the real board
-too (MAME's original driver notes it: *"crashes when selecting track on PCB"*), and the second
+too (MAME's original driver notes it: *"crashes (always?) when selecting track on PCB"*), and the second
 comes from the game's own RAM state.
 
 The grey screen itself is not a MAME screen: it is the **game's own address-error handler** at

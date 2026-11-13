@@ -108,8 +108,8 @@ speaks the 68000 natively.
 
 The drivers here are written to go upstream, so they log the way MAME's C++ guide asks: `logerror`
 for what a developer reads and `osd_printf_verbose` for what a user diagnoses, never a message at the
-default verbosity. A trace worth keeping for good, such as which scale law a Wheels & Fire machine
-runs, is one `logerror` line written once. `logerror` is only kept with `-log`, which writes
+default verbosity. A trace worth keeping for good, such as an unexpected write to the blit-start
+register, is one `logerror` line written once. `logerror` is only kept with `-log`, which writes
 `error.log` in the working directory: `scripts/lib/mame_run.sh` passes it to a played session, and
 any run that has to say what it ran reads it there.
 
@@ -146,7 +146,7 @@ lever (button 4, mask `0x0010`, active low, so its default under the mask is the
 - **A value equal to its type's maximum is a cap, not a measurement.** The visible height of a
   board is measured with something anchored to an edge and where it comes to rest, not with the
   clip rectangle the game declares: Wheels & Fire's race portrait slides in pinned to the bottom
-  and rests on row 251, while the declared clip ends at `0xff`.
+  and rests on the last visible row, while the declared clip ends at `0xff`.
 - **Measure inside the box of the fault.** A detector averaging over the whole screen dilutes a fault
   that occupies part of it below any threshold; bound the region to where the fault is seen.
 - **Open every capture.** A measurement answers the question it was asked; looking at the image asks
