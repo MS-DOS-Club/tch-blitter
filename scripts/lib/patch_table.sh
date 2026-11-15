@@ -7,7 +7,6 @@ PATCHES="
 0002-wheelfir-radendurh.patch|src/mame/tch/wheelfir.cpp src/mame/mame.lst
 0003-lua-thread-context-race.patch|src/frontend/mame/luaengine.cpp
 0004-gdbstub-one-thread-per-cpu.patch|src/osd/modules/debugger/debuggdbstub.cpp
-0005-rltennis-blitter-scale.patch|src/mame/tch/rltennis.cpp
 "
 
 patch_table_names() { printf '%s\n' "$PATCHES" | cut -d'|' -f1 | sed '/^$/d'; }

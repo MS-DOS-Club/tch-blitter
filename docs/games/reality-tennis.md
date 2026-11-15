@@ -45,7 +45,7 @@ that starts at (1,1).
 | board | [the first blitter board](../boards/reality-tennis.md), with a single 68000 at 8 MHz |
 | MAME sets | `rltennis` and `rltennisa` |
 | driver in MAME | `tch/rltennis.cpp` |
-| driver in this repository | the same file, with the blitter's scaling, its 8-bit spans, the (1,1) origin and its timing, proposed to MAME |
+| driver in this repository | the same file: the blitter's scaling, its 8-bit spans, the (1,1) origin and its timing were added here, then merged into MAME |
 | status in MAME 0.289 | **working**, `IMPERFECT_GRAPHICS`, `IMPERFECT_TIMING` |
 | status in current MAME | **working**, `IMPERFECT_GRAPHICS`, `IMPERFECT_TIMING` |
 <!-- end of generated block -->

@@ -99,9 +99,9 @@ Kong Ball's title, which the original driver paints over the leftovers of the pr
 Four of the five games were repaired here, starting from the MAME release the table above names.
 The driver that repairs three of them is now MAME's own.
 
-The fifth, Reality Tennis, already worked in MAME. Its driver here adds the scale register, the
-blit spans, the picture's origin and the blitter's timing, read off the running game, and is
-proposed to MAME.
+The fifth, Reality Tennis, already worked in MAME. The scale register, the blit spans, the
+picture's origin and the blitter's timing were added to its driver here, read off the running
+game, and that driver is now MAME's own too.
 
 What is still open is listed on the Wheels & Fire and Radical Enduro pages, with what is known
 about each case and what is left to measure.

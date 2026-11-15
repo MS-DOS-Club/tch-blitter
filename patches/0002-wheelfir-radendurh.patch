@@ -1,8 +1,8 @@
 diff --git a/src/mame/mame.lst b/src/mame/mame.lst
-index 432f2e6cc3c9a6cd2bf1c48a03faa2155122a3f9..0efeaec06a22c460c7590ea60bff23e30d9926f7 100644
+index 552f845b33239d604f24d7e3f172ed0c06b305d9..a6df9d84f8201cb615751d6d51bacbcea2d9cfc0 100644
 --- a/src/mame/mame.lst
 +++ b/src/mame/mame.lst
-@@ -47006,6 +47006,7 @@ topdrive
+@@ -47085,6 +47085,7 @@ topdrive
  kongball
  pwball
  radendur

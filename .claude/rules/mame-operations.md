@@ -29,7 +29,7 @@ then is information about the fix.
   instrument a run without being misled (the debugger from Lua and the six things a breakpoint
   needs, unattended runs, the cfg traps) is `docs/mame-techniques.md`: read it before the first
   harness.
-- `wheelfir.cpp` is MAME's own and `rltennis.cpp` and the `radendurh` clone are proposed to it, so
+- `wheelfir.cpp` and `rltennis.cpp` are MAME's own and the `radendurh` clone is proposed to it, so
   a change to either driver is written as MAME reviews it, from the first line. MAME's rules are
   `docs/source/contributing/cxx.rst` in `upstream/`; before a pull request is opened or amended,
   the `mame-review` skill (https://github.com/rb6502/mame-ai-tips/tree/master/mame-review)

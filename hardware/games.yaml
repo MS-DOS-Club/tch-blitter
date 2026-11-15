@@ -10,7 +10,7 @@ games:
   mame_driver: tch/rltennis.cpp
   page:
     board: "[the first blitter board](../boards/reality-tennis.md), with a single 68000 at 8 MHz"
-    driver_here: "the same file, with the blitter's scaling, its 8-bit spans, the (1,1) origin and its timing, proposed to MAME"
+    driver_here: "the same file: the blitter's scaling, its 8-bit spans, the (1,1) origin and its timing were added here, then merged into MAME"
     year_note: " (`⚠` recreativas.org dates it 1994)"
   manufacturer:
     value: TCH

@@ -38,15 +38,14 @@ The romsets are not distributed (`README.md`, Getting started, says how to get a
 what a machine is missing; `make play` runs radendurh; `make check` and `make check-all` run the
 checks (`.claude/rules/checks.md`). `scripts/README.md` says what each tool is for.
 
-Two drivers are worked on here, and each patch is the only part of its driver that travels, since
-`upstream/` is not committed. `wheelfir.cpp` is MAME's own since the board's driver was merged, so
-its patch carries only the `radendurh` clone; `rltennis.cpp`'s carries the whole change still
-proposed to MAME:
+Two drivers are worked on here, and a patch is the only part of a driver that travels, since
+`upstream/` is not committed. Both are MAME's own since their changes were merged: `wheelfir.cpp`'s
+patch carries only the `radendurh` clone, and `rltennis.cpp` has no patch until it changes again:
 
 | driver | games | SUBTARGET | binary | patch |
 |--------|-------|-----------|--------|-------|
 | `tch/wheelfir.cpp` | wheelfir, pwball, kongball, radendur, radendurh | `wheelfir` | `upstream/wheelfir` | `0002-wheelfir-radendurh.patch` (and `mame.lst`) |
-| `tch/rltennis.cpp` | rltennis, rltennisa | `rltennis` | `upstream/rltennis` | `0005-rltennis-blitter-scale.patch` |
+| `tch/rltennis.cpp` | rltennis, rltennisa | `rltennis` | `upstream/rltennis` | none |
 
 Two more patches are not drivers. `0003-lua-thread-context-race.patch` fixes a race in MAME's Lua
 console thread, and `0004-gdbstub-one-thread-per-cpu.patch` makes the gdbstub serve one GDB thread
