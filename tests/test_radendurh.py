@@ -361,6 +361,7 @@ def test_maincpu_image_interleaves_the_two_halves() -> None:
     )
 
 
+@needs_rom
 def test_check_answers_by_the_zip_and_the_flat_image_on_disk(tmp_path: Path) -> None:
     t = table()
     roms, _ = rh.build(t, None)
