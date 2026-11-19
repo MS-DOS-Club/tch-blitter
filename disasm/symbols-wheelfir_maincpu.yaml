@@ -91,8 +91,14 @@ symbols:
     name: wf_pal_to_white
   - addr: 0x000a4462
     name: wf_generate_road_table
+  - addr: 0x000a47ba
+    name: wf_link_wait_for_master
   - addr: 0x000a492c
     name: wf_port_7c0001
+  - addr: 0x000a509a
+    name: wf_link_handshake_low
+  - addr: 0x000a50be
+    name: wf_link_handshake_high
   - addr: 0x000a51d2
     name: wf_link_share_difficulty
   - addr: 0x000a5d08

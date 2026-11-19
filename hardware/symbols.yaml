@@ -520,6 +520,18 @@ images:
     evidence: 'READ: 0xa4462..0xa44e6, 13 segments, each value written to entries n and n+1; executed in
       the wheelfir race trace of 2026-10-13 (disasm/executed/wheelfir_maincpu.txt)'
     state: confirmed
+  - addr: 673722
+    name: wf_link_wait_for_master
+    description: 'wheelfir main. The wait of the slave cabinet in the boot link handshake. With wf_link_player_number
+      nonzero it raises and lowers the handshake line (bit 7 of control_and_link) through wf_link_handshake_high
+      and wf_link_handshake_low, reading the link data byte (0x7c0001) after each, until it holds 0xa5, the
+      master''s sync byte. With the Test line of player_inputs (bit 12) low it leaves through 0xdd31e instead.
+      With no partner the byte never arrives. Zero in wf_link_player_number takes the first cabinet''s path at
+      0xa4816. The address is a point inside the boot handshake, not the start of the routine, which is not read'
+    level: verified
+    evidence: 'READ: 0xa47ba `tst.w $20bc98.l` / `beq $a4816`; the loop 0xa47c6..0xa47fc, with `cmp.b #$a5` at 0xa47d2
+      and 0xa47e4 after each read of $7c0001, `btst #$c` on $7e0000 at 0xa47f0 and `jmp $dd31e` at 0xa47f6.
+      The symbol below it, wf_generate_road_table, ends at 0xa44e6'
   - addr: 674092
     name: wf_port_7c0001
     description: 'Writes 0xAC and then 0xFF to the low byte of control_and_link (0x7c0001), each followed
@@ -531,6 +543,20 @@ images:
       at 0xa494a, each with a `dbra` over `bsr 0xa4962`; sixteen call sites. The address 0xa452c the table
       carried before is 0x400 lower, inside a RAM clear loop. MEASURED live on 2026-10-13: 0xa492c executes
       in the attract'
+  - addr: 675994
+    name: wf_link_handshake_low
+    description: wheelfir main. Clears bit 7 of control_and_link, the link handshake line, through its RAM shadow
+      at 0x200448, with interrupts off
+    level: verified
+    evidence: 'READ: 0xa509a..0xa50bc, `andi.b #$7f` at 0xa50a8, `move.b D0,$7c0000.l` at 0xa50ac, the shadow
+      store at 0xa50b2; called by wf_link_wait_for_master at 0xa47d8'
+  - addr: 676030
+    name: wf_link_handshake_high
+    description: wheelfir main. Sets bit 7 of control_and_link, the link handshake line, through its RAM shadow
+      at 0x200448, with interrupts off
+    level: verified
+    evidence: 'READ: 0xa50be..0xa50e0, `ori.b #$80` at 0xa50cc, `move.b D0,$7c0000.l` at 0xa50d0, the shadow
+      store at 0xa50d6; called by wf_link_wait_for_master at 0xa47c6 and 0xa47fe'
   - addr: 676306
     name: wf_link_share_difficulty
     description: wheelfir main. Shares the DIFFICULTY LEVEL between two linked cabinets, then rebuilds the
