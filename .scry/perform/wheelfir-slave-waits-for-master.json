@@ -1,0 +1,578 @@
+{
+  "version": 3,
+  "server": "mame",
+  "entry": "scry_mame.server",
+  "start": {
+    "system": "",
+    "rompath": "",
+    "reference_rom": "",
+    "symbols": "",
+    "reference_addr": 0,
+    "inipath": "",
+    "boot_seconds": 8.0,
+    "shared": false,
+    "display": null,
+    "size": null,
+    "background": null,
+    "boot_lua": "",
+    "env": null,
+    "bases": null,
+    "reference_base": 0,
+    "stub_port": 0,
+    "state_dir": "",
+    "throttle_from_frame": 0,
+    "types": "",
+    "cfg": "",
+    "binary": "",
+    "presence": true,
+    "view": "",
+    "profile": "${root}/.scry/start/wheelfir.json"
+  },
+  "steps": [
+    {
+      "op": "lua",
+      "script": "manager.machine.ioport.ports[':CABINET'].fields['Controls'].user_value=1",
+      "recorded": {
+        "pc": "0x000ea3e0",
+        "frame": 0
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 600,
+      "recorded": {
+        "pc": "0x0009bc62",
+        "frame": 600
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "Test",
+      "frames": 10,
+      "recorded": {
+        "pc": "0x000e01a8",
+        "frame": 611
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 120,
+      "recorded": {
+        "pc": "0x000dd9ee",
+        "frame": 731
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "1 Player Start",
+      "frames": 6,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 738
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 300,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1038
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 63,
+      "recorded": {
+        "pc": "0x000dd9f4",
+        "frame": 1101
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "P1 Down",
+      "frames": 8,
+      "recorded": {
+        "pc": "0x000dd9ee",
+        "frame": 1110
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 10,
+      "recorded": {
+        "pc": "0x000dd9ee",
+        "frame": 1120
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "P1 Down",
+      "frames": 8,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1129
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 10,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1139
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "P1 Down",
+      "frames": 8,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1148
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 10,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1158
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "P1 Down",
+      "frames": 8,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1167
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 10,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1177
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "P1 Down",
+      "frames": 8,
+      "recorded": {
+        "pc": "0x000dd9f4",
+        "frame": 1186
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 10,
+      "recorded": {
+        "pc": "0x000dd9f4",
+        "frame": 1196
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "P1 Down",
+      "frames": 8,
+      "recorded": {
+        "pc": "0x000dd9ee",
+        "frame": 1205
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 10,
+      "recorded": {
+        "pc": "0x000dd9ee",
+        "frame": 1215
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "P1 Down",
+      "frames": 8,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1224
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 30,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1254
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 63,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1317
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "Gear Shift",
+      "frames": 2,
+      "recorded": {
+        "pc": "0x000dd9f4",
+        "frame": 1320
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 90,
+      "recorded": {
+        "pc": "0x000dd9ee",
+        "frame": 1410
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 63,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1473
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "Gear Shift",
+      "frames": 2,
+      "recorded": {
+        "pc": "0x000dd9ee",
+        "frame": 1476
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 40,
+      "recorded": {
+        "pc": "0x000dd9ee",
+        "frame": 1516
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "Gear Shift",
+      "frames": 2,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1519
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 40,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1559
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "Gear Shift",
+      "frames": 2,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1562
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 40,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1602
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "P1 Down",
+      "frames": 8,
+      "recorded": {
+        "pc": "0x000dd9ee",
+        "frame": 1611
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 30,
+      "recorded": {
+        "pc": "0x000dd9f4",
+        "frame": 1641
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "Gear Shift",
+      "frames": 2,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1644
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 40,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1684
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "Gear Shift",
+      "frames": 2,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1687
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 40,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1727
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 63,
+      "recorded": {
+        "pc": "0x000dd9f4",
+        "frame": 1790
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "1 Player Start",
+      "frames": 6,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1797
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 120,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1917
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 63,
+      "recorded": {
+        "pc": "0x000dd9f4",
+        "frame": 1980
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "P1 Down",
+      "frames": 8,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 1989
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 30,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 2019
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 43,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 2062
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "Gear Shift",
+      "frames": 2,
+      "recorded": {
+        "pc": "0x000dd9ee",
+        "frame": 2065
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 40,
+      "recorded": {
+        "pc": "0x000dd9ee",
+        "frame": 2105
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "Gear Shift",
+      "frames": 2,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 2108
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 60,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 2168
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 63,
+      "recorded": {
+        "pc": "0x000dd9f4",
+        "frame": 2231
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "Gear Shift",
+      "frames": 2,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 2234
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 40,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 2274
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "Gear Shift",
+      "frames": 2,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 2277
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 200,
+      "recorded": {
+        "pc": "0x000a47f4",
+        "frame": 2477
+      }
+    },
+    {
+      "op": "screen_signature",
+      "recorded": {
+        "signature": "617358339d19c030",
+        "pc": "0x000a47fc",
+        "frame": 2477
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 303,
+      "recorded": {
+        "pc": "0x000a509e",
+        "frame": 2780
+      }
+    },
+    {
+      "op": "screen_signature",
+      "recorded": {
+        "signature": "617358339d19c030",
+        "pc": "0x000a50a2",
+        "frame": 2780
+      }
+    },
+    {
+      "op": "input",
+      "port": ":P1",
+      "field": "Test",
+      "frames": 4,
+      "recorded": {
+        "pc": "0x000e8e08",
+        "frame": 2785
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 90,
+      "recorded": {
+        "pc": "0x000dd9ee",
+        "frame": 2875
+      }
+    },
+    {
+      "op": "run_for",
+      "frames": 63,
+      "recorded": {
+        "pc": "0x00201c8a",
+        "frame": 2938
+      }
+    },
+    {
+      "op": "screen_signature",
+      "recorded": {
+        "signature": "03fde6715780b02b",
+        "pc": "0x000dc738",
+        "frame": 2938
+      }
+    }
+  ],
+  "needs": {
+    "states": [],
+    "declarations": {
+      "breakpoints": {
+        "tool": "declaration_list",
+        "refs": [
+          "0x201060"
+        ]
+      },
+      "watches": {
+        "tool": "declaration_list",
+        "refs": []
+      },
+      "regpoints": {
+        "tool": "declaration_list",
+        "refs": []
+      }
+    }
+  }
+}

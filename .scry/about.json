@@ -12,6 +12,7 @@
     "start/pwball.json": "Power Ball.",
     "start/kongball.json": "Kong Ball.",
     "start/rltennis.json": "Reality Tennis.",
-    "start/rltennisa.json": "Reality Tennis, the second layout."
+    "start/rltennisa.json": "Reality Tennis, the second layout.",
+    "perform/wheelfir-slave-waits-for-master.json": "replays 60 steps."
   }
 }

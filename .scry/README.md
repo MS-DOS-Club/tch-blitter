@@ -2,24 +2,23 @@
 
 How this repository's arcade boards start under SCRY.
 
-SCRY is a set of MCP servers (`mame`, `dosbox-x`) that let an assistant run a program in an
-emulator and inspect it live. This folder is what this repository declares for it: how the
-program starts and, where it has them, what its screens look like and a session that
-drives it.
+SCRY is a set of MCP servers that let an assistant run a program in an emulator and inspect it
+live. This folder is what this repository keeps for it: how the program starts. Where it has
+them, it also holds what its screens look like and a list of steps that drives it.
 
 ## Build first
 
-The recipes below need this built first.
+The start profiles below need this built first.
 
     make setup && make disasm
 
 ## How to start
 
-Call the `mame` server's `start` tool with a recipe's name: `start(profile="<name>")`. An argument in the same call wins over the recipe's. A recipe's paths resolve against the directory holding `.scry/`, and what would be this machine's path is a [placeholder](https://github.com/scry-mcp/scry-core/blob/main/docs/store-paths.md).
+Call the `mame` server's `start` tool with a start profile's name: `start(profile="<name>")`. An argument in the same call wins over the profile's. A profile's paths resolve against the directory holding `.scry/`, and what would be this machine's path is a [placeholder](https://github.com/scry-mcp/scry-core/blob/main/docs/store-paths.md).
 
-## Recipes
+## Start profiles
 
-A recipe is the arguments of `start`, so a session boots a program without composing them by hand.
+A start profile is a saved set of `start` arguments, so a session boots a program without composing them by hand.
 
 - `kongball` (`start/kongball.json`): Kong Ball.
 - `pwball` (`start/pwball.json`): Power Ball.
@@ -28,6 +27,12 @@ A recipe is the arguments of `start`, so a session boots a program without compo
 - `rltennis` (`start/rltennis.json`): Reality Tennis.
 - `rltennisa` (`start/rltennisa.json`): Reality Tennis, the second layout.
 - `wheelfir` (`start/wheelfir.json`): Wheels & Fire.
+
+## Saved step lists
+
+Each is a list of steps the `perform` tool replays.
+
+- `perform/wheelfir-slave-waits-for-master.json`: replays 60 steps.
 
 ---
 
